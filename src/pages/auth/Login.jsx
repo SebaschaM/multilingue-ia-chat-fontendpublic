@@ -1,11 +1,20 @@
-import styles from "../../../styles/Login.module.css";
+import styles from "../../styles/Login.module.css";
 
 import { Button, Input, Card, CardContent, Typography } from "@mui/material";
 import { ArrowBackIos } from "@mui/icons-material";
 
 import { Link } from "react-router-dom";
 
+import { useState } from "react";
+
 function Login() {
+  const [inputPassword, setInputPassword] = useState(false);
+
+  const onLogin = () => {
+    setInputPassword(true);
+    console.log("Mostrar input de contraseña");
+  };
+
   return (
     <div className={styles.container}>
       <img
@@ -52,7 +61,7 @@ function Login() {
               quos.
             </Typography>
             <Input
-              defaultValue="email@example.com"
+              placeholder="email@example.com"
               sx={{
                 marginTop: "1rem",
                 height: "2.1rem",
@@ -63,6 +72,21 @@ function Login() {
                 },
               }}
             />
+            {inputPassword && (
+              <Input
+                placeholder="**********"
+                sx={{
+                  marginTop: "1rem",
+                  height: "2.1rem",
+                  borderColor: "#17C3CE",
+                  width: "80%",
+                  ":after": {
+                    borderBottom: "3px solid #17C3CE",
+                  },
+                }}
+              />
+            )}
+
             <Button
               variant="contained"
               sx={{
@@ -74,6 +98,7 @@ function Login() {
                   background: "#19B8C3",
                 },
               }}
+              onClick={onLogin}
             >
               Entrar
             </Button>
