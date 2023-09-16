@@ -6,10 +6,13 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-
 function Login() {
-  const [inputPassword, setInputPassword] = useState(false);
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  //const [inputPassword, setInputPassword] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
   const onLogin = (data) => {
     setInputPassword(true);
@@ -52,7 +55,10 @@ function Login() {
         }}
       >
         <CardContent>
-          <form  onClick={handleSubmit(onLogin)} className={styles.container_form}>
+          <form
+            onClick={handleSubmit(onLogin)}
+            className={styles.container_form}
+          >
             <h2>Bienvenido 👋</h2>
             <Typography
               variant="h6"
@@ -67,8 +73,7 @@ function Login() {
               type="email"
               {...register("email", { required: true })}
               error={errors.email}
-                helperText={errors.email && "email requerido"}
-
+              helperText={errors.email && "email requerido"}
               sx={{
                 marginTop: "1rem",
                 height: "2.1rem",
@@ -79,7 +84,7 @@ function Login() {
                 },
               }}
             />
-            {inputPassword && (
+            {/*inputPassword && (
               <Input
                 placeholder="**********"
                 {...register("password", { required: true })}
@@ -98,7 +103,7 @@ x
                   },
                 }}
               />
-            )}
+              )*/}
 
             <Button
               variant="contained"
