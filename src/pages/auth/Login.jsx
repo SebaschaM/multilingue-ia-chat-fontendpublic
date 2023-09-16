@@ -2,16 +2,18 @@ import styles from "../../styles/Login.module.css";
 
 import { Button, Input, Card, CardContent, Typography } from "@mui/material";
 import { ArrowBackIos } from "@mui/icons-material";
-
 import { Link } from "react-router-dom";
-
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+
 
 function Login() {
   const [inputPassword, setInputPassword] = useState(false);
+  const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const onLogin = () => {
+  const onLogin = (data) => {
     setInputPassword(true);
+    console.log(data);
     console.log("Mostrar input de contraseña");
   };
 
@@ -50,7 +52,7 @@ function Login() {
         }}
       >
         <CardContent>
-          <form className={styles.container_form}>
+          <form  onClick={handleSubmit(onLogin)} className={styles.container_form}>
             <h2>Bienvenido 👋</h2>
             <Typography
               variant="h6"
@@ -62,6 +64,11 @@ function Login() {
             </Typography>
             <Input
               placeholder="email@example.com"
+              type="email"
+              {...register("email", { required: true })}
+              error={errors.email}
+                helperText={errors.email && "email requerido"}
+
               sx={{
                 marginTop: "1rem",
                 height: "2.1rem",
@@ -75,6 +82,12 @@ function Login() {
             {inputPassword && (
               <Input
                 placeholder="**********"
+                {...register("password", { required: true })}
+                type="password"
+                error={errors.password}
+                helperText={errors.password && "Contraseña requerida"}
+x
+
                 sx={{
                   marginTop: "1rem",
                   height: "2.1rem",
