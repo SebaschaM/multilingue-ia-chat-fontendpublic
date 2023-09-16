@@ -1,0 +1,74 @@
+.vector_img_right {
+  position: absolute;
+  width: 18rem;
+  height: 8rem;
+  top: 0;
+  right: 0;
+}
+
+.vector_img_left {
+  position: absolute;
+  width: 16rem;
+  height: 8rem;
+  bottom: 0;
+  left: 0;
+}
+
+.container {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  row-gap: 2rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.title_login_page {
+  text-align: center;
+}
+
+.container_form {
+  display: flex;
+  flex-direction: column;
+  row-gap: 1.6rem;
+  align-items: center;
+  padding: 1rem 3.5rem 2.5rem;
+}
+
+.form_description {
+  color: #6b6b6b;
+  text-align: center;
+  line-height: 1.6rem;
+}
+
+.text_link {
+  text-align: center;
+}
+
+.link {
+  color: #17c3ce;
+}
+
+.text_color {
+  color: #ffffff;
+}
+
+.container_to_register {
+  position: absolute;
+  bottom: 1rem;
+  left: 2rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  column-gap: 0.3rem;
+  color: #ffffff;
+  cursor: pointer;
+  &:hover {
+    color: #f3f3f3;
+  }
+}
+
+.text_link {
+  font-weight: bold;
+}
