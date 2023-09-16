@@ -56,7 +56,7 @@ function Login() {
       >
         <CardContent>
           <form
-            onClick={handleSubmit(onLogin)}
+            onSubmit={handleSubmit(onLogin)}
             className={styles.container_form}
           >
             <h2>Bienvenido 👋</h2>
