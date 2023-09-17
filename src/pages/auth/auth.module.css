@@ -24,7 +24,7 @@
   align-items: center;
 }
 
-.title_login_page {
+.title_page {
   text-align: center;
 }
 
@@ -42,12 +42,6 @@
   line-height: 1.6rem;
 }
 
-.text_link {
-  color: #000000;
-  font-weight: bold;
-  text-align: center;
-}
-
 .link {
   color: #17c3ce;
 }
@@ -56,7 +50,13 @@
   color: #ffffff;
 }
 
-.container_to_register {
+.text_link {
+  text-align: center;
+  font-weight: bold;
+}
+
+/* BUTTON BACK */
+.container_button_back {
   position: absolute;
   bottom: 1rem;
   left: 2rem;

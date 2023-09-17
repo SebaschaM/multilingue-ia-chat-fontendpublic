@@ -1,11 +1,11 @@
-import styles from "../../../styles/Register.module.css";
+import styles from "./auth.module.css";
 
-import { Button, Input, Card, CardContent, Typography } from "@mui/material";
-import { ArrowBackIos } from "@mui/icons-material";
+import { Button, Card, CardContent, Typography } from "@mui/material";
+import { ArrowBackIos, Google } from "@mui/icons-material";
 
 import { Link } from "react-router-dom";
 
-function Register() {
+function Verify_Email() {
   return (
     <div className={styles.container}>
       <img
@@ -18,18 +18,19 @@ function Register() {
         alt="vector_right"
         className={styles.vector_img_left}
       />
-      <div className={styles.container_to_register}>
+      <div className={styles.container_button_back}>
         <ArrowBackIos
           sx={{
             fontWeight: "bold",
             width: "2rem",
           }}
         />
-        <Link to={"/home"}>
-          <p className={`${styles.text_link} ${styles.text_color}`}>Home</p>
+        <Link to={"/"}>
+          <p className={`${styles.text_link} ${styles.text_color}`}>Login</p>
         </Link>
       </div>
-      <h1 className={styles.title_login_page}>Crea tu cuenta</h1>
+
+      <h1 className={styles.title_page}>Verfica tu correo</h1>
       <Card
         sx={{
           minWidth: "30rem",
@@ -42,7 +43,6 @@ function Register() {
       >
         <CardContent>
           <form className={styles.container_form}>
-            <h2>Bienvenido 👋</h2>
             <Typography
               variant="h6"
               color="text.secondary"
@@ -51,39 +51,33 @@ function Register() {
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Unde,
               quos.
             </Typography>
-            <Input
-              defaultValue="email@example.com"
-              sx={{
-                marginTop: "1rem",
-                height: "2.1rem",
-                borderColor: "#17C3CE",
-                width: "80%",
-                ":after": {
-                  borderBottom: "3px solid #17C3CE",
-                },
-              }}
-            />
+
             {/* COMPONENT */}
             <Button
               variant="contained"
               sx={{
+                display: "flex",
+                columnGap: "0.8rem",
                 background: "#17C3CE",
-                marginTop: "1.8rem",
+                marginTop: "1.4rem",
                 padding: "0.8rem 1.8rem",
-                width: "8rem",
+                width: "auto",
                 "&:hover": {
                   background: "#19B8C3",
                 },
               }}
             >
-              Entrar
+              <Google
+                sx={{
+                  width: "1.5rem",
+                }}
+              />
+              Abir Gmail
             </Button>
           </form>
           <p className={styles.text_link}>
-            ¿Ya tienes una cuenta?{" "}
-            <Link to={"/"} className={styles.link}>
-              {" "}
-              Ingresa aquí
+            <Link to={"/verify-email"} className={styles.link}>
+              Reenviar correo electrónico
             </Link>
           </p>
         </CardContent>
@@ -92,4 +86,4 @@ function Register() {
   );
 }
 
-export default Register;
+export default Verify_Email;

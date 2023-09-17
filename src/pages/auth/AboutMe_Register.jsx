@@ -1,25 +1,11 @@
 import styles from "./auth.module.css";
 
 import { Button, Input, Card, CardContent, Typography } from "@mui/material";
-import { ArrowBackIos } from "@mui/icons-material";
+import { ArrowBackIos, Google } from "@mui/icons-material";
+
 import { Link } from "react-router-dom";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 
-function Login() {
-  //const [inputPassword, setInputPassword] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
-
-  const onLogin = (data) => {
-    setInputPassword(true);
-    console.log(data);
-    console.log("Mostrar input de contraseña");
-  };
-
+function AboutMe_Register() {
   return (
     <div className={styles.container}>
       <img
@@ -39,11 +25,10 @@ function Login() {
             width: "2rem",
           }}
         />
-        <Link to={"/home"}>
-          <p className={`${styles.text_link} ${styles.text_color}`}>Home</p>
+        <Link to={"/"}>
+          <p className={`${styles.text_link} ${styles.text_color}`}>Login</p>
         </Link>
       </div>
-      <h1 className={styles.title_page}>Iniciar sesión</h1>
       <Card
         sx={{
           minWidth: "30rem",
@@ -55,11 +40,8 @@ function Login() {
         }}
       >
         <CardContent>
-          <form
-            onSubmit={handleSubmit(onLogin)}
-            className={styles.container_form}
-          >
-            <h2>Bienvenido 👋</h2>
+          <form className={styles.container_form}>
+            <h2>Comentanos sobre ti</h2>
             <Typography
               variant="h6"
               color="text.secondary"
@@ -70,10 +52,7 @@ function Login() {
             </Typography>
             <Input
               placeholder="email@example.com"
-              type="email"
-              {...register("email", { required: true })}
-              error={errors.email}
-              helperText={errors.email && "email requerido"}
+              type="text"
               sx={{
                 marginTop: "1rem",
                 height: "2.1rem",
@@ -84,48 +63,32 @@ function Login() {
                 },
               }}
             />
-            {/*inputPassword && (
-              <Input
-                placeholder="**********"
-                {...register("password", { required: true })}
-                type="password"
-                error={errors.password}
-                helperText={errors.password && "Contraseña requerida"}
-x
-
-                sx={{
-                  marginTop: "1rem",
-                  height: "2.1rem",
-                  borderColor: "#17C3CE",
-                  width: "80%",
-                  ":after": {
-                    borderBottom: "3px solid #17C3CE",
-                  },
-                }}
-              />
-              )*/}
-
+            {/* COMPONENT */}
             <Button
               variant="contained"
               sx={{
+                display: "flex",
+                columnGap: "0.8rem",
                 background: "#17C3CE",
-                marginTop: "1.8rem",
+                marginTop: "1.4rem",
                 padding: "0.8rem 1.8rem",
                 width: "auto",
                 "&:hover": {
                   background: "#19B8C3",
                 },
               }}
-              onClick={onLogin}
             >
-              Entrar
+              <Google
+                sx={{
+                  width: "1.5rem",
+                }}
+              />
+              Abir Gmail
             </Button>
           </form>
           <p className={styles.text_link}>
-            ¿No tienes cuenta?{" "}
-            <Link to={"/register"} className={styles.link}>
-              {" "}
-              Registrate aquí
+            <Link to={"/verify-email"} className={styles.link}>
+              Reenviar correo electrónico
             </Link>
           </p>
         </CardContent>
@@ -134,4 +97,4 @@ x
   );
 }
 
-export default Login;
+export default AboutMe_Register;
