@@ -83,7 +83,7 @@ function AboutMe_Register() {
                   width: "1.5rem",
                 }}
               />
-              Abir Gmail
+              Abrir Gmail
             </Button>
           </form>
           <p className={styles.text_link}>
