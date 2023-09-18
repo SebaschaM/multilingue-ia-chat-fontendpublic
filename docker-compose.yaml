@@ -1,7 +1,7 @@
 version: "3"
 services:
   db:
-    container_name: multilingue-db
+    container_name: multilingue-db1
     image: postgres:latest
     restart: always
     environment:
@@ -9,13 +9,13 @@ services:
       POSTGRES_PASSWORD: sebas
       POSTGRES_DB: multilingue
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data1
     ports:
       - "5433:5432"
     networks:
       - backend
   web:
-    container_name: multilingue-backend
+    container_name: multilingue-backend1
     image: yactayocrisostomo/multilingue-ia-chat-backend-web
     restart: always
     command: python run.py

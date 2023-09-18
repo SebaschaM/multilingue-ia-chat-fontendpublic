@@ -3,21 +3,33 @@ import styles from "./auth.module.css";
 import { Button, Input, Card, CardContent, Typography } from "@mui/material";
 import { ArrowBackIos } from "@mui/icons-material";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useAuth } from "../../hooks/useAuth";
 
 function Login() {
-  //const [inputPassword, setInputPassword] = useState(false);
+  const { handleLogin } = useAuth();
+
+  const [inputPassword, setInputPassword] = useState(false);
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
 
-  const onLogin = (data) => {
-    setInputPassword(true);
-    console.log(data);
-    console.log("Mostrar input de contraseña");
+  const onLogin = async (data) => {
+    if (data.email) {
+      setInputPassword(true);
+    }
+    if (data.password) {
+      const response = await handleLogin(data);
+      if ("error" in response) {
+        console.log(response.error)
+      }
+      else {
+        console.log("enviar al sistema")        
+      }
+    }
   };
 
   return (
@@ -73,7 +85,7 @@ function Login() {
               type="email"
               {...register("email", { required: true })}
               error={errors.email}
-              helperText={errors.email && "email requerido"}
+              helpertext={errors.email && "email requerido"}
               sx={{
                 marginTop: "1rem",
                 height: "2.1rem",
@@ -84,14 +96,14 @@ function Login() {
                 },
               }}
             />
-            {/*inputPassword && (
+            {inputPassword && (
               <Input
                 placeholder="**********"
                 {...register("password", { required: true })}
                 type="password"
                 error={errors.password}
-                helperText={errors.password && "Contraseña requerida"}
-x
+                helpertext={errors.password && "Contraseña requerida"}
+
 
                 sx={{
                   marginTop: "1rem",
@@ -103,9 +115,10 @@ x
                   },
                 }}
               />
-              )*/}
+              )}
 
             <Button
+              type="submit"
               variant="contained"
               sx={{
                 background: "#17C3CE",

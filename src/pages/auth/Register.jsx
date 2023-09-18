@@ -2,10 +2,31 @@ import styles from "./auth.module.css";
 
 import { Button, Input, Card, CardContent, Typography } from "@mui/material";
 import { ArrowBackIos } from "@mui/icons-material";
-
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useAuth } from "../../hooks/useAuth";
 
 function Register() {
+  const { handleRegister } = useAuth();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const [inputPassword, setInputPassword] = useState(false);
+
+  const onRegister = async (data) => {
+    if (data.email) {
+      setInputPassword(true);
+    }
+    if (data.password) {
+      const response = await handleRegister(data);
+      console.log(response);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <img
@@ -41,7 +62,10 @@ function Register() {
         }}
       >
         <CardContent>
-          <form className={styles.container_form}>
+          <form
+            onSubmit={handleSubmit(onRegister)}
+            className={styles.container_form}
+          >
             <h2>Bienvenido 👋</h2>
             <Typography
               variant="h6"
@@ -53,6 +77,10 @@ function Register() {
             </Typography>
             <Input
               placeholder="email@example.com"
+              type="email"
+              {...register("email", { required: true })}
+              error={errors.email}
+              helpertext={errors.email && "email requerido"}
               sx={{
                 marginTop: "1rem",
                 height: "2.1rem",
@@ -63,8 +91,29 @@ function Register() {
                 },
               }}
             />
+
+            {inputPassword && (
+              <Input
+                placeholder="**********"
+                {...register("password", { required: true })}
+                type="password"
+                error={errors.password}
+                helpertext={errors.password && "Contraseña requerida"}
+                sx={{
+                  marginTop: "1rem",
+                  height: "2.1rem",
+                  borderColor: "#17C3CE",
+                  width: "80%",
+                  ":after": {
+                    borderBottom: "3px solid #17C3CE",
+                  },
+                }}
+              />
+            )}
+
             {/* COMPONENT */}
             <Button
+              type="submit"
               variant="contained"
               sx={{
                 background: "#17C3CE",
