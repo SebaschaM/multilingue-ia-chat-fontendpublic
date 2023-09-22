@@ -13,6 +13,8 @@ module.exports = {
   plugins: ['react-refresh'],
   rules: {
     'react-hooks/exhaustive-deps': 'off',
+    //desactivar las props valitations de react
+    'react/prop-types': 'off',
     'no-unused-vars': 'off',
     'react-refresh/only-export-components': [
       'warn',
