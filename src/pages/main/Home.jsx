@@ -3,9 +3,7 @@ import styles from "./Home.module.css";
 import { Button } from "@mui/material";
 import { Link } from "react-router-dom";
 
-
 function Home() {
-
   return (
     <div className="">
       <img
@@ -21,34 +19,27 @@ function Home() {
 
       <h1 className={styles.title_page}>TRANSLATE COMMUNICATION</h1>
 
-      <div className={styles.form}>
-
+      <div className={styles.content_page}>
         <p>Nihil repellendus nesciunt ut autem numquam.</p>
         <p>Repellat debitis aut esse cum debitis a mollitia non.</p>
 
         <Link to={"/"}>
-          <Button>
-            Iniciar sesión
-          </Button>
+          <Button>Iniciar sesión</Button>
         </Link>
-
+        {/*
         <Link to={"/register"}>
           <Button>
             Registrarse
           </Button>
-        </Link>
+  </Link>*/}
       </div>
-
       <img
         src="https://res.cloudinary.com/dmq5kmzij/image/upload/v1695003999/LANDING.png"
         alt="landing"
         className={styles.landing_img}
       />
-
     </div>
-
   );
-
 }
 
 export default Home;

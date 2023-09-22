@@ -34,6 +34,8 @@ function AboutMe_Register() {
           minWidth: "30rem",
           width: "40rem",
           display: "flex",
+          paddingTop: "2rem",
+          paddingBottom: "2rem",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
@@ -50,8 +52,36 @@ function AboutMe_Register() {
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Unde,
               quos.
             </Typography>
+            <div className={styles.form_div_internal}>
+              <Input
+                placeholder="Jhon"
+                type="text"
+                sx={{
+                  marginTop: "1rem",
+                  height: "2.1rem",
+                  borderColor: "#17C3CE",
+                  width: "80%",
+                  ":after": {
+                    borderBottom: "3px solid #17C3CE",
+                  },
+                }}
+              />
+              <Input
+                placeholder="Doe"
+                type="text"
+                sx={{
+                  marginTop: "1rem",
+                  height: "2.1rem",
+                  borderColor: "#17C3CE",
+                  width: "80%",
+                  ":after": {
+                    borderBottom: "3px solid #17C3CE",
+                  },
+                }}
+              />
+            </div>
             <Input
-              placeholder="email@example.com"
+              placeholder="12/12/1212"
               type="text"
               sx={{
                 marginTop: "1rem",
@@ -63,7 +93,23 @@ function AboutMe_Register() {
                 },
               }}
             />
+            <div>
+              <Input
+                placeholder="email@example.com"
+                type="text"
+                sx={{
+                  marginTop: "1rem",
+                  height: "2.1rem",
+                  borderColor: "#17C3CE",
+                  width: "80%",
+                  ":after": {
+                    borderBottom: "3px solid #17C3CE",
+                  },
+                }}
+              />
+            </div>
             {/* COMPONENT */}
+
             <Button
               variant="contained"
               sx={{
@@ -78,11 +124,6 @@ function AboutMe_Register() {
                 },
               }}
             >
-              <Google
-                sx={{
-                  width: "1.5rem",
-                }}
-              />
               Abir Gmail
             </Button>
           </form>

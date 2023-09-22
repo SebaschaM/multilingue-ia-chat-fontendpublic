@@ -36,6 +36,8 @@ function Verify_Email() {
           minWidth: "30rem",
           width: "40rem",
           display: "flex",
+          paddingTop: "2rem",
+          paddingBottom: "2rem",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",

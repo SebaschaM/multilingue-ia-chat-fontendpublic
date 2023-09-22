@@ -49,6 +49,8 @@ function Login() {
           minWidth: "30rem",
           width: "40rem",
           display: "flex",
+          paddingTop: "2rem",
+          paddingBottom: "2rem",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
@@ -121,13 +123,14 @@ x
               Entrar
             </Button>
           </form>
+          {/* 
           <p className={styles.text_link}>
             ¿No tienes cuenta?{" "}
             <Link to={"/register"} className={styles.link}>
               {" "}
               Registrate aquí
             </Link>
-          </p>
+          </p>*/}
         </CardContent>
       </Card>
     </div>

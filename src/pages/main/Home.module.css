@@ -1,59 +1,56 @@
 .vector_img_right {
-    position: absolute;
-    width: 18rem;
-    height: 8rem;
-    top: 0;
-    right: 0;
+  position: absolute;
+  width: 18rem;
+  height: 8rem;
+  top: 0;
+  right: 0;
 }
 
 .vector_img_left {
-    position: absolute;
-    width: 16rem;
-    height: 8rem;
-    bottom: 0;
-    left: 0;
+  position: absolute;
+  width: 16rem;
+  height: 8rem;
+  bottom: 0;
+  left: 0;
 }
 
 .landing_img {
-    position: absolute;
-    top: 19rem;
-    right: 7rem;
-    width: 38rem;
-    height: 18rem;
-
+  position: absolute;
+  top: 19rem;
+  right: 7rem;
+  width: 38rem;
+  height: 18rem;
 }
 
-.form {
-    position: absolute;
-    top: 26rem;
-    left: 9rem;
-   
+.content_page {
+  position: absolute;
+  top: 26rem;
+  left: 9rem;
 }
-.form p {
-    font-size: 1.8rem;
+.content_page p {
+  font-size: 1.8rem;
 }
 
 .title_page {
-    position: absolute;
-    top: 14rem;
-    left: 9rem;
-    color: #17C3CE;
-    font-size: 3.6rem;
-    font-style: "bold",
-
+  position: absolute;
+  top: 14rem;
+  left: 9rem;
+  color: #17c3ce;
+  font-size: 3.6rem;
+  font-style: "bold";
 }
 
-.form button {
-    background:#17C3CE;
-    margin: 2rem 5rem 2rem 0;
-    padding: 1.3rem 5rem;
-    color: rgb(255, 255, 255);
-    font-size: 1.2rem;
-    border-radius: 0.8rem;
-    width: auto;
+.content_page button {
+  background: #17c3ce;
+  margin: 2rem 5rem 2rem 0;
+  padding: 1.3rem 5rem;
+  color: rgb(255, 255, 255);
+  font-size: 1.2rem;
+  border-radius: 0.8rem;
+  width: auto;
 }
 
-.form button:hover {
-    background:#19B8C3;
-    border-bottom: 3px solid #077981;
+.content_page button:hover {
+  background: #19b8c3;
+  border-bottom: 3px solid #077981;
 }

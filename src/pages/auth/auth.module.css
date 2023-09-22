@@ -33,7 +33,7 @@
   flex-direction: column;
   row-gap: 1.6rem;
   align-items: center;
-  padding: 1rem 3.5rem 2.5rem;
+  padding: 0.5rem 2rem;
 }
 
 .form_description {
@@ -69,4 +69,10 @@
   &:hover {
     color: #f3f3f3;
   }
+}
+
+.form_div_internal {
+  display: flex;
+  column-gap: 2rem;
+  width: 80%;
 }
