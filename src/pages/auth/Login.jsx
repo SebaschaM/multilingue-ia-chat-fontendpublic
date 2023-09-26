@@ -1,6 +1,17 @@
 import styles from "./auth.module.css";
 
-import { Button, Input, Card, CardContent, Typography } from "@mui/material";
+import {
+  Button,
+  Input,
+  Card,
+  CardContent,
+  Typography,
+  CircularProgress,
+  Alert,
+  AlertTitle,
+  Snackbar,
+  Stack,
+} from "@mui/material";
 import { ArrowBackIos } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -11,12 +22,20 @@ import { useAtom } from "jotai";
 
 function Login() {
   const navigate = useNavigate();
-  const { handleLogin } = useAuth();
+  const { handleLogin, handleVerifyEmail } = useAuth();
   const [user, setUserAtom] = useAtom(userAtom);
   // const [socket] = useAtom(socketAtom);
   // console.log(socket, "valor del atomo global socket")
 
   const [inputPassword, setInputPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [counterIntent, setCounterIntent] = useState(3);
+  const [showCounterIntent, setShowCounterIntent] = useState(false);
+  const [dataToast, setDataToast] = useState({
+    show: false,
+    severity: "",
+    message: "",
+  });
   const {
     register,
     handleSubmit,
@@ -25,31 +44,101 @@ function Login() {
 
   useEffect(() => {
     console.log(user, "valor del atomo global");
-
     if (user != null) {
       // localStorage.setItem("userData", JSON.stringify(user));
       navigate("/home-chat");
-   
     }
   }, [user, navigate]);
 
-
   const onLogin = async (data) => {
     if (data.email) {
-      setInputPassword(true);
+      setIsLoading(true);
+      const response = await handleVerifyEmail(data.email);
+
+      if (response.success) {
+        setInputPassword(true);
+        setIsLoading(false);
+      } else {
+        setIsLoading(false);
+        setDataToast({
+          show: true,
+          severity: "error",
+          message: response.message,
+        });
+      }
     }
     if (data.password) {
       const response = await handleLogin(data);
-      if ("error" in response) {
-        console.log(response.error);
-      } else {
+      if (response.success) {
+        setDataToast({
+          show: true,
+          severity: "success",
+          message: response.message,
+        });
         setUserAtom(response.user);
+      } else {
+        setDataToast({
+          show: true,
+          severity: "error",
+          message: response.error,
+        });
+        if (counterIntent > 0) {
+          setCounterIntent(counterIntent - 1);
+        } else {
+          setCounterIntent(0);
+        }
+        setShowCounterIntent(true);
       }
     }
   };
 
   return (
     <div className={styles.container}>
+      <Snackbar
+        open={showCounterIntent}
+        autoHideDuration={3000}
+        onClose={() => setShowCounterIntent(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "left" }}
+      >
+        <Alert
+          onClose={() => setShowCounterIntent(false)}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          {counterIntent === 0 ? (
+            <>Vuelvelo a intentarlo en 1 hora</>
+          ) : (
+            <>Te quedan {counterIntent} intentos</>
+          )}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={counterIntent > 0 && dataToast.show}
+        autoHideDuration={3000}
+        onClose={() =>
+          setDataToast({
+            show: false,
+            severity: "",
+            message: "",
+          })
+        }
+      >
+        <Alert
+          onClose={() =>
+            setDataToast({
+              show: false,
+              severity: "",
+              message: "",
+            })
+          }
+          severity={dataToast.severity}
+          sx={{ width: "100%" }}
+        >
+          {dataToast.message}
+        </Alert>
+      </Snackbar>
+
       <img
         src="https://res.cloudinary.com/dvzjgzqbn/image/upload/v1694734856/Otros/Vector_right_qtg8j1.png"
         alt="vector_right"
@@ -130,23 +219,26 @@ function Login() {
                 }}
               />
             )}
-
-            <Button
-              type="submit"
-              variant="contained"
-              sx={{
-                background: "#17C3CE",
-                marginTop: "1.8rem",
-                padding: "0.8rem 1.8rem",
-                width: "auto",
-                "&:hover": {
-                  background: "#19B8C3",
-                },
-              }}
-              onClick={onLogin}
-            >
-              Entrar
-            </Button>
+            {!isLoading ? (
+              <Button
+                type="submit"
+                variant="contained"
+                sx={{
+                  background: "#17C3CE",
+                  marginTop: "1.8rem",
+                  padding: "0.8rem 1.8rem",
+                  width: "auto",
+                  "&:hover": {
+                    background: "#19B8C3",
+                  },
+                }}
+                onClick={onLogin}
+              >
+                Entrar
+              </Button>
+            ) : (
+              <CircularProgress />
+            )}
           </form>
           <p className={styles.text_link}>
             ¿No tienes cuenta?{" "}

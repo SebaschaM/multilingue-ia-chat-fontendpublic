@@ -5,8 +5,12 @@ export const useAuth = () => {
   //TODO: PODEMOS INSTANCIAR EL ESTADO GLOBAL
 
   const handleLogin = async (dataLogin) => {
-    const {data} = await ApiJson.post("/login", dataLogin);
-    return data;
+    try {
+      const { data } = await ApiJson.post("/login", dataLogin);
+      return data;
+    } catch (error) {
+      return { error: error.response.data.error, success: false };
+    }
   };
 
   //TODO: PODEMOS MANEJARLO CON MULTIPART DATA PARA EL ENVIO DE IMAGENES
@@ -17,13 +21,19 @@ export const useAuth = () => {
   };
 
   const handleVerifyEmail = async (dataVerifyEmail) => {
-    const { data } = await ApiJson.post("/verify-email", dataVerifyEmail);
-    return data;
-  }
+    try {
+      const { data } = await ApiJson.post("/verify-email-exists", {
+        email: dataVerifyEmail,
+      });
+      return data;
+    } catch (error) {
+      return { success: false, message: error.response.data.error };
+    }
+  };
 
   return {
     handleLogin,
     handleRegister,
-    handleVerifyEmail
+    handleVerifyEmail,
   };
 };
