@@ -6,13 +6,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../../hooks/useAuth";
-import { userAtom } from "../../store/store";
+import { socketAtom, userAtom } from "../../store/store";
 import { useAtom } from "jotai";
 
 function Login() {
   const navigate = useNavigate();
   const { handleLogin } = useAuth();
   const [user, setUserAtom] = useAtom(userAtom);
+  // const [socket] = useAtom(socketAtom);
+  // console.log(socket, "valor del atomo global socket")
 
   const [inputPassword, setInputPassword] = useState(false);
   const {
@@ -23,11 +25,14 @@ function Login() {
 
   useEffect(() => {
     console.log(user, "valor del atomo global");
-    if (user != null) {
 
+    if (user != null) {
+      // localStorage.setItem("userData", JSON.stringify(user));
       navigate("/home-chat");
+   
     }
-  }, [user]);
+  }, [user, navigate]);
+
 
   const onLogin = async (data) => {
     if (data.email) {

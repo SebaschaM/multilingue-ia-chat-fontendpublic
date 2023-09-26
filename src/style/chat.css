@@ -1,3 +1,16 @@
+/* Estilo para los mensajes del usuario actual */
+.user-message {
+  background-color: #4caf50; /* Cambia el color de fondo según tus preferencias */
+  color: #fff; /* Cambia el color de texto según tus preferencias */
+}
+
+/* Estilo para los mensajes de otros usuarios */
+.other-user-message {
+  background-color: #2196F3; /* Cambia el color de fondo según tus preferencias */
+  color: #fff; /* Cambia el color de texto según tus preferencias */
+}
+
+
 .card {
   width: 300px; /* Ancho aumentado */
   margin: 0 auto; /* Centrado horizontalmente */

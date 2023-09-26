@@ -5,10 +5,11 @@ import {
   Login,
   Verify_Email,
   AboutMe_Register,
-  HomeChat
+  HomeChat,
+  PanelChat,
+  HomeChat2,
 } from "../pages";
 
-import {  } from "module";
 
 export const AppRouter = () => {
   return (
@@ -20,6 +21,8 @@ export const AppRouter = () => {
         <Route path="/home-chat" element={<HomeChat />} />
         <Route path="/verify-email" element={<Verify_Email />} />
         <Route path="/aboutme-register" element={<AboutMe_Register />} />
+        <Route path="/panel-chat" element={<PanelChat />} />
+
       </Routes>
     </BrowserRouter>
   );
