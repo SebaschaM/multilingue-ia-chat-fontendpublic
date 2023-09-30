@@ -1,10 +1,97 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap");
+
+:root {
+  /* Colores */
+  --color-gray: #f1f3f4;
+  --color-gray-2: #dedede;
+  --color-gray-transparent: rgba(222, 222, 222, 0.75);
+  --color-blue: #2a5ee0;
+  --color-blue-dark: #0a4ef4;
+  /* --color-purple: #3360ff; */
+  --color-purple: #00aee2;
+  --color-red: #ff5959;
+  --color-red-dark: #d84545;
+  --color-white: #ffffff;
+  --color-black: #1c2536;
+  --color-line: #2d2f35;
+
+  /* Texts */
+  --color-text-title: #2e384d;
+  --color-text-span: #afafbb;
+
+  /* Links */
+  --link-hover: #f6f6f6;
+
+  /* Accordion */
+  --color-item-accordion: #e7e7e7;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+body {
+  font-family: "Roboto", sans-serif;
+}
+
+h1 {
+  font-weight: 900;
+  color: var(--color-text-title);
+}
+
+h2 {
+  font-weight: 700;
+  color: var(--color-text-title);
+}
+
+h3 {
+  font-weight: 500;
+  color: var(--color-text-title);
+}
+
+p {
+  font-weight: 400;
+  color: var(--color-text-title);
+}
+
+span {
+  font-weight: 300;
+  color: var(--color-text-span);
+}
+
 a {
+  text-decoration: none;
+}
+
+ul {
+  list-style: none;
+}
+
+select {
+  padding-block: 0.8rem;
+  padding-inline: 1rem;
+  border: 1px solid var(--color-gray-2);
+  background-color: var(--color-white);
+  color: var(--color-black);
+  outline: none;
+  border-radius: 10px;
+  height: 100%;
+}
+
+input {
+  padding-block: 0.8rem;
+  padding-inline: 1rem;
+  color: var(--color-black);
+  border: 1px solid var(--color-gray);
+  outline: none;
+  border-radius: 10px;
+  height: 100%;
+  width: 40%;
+}
+
+/* a {
   text-decoration: none;
   font-weight: 700;
 }
@@ -32,4 +119,55 @@ h4 {
 p {
   font-size: 1.2rem;
   font-weight: 400;
+} */
+
+/* Scroll */
+::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--color-white);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-gray-2);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-purple);
+}
+
+/* Tabs */
+.react-tabs__tab {
+  transition: all 0.3s ease-in-out;
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px;
+  border: transparent;
+}
+
+.react-tabs__tab:hover {
+  background-color: var(--color-blue);
+  color: var(--color-white);
+}
+
+.react-tabs__tab--selected {
+  background-color: var(--color-blue);
+  color: var(--color-white);
+  border: transparent;
+}
+
+/* Date Time Picker */
+.react-time-picker__wrapper {
+  border: 1px solid var(--color-gray-2) !important;
+  border-radius: 10px !important;
+  padding-block: 0.5rem;
+  padding-inline: 1rem;
+}
+
+/* React Calendar */
+.react-calendar {
+  width: 100% !important;
 }

@@ -1,0 +1,122 @@
+/* .navbar {
+  background-color: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  row-gap: 1rem;
+  padding-inline: 0.5rem;
+  padding-block: 0.5rem;
+} */
+
+.navbar_img {
+  display: flex;
+  justify-content: center;
+  padding-block: 2rem;
+}
+
+.navbar_img img {
+  width: 9rem;
+}
+
+/* Navbar Links */
+.container_pr {
+  display: flex;
+  flex-direction: column;
+  row-gap: 2rem;
+  height: 36rem;
+  height: 100%;
+}
+
+.sidebar {
+  border: none !important;
+  background-color: #fff !important;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* .sidebar div {
+  background-color: transparent !important;
+} */
+
+.sidebar_menu {
+  background-color: transparent;
+}
+
+.sidebar_menu ul {
+  display: flex;
+  flex-direction: column;
+  row-gap: 0.5rem;
+}
+
+.navbar_link_2 a {
+  transition: all 0.3s ease-in-out;
+  /* border-radius: 10px; */
+}
+
+.navbar_link_2 a:hover {
+  background-color: var(--color-purple) !important;
+}
+
+.navbar_link_2_active a {
+  background-color: var(--color-purple) !important;
+  /* border-radius: 10px; */
+}
+
+.navbar_link_2_active a span {
+  color: var(--color-white) !important;
+  font-weight: 400;
+}
+
+.navbar_link_2 a:hover span {
+  color: var(--link-hover) !important;
+}
+
+.navbar_link_2 a span {
+  color: var(--color-black);
+  font-weight: 400;
+  font-size: 1rem;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Navbar User */
+.navbar_user {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  column-gap: 1.5rem;
+  padding-left: 20px;
+  padding-block: 1rem;
+}
+
+.navbar_user img {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+}
+
+.navbar_user_data {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.navbar_user_data h3 {
+  font-size: 1rem;
+  color: var(--color-black);
+}
+
+.navbar_user_data span {
+  font-size: 0.8rem;
+  color: var(--text-span);
+}
+
+.navbar_icon_power {
+  transition: color 0.3s ease-in-out;
+  color: var(--color-black);
+}
+
+.navbar_icon_power:hover {
+  color: red;
+}
