@@ -10,12 +10,12 @@ import {
 export const PrivateRouter = () => {
   return (
     <Routes>
-      <Route path="dashboard" element={<Dashboard />} />
+      <Route path="" element={<Dashboard />} />
       <Route path="metrics" element={<DashboardMetrics />} />
       <Route path="chats" element={<DashboardChat />} />
       <Route path="requests" element={<DashboardRequests />} />
 
-      <Route path="*" element={<Navigate to="/exe-digital/dashboard" />} />
+      <Route path="*" element={<Navigate to="/admin/dashboard/" />} />
     </Routes>
   );
 };

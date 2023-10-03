@@ -23,7 +23,7 @@ export const AppRouter = () => {
 
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/exe-digital/*" element={<PrivateRouter />} />
+        <Route path="/admin/dashboard/*" element={<PrivateRouter />} />
       </Routes>
     </BrowserRouter>
   );

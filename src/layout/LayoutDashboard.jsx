@@ -1,4 +1,4 @@
-import Aside from "../components/private/Aside";
+import { Aside } from "../components";
 import styles from "./LayoutDashboard.module.css";
 
 export default function LayoutDashboard({ children, title }) {

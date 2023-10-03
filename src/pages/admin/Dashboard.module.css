@@ -49,6 +49,7 @@
 .card_data {
   display: flex;
   flex-direction: column;
+  row-gap: 0.5rem;
 }
 
 .card_data_header {

@@ -1,17 +1,17 @@
 import { BsCheckAll, BsClock, BsPerson } from "react-icons/bs";
 
 import { LayoutDashboard, LayoutDashboardContent } from "../../layout";
-import styles from "./Dashboard.module.css";
 import { Box, Button, Modal, Typography } from "@mui/material";
 import { useState } from "react";
-import ModalCustom from "../../components/ModalCustom";
+import { ModalCustom } from "../../components";
+import styles from "./Dashboard.module.css";
 
-const DashboardMetrics = () => {
+const DashboardChat = () => {
   const [openModal, setOpenModal] = useState(false);
 
   return (
     <LayoutDashboard title="Overall Holding">
-      <LayoutDashboardContent title="Metricas del agente">
+      <LayoutDashboardContent title="Gestion de Chats">
         <div className={styles.content_header_cards}>
           <div className={styles.card_header}>
             <h2>Conversaciones</h2>
@@ -51,4 +51,4 @@ const DashboardMetrics = () => {
   );
 };
 
-export default DashboardMetrics;
+export default DashboardChat;

@@ -14,7 +14,7 @@ export * from "./index";
 export { default as Home } from "./main/Home";
 
 // admin
-export { default as Dashboard } from "./private/Dashboard";
-export { default as DashboardChat } from "./private/DashboardChat";
-export { default as DashboardMetrics } from "./private/DashboardMetrics";
-export { default as DashboardRequests } from "./private/DashboardRequests";
+export { default as Dashboard } from "./admin/Dashboard";
+export { default as DashboardChat } from "./admin/DashboardChat";
+export { default as DashboardMetrics } from "./admin/DashboardMetrics";
+export { default as DashboardRequests } from "./admin/DashboardRequests";

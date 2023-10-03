@@ -4,14 +4,14 @@ import { LayoutDashboard, LayoutDashboardContent } from "../../layout";
 import styles from "./Dashboard.module.css";
 import { Box, Button, Modal, Typography } from "@mui/material";
 import { useState } from "react";
-import ModalCustom from "../../components/ModalCustom";
+import { ModalCustom } from "../../components";
 
-const DashboardChat = () => {
+const DashboardMetrics = () => {
   const [openModal, setOpenModal] = useState(false);
 
   return (
     <LayoutDashboard title="Overall Holding">
-      <LayoutDashboardContent title="Gestion de Chats">
+      <LayoutDashboardContent title="Metricas del agente">
         <div className={styles.content_header_cards}>
           <div className={styles.card_header}>
             <h2>Conversaciones</h2>
@@ -51,4 +51,4 @@ const DashboardChat = () => {
   );
 };
 
-export default DashboardChat;
+export default DashboardMetrics;

@@ -1,7 +1,7 @@
 import { Box, Modal, TextField, Typography } from "@mui/material";
 import React from "react";
 
-const ModalCustom = ({ openModal, setOpenModal }) => {
+const ModalCustom = ({ openModal, setOpenModal, children }) => {
   const style = {
     position: "absolute",
     top: "50%",
@@ -26,17 +26,13 @@ const ModalCustom = ({ openModal, setOpenModal }) => {
       aria-describedby="modal-modal-description"
     >
       <Box sx={style}>
-        <Typography
-          id="modal-modal-title"
-          variant="h6"
-          component="h2"
-          textAlign={"center"}
-        >
+        {/* <Typography id="modal-modal-title" variant="h6" component="h2" textAlign={'center'}>
           Aqui puede ir el titulo del formulario
         </Typography>
         <form>
           <TextField id="outlined-basic" label="Outlined" variant="outlined" />
-        </form>
+        </form> */}
+        {children}
       </Box>
     </Modal>
   );
