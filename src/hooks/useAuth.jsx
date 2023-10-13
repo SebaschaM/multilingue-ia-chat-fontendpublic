@@ -1,12 +1,14 @@
 // import { useEffect, useState } from "react";
+import { useAtom } from "jotai";
 import ApiJson from "../api/api-json-config";
+import { userAtom } from "../store/store";
 
 export const useAuth = () => {
-  //TODO: PODEMOS INSTANCIAR EL ESTADO GLOBAL
+  const [user, setUserAtom] = useAtom(userAtom);
 
   const handleLogin = async (dataLogin) => {
     try {
-      const { data } = await ApiJson.post("/login", dataLogin);
+      const { data } = await ApiJson.post("/admin/auth/login", dataLogin);
       return data;
     } catch (error) {
       return { error: error.response.data.error, success: false };
@@ -22,7 +24,7 @@ export const useAuth = () => {
 
   const handleVerifyEmail = async (dataVerifyEmail) => {
     try {
-      const { data } = await ApiJson.post("/verify-email-exists", {
+      const { data } = await ApiJson.post("/admin/auth/verify-email-exists", {
         email: dataVerifyEmail,
       });
       return data;
@@ -31,9 +33,17 @@ export const useAuth = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("userData");
+    setUserAtom(null);
+  };
+
   return {
     handleLogin,
     handleRegister,
     handleVerifyEmail,
+    handleLogout,
+    setUserAtom,
+    user,
   };
 };

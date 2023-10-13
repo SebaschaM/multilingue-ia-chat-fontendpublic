@@ -220,7 +220,94 @@ const Dashboard = () => {
         <ModalCustom openModal={openModal} setOpenModal={setOpenModal}>
           <h1>Contenido del modal</h1>
         </ModalCustom> */}
-        <Grid container>
+        <Grid container spacing={3}>
+          <Grid item xs={12} sm={6} md={4}>
+            <Card>
+              <CardActionArea
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              >
+                <PieChart width={800} height={400}>
+                  <Pie
+                    data={data}
+                    innerRadius={60}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {data.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </CardActionArea>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <Card>
+              <CardActionArea
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              >
+                <PieChart width={800} height={400}>
+                  <Pie
+                    data={data}
+                    innerRadius={60}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {data.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </CardActionArea>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <Card>
+              <CardActionArea
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              >
+                <PieChart width={800} height={400}>
+                  <Pie
+                    data={data}
+                    innerRadius={60}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {data.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </CardActionArea>
+            </Card>
+          </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <Card>
               <CardActionArea

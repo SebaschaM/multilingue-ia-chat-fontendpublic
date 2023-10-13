@@ -1,7 +1,11 @@
-export { default as AboutMe_Register } from "./auth/AboutMe_Register";
-export { default as Login } from "./auth/Login";
-export { default as Register } from "./auth/Register";
-export { default as Verify_Email } from "./auth/Verify_Email";
+export { default as Dashboard } from "./admin/Dashboard";
+export { default as DashboardChat } from "./admin/DashboardChat";
+export { default as DashboardMetrics } from "./admin/DashboardMetrics";
+export { default as DashboardRequests } from "./admin/DashboardRequests";
+export { default as AboutMe_Register } from "./admin/auth/AboutMe_Register";
+export { default as Login } from "./admin/auth/Login";
+export { default as Register } from "./admin/auth/Register";
+export { default as Verify_Email } from "./admin/auth/Verify_Email";
 export { default as Chat } from "./chat/Chat";
 export { default as ChatRooms } from "./chat/ChatRooms";
 export { default as ChatUserList } from "./chat/ChatUserList";
@@ -12,9 +16,3 @@ export { default as SalasDisponibles } from "./chat/SalasDisponibles";
 export { default as UsersOnline } from "./chat/UsersOnline";
 export * from "./index";
 export { default as Home } from "./main/Home";
-
-// admin
-export { default as Dashboard } from "./admin/Dashboard";
-export { default as DashboardChat } from "./admin/DashboardChat";
-export { default as DashboardMetrics } from "./admin/DashboardMetrics";
-export { default as DashboardRequests } from "./admin/DashboardRequests";

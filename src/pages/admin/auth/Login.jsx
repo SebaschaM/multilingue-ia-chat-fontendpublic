@@ -16,14 +16,13 @@ import { ArrowBackIos } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useAuth } from "../../hooks/useAuth";
-import { socketAtom, userAtom } from "../../store/store";
+
 import { useAtom } from "jotai";
+import { useAuth } from "../../../hooks/useAuth";
 
 function Login() {
   const navigate = useNavigate();
-  const { handleLogin, handleVerifyEmail } = useAuth();
-  const [user, setUserAtom] = useAtom(userAtom);
+  const { handleLogin, handleVerifyEmail, user, setUserAtom } = useAuth();
   // const [socket] = useAtom(socketAtom);
   // console.log(socket, "valor del atomo global socket")
 
@@ -46,7 +45,7 @@ function Login() {
     console.log(user, "valor del atomo global");
     if (user != null) {
       // localStorage.setItem("userData", JSON.stringify(user));
-      navigate("/home-chat");
+      navigate("/admin/dashboard");
     }
   }, [user, navigate]);
 

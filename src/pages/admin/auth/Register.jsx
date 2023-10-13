@@ -5,7 +5,7 @@ import { ArrowBackIos } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../../hooks/useAuth";
 
 function Register() {
   const { handleRegister } = useAuth();
