@@ -23,10 +23,12 @@ export const useAuth = () => {
   };
 
   const handleVerifyEmail = async (dataVerifyEmail) => {
+    console.log(dataVerifyEmail);
     try {
       const { data } = await ApiJson.post("/admin/auth/verify-email-exists", {
         email: dataVerifyEmail,
       });
+      console.log(data);
       return data;
     } catch (error) {
       return { success: false, message: error.response.data.error };
@@ -38,6 +40,22 @@ export const useAuth = () => {
     setUserAtom(null);
   };
 
+  const handleVerifyMaintenance = async () => {
+    try {
+      const data = {
+        id: 12345,
+        message_notification: "El sistema está en mantenimiento",
+        date_start: "2023-10-12T18:29:51.000Z",
+        date_end: "2023-10-13T18:29:51.000Z",
+        status: "activee",
+      };
+      // const { data } = await ApiJson.post("/verify-maintenance", {});
+      return data;
+    } catch (error) {
+      return { success: false, message: error.response.data.error };
+    }
+  };
+
   return {
     handleLogin,
     handleRegister,
@@ -45,5 +63,6 @@ export const useAuth = () => {
     handleLogout,
     setUserAtom,
     user,
+    handleVerifyMaintenance,
   };
 };

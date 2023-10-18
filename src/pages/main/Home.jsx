@@ -26,17 +26,17 @@ function Home() {
         <p>Nihil repellendus nesciunt ut autem numquam.</p>
         <p>Repellat debitis aut esse cum debitis a mollitia non.</p>
 
-        <Link to={"/"}>
+        <Link to={"/admin/auth"}>
           <Button>
             Iniciar sesión
           </Button>
         </Link>
 
-        <Link to={"/register"}>
+        {/* <Link to={"/register"}>
           <Button>
             Registrarse
           </Button>
-        </Link>
+        </Link> */}
       </div>
 
       <img

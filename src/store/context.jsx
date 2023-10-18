@@ -36,6 +36,8 @@ export const ContextSocketProvider = ({ children }) => {
         console.error("Error de conexión:", error);
       });
       
+   
+      
 
       // Actualiza el átomo socketAtom con la instancia del socket
       setSocket(newSocket);

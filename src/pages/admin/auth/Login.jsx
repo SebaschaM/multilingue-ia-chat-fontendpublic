@@ -16,13 +16,20 @@ import { ArrowBackIos } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-
-import { useAtom } from "jotai";
 import { useAuth } from "../../../hooks/useAuth";
+import { socketAtom, userAtom } from "../../../store/store";
+import { useAtom } from "jotai";
 
 function Login() {
   const navigate = useNavigate();
-  const { handleLogin, handleVerifyEmail, user, setUserAtom } = useAuth();
+
+  const {
+    handleLogin,
+    handleVerifyEmail,
+    user,
+    setUserAtom,
+    handleVerifyMaintenance,
+  } = useAuth();
   // const [socket] = useAtom(socketAtom);
   // console.log(socket, "valor del atomo global socket")
 
@@ -30,29 +37,96 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [counterIntent, setCounterIntent] = useState(3);
   const [showCounterIntent, setShowCounterIntent] = useState(false);
+  const [dataVerifyMaintenance, setDatatVerifyMaintenance] = useState({
+    id: "",
+    message_notification: "",
+    date_start: "",
+    date_end: "",
+    status: "",
+  });
+
   const [dataToast, setDataToast] = useState({
     show: false,
     severity: "",
     message: "",
   });
+
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
+    getValues,
   } = useForm();
 
   useEffect(() => {
     console.log(user, "valor del atomo global");
     if (user != null) {
-      // localStorage.setItem("userData", JSON.stringify(user));
-      navigate("/admin/dashboard");
+      navigate("/home-chat");
+    }
+    if (user) {
+      if (user.role.id == 1 || user.role.id == 2) {
+        navigate("/admin/dashboard");
+      }
+
+
+
+      console.log(user.role.id);
     }
   }, [user, navigate]);
 
+  const handleValidateMaintenance = async () => {
+    const response = await handleVerifyMaintenance();
+    if (response) {
+      setDatatVerifyMaintenance(response);
+      console.log(response);
+      return response;
+    } else {
+      setDataToast({
+        show: true,
+        severity: "error",
+        message: response,
+      });
+    }
+  };
+
+  useEffect(() => {
+    handleValidateMaintenance();
+  }, []);
+
+  if (dataVerifyMaintenance.status === "active") {
+    return (
+      <div>
+        {" "}
+        El sistema está en mantenimiento: Desde{" "}
+        {dataVerifyMaintenance.date_start} hasta{" "}
+        {dataVerifyMaintenance.date_end}, el motivo es{" "}
+        {dataVerifyMaintenance.message_notification}{" "}
+      </div>
+    );
+  }
+
+  const isValidEmail = (email) => {
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i;
+    return regex.test(email);
+  };
+
+  const isValidPassword = (password) => {
+    //validar si el usuario está ingresando en el login una clave segura
+  };
   const onLogin = async (data) => {
     if (data.email) {
+      if (!isValidEmail(data.email)) {
+        setDataToast({
+          show: true,
+          severity: "error",
+          message: "El email no es válido",
+        });
+        return;
+      }
       setIsLoading(true);
       const response = await handleVerifyEmail(data.email);
+      console.log(response);
 
       if (response.success) {
         setInputPassword(true);
@@ -68,6 +142,7 @@ function Login() {
     }
     if (data.password) {
       const response = await handleLogin(data);
+      console.log(response, "respuesta del login");
       if (response.success) {
         setDataToast({
           show: true,
@@ -89,6 +164,11 @@ function Login() {
         setShowCounterIntent(true);
       }
     }
+  };
+
+  const onEdit = () => {
+    // setValue("email", "");
+    setInputPassword(false);
   };
 
   return (
@@ -155,7 +235,7 @@ function Login() {
             width: "2rem",
           }}
         />
-        <Link to={"/home"}>
+        <Link to={"/"}>
           <p className={`${styles.text_link} ${styles.text_color}`}>Home</p>
         </Link>
       </div>
@@ -184,29 +264,34 @@ function Login() {
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Unde,
               quos.
             </Typography>
-            <Input
-              placeholder="email@example.com"
-              type="email"
-              {...register("email", { required: true })}
-              error={errors.email}
-              helpertext={errors.email && "email requerido"}
-              sx={{
-                marginTop: "1rem",
-                height: "2.1rem",
-                borderColor: "#17C3CE",
-                width: "80%",
-                ":after": {
-                  borderBottom: "3px solid #17C3CE",
-                },
+            <div
+              style={{
+                display: "flex",
+                width: "100%",
+                position: "relative",
+                justifyContent: "center",
               }}
-            />
-            {inputPassword && (
+            >
               <Input
-                placeholder="**********"
-                {...register("password", { required: true })}
-                type="password"
-                error={errors.password}
-                helpertext={errors.password && "Contraseña requerida"}
+                placeholder="email@example.com"
+                disabled={inputPassword}
+                type="email"
+                {...register("email", {
+                  required: true,
+                  maxLength: 50,
+                  minLength: 3,
+                })}
+                error={errors.email}
+                helpertext={errors.email && "email requerido"}
+                // sx={{
+                //   marginTop: "1rem",
+                //   height: "2.1rem",
+                //   borderColor: "#17C3CE",
+
+                //   ":after": {
+                //     borderBottom: "3px solid #17C3CE",
+                //   },
+                // }}
                 sx={{
                   marginTop: "1rem",
                   height: "2.1rem",
@@ -217,16 +302,65 @@ function Login() {
                   },
                 }}
               />
+              {inputPassword && (
+                <>
+                  <Button
+                    style={{ height: "2.1rem" }}
+                    variant="contained"
+                    color="primary"
+                    sise="small"
+                    text="Editar"
+                    sx={{
+                      textTransform: "capitalize",
+                      position: "absolute",
+                      right: "-1.5rem",
+                      bottom: "0",
+                      color: "#FFF"
+                    }}
+                    onClick={onEdit}
+                  >
+                    {" "}
+                    Editar
+                  </Button>
+                </>
+              )}
+            </div>
+
+            {inputPassword && (
+              <div
+                style={{
+                  display: "flex",
+                  width: "100%",
+                  justifyContent: "center",
+                }}
+              >
+                <Input
+                  placeholder="**********"
+                  {...register("password", { required: true })}
+                  type="password"
+                  error={errors.password}
+                  helpertext={errors.password && "Contraseña requerida"}
+                  sx={{
+                    marginTop: "1rem",
+                    height: "2.1rem",
+                    borderColor: "#17C3CE",
+                    width: "80%",
+                    ":after": {
+                      borderBottom: "3px solid #17C3CE",
+                    },
+                  }}
+                />
+              </div>
             )}
             {!isLoading ? (
               <Button
                 type="submit"
                 variant="contained"
                 sx={{
-                  background: "#17C3CE",
                   marginTop: "1.8rem",
                   padding: "0.8rem 1.8rem",
                   width: "auto",
+                  color: "#FFF",
                   "&:hover": {
                     background: "#19B8C3",
                   },

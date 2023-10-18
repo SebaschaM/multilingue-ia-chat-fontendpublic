@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const ApiJson = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "https://exe-service.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -14,5 +14,4 @@ const ApiJson = axios.create({
 //     return Promise.reject(error);
 //   }
 // );
-
 export default ApiJson;
