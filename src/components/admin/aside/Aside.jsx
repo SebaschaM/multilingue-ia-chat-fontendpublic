@@ -96,7 +96,7 @@ const Aside = () => {
                   objectFit: "contain",
                   cursor: "pointer",
                 }}
-                src="/src/assets/logo-sm.png"
+                src="/logo-sm.png"
                 alt="logo"
               />
             ) : (
@@ -107,7 +107,7 @@ const Aside = () => {
                   objectFit: "contain",
                   cursor: "pointer",
                 }}
-                src="/src/assets/logo.png"
+                src="/logo.png"
                 alt="logo"
               />
             )}
@@ -164,7 +164,7 @@ const Aside = () => {
             </Button>
           )}
           <div className={styles.navbar_user}>
-            <img src="/src/assets/avatar.jpg" alt="avatar" />
+            <img src="/avatar.jpg" alt="avatar" />
             <div className={styles.navbar_user_data}>
               <h3>Sebastian</h3>
               <span>sebas@gmail.com</span>

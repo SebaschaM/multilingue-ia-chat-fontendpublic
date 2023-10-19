@@ -11,6 +11,8 @@ import {
   AlertTitle,
   Snackbar,
   Stack,
+  Box,
+  LinearProgress,
 } from "@mui/material";
 import { ArrowBackIos } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
@@ -19,9 +21,14 @@ import { useForm } from "react-hook-form";
 import { useAuth } from "../../../hooks/useAuth";
 import { socketAtom, userAtom } from "../../../store/store";
 import { useAtom } from "jotai";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
 
 function Login() {
   const navigate = useNavigate();
+  const [validationCount, setValidationCount] = useState(0);
+  const [progressPassword, setProgressPassword] = useState(validationCount);
+  const [porcent, setPorcent] = useState(0);
 
   const {
     handleLogin,
@@ -45,10 +52,76 @@ function Login() {
     status: "",
   });
 
+  const countValidations = (password) => {
+    let count = 0;
+
+    if (password.length === 0) {
+      count = 0;
+    }
+
+    if (password.length > 0) {
+      count++;
+    }
+
+    if (password.length >= 8) {
+      count++;
+    }
+
+    if (/[a-z]/.test(password)) {
+      count++;
+    }
+
+    if (/[A-Z]/.test(password)) {
+      count++;
+    }
+
+    if (/\d/.test(password)) {
+      count++;
+    }
+
+    if (/[@$!%*#?&_.]/.test(password)) {
+      count++;
+    }
+
+    const porcentValue = {
+      0: 0,
+      1: 10,
+      2: 30,
+      3: 50,
+      4: 70,
+      5: 90,
+      6: 100,
+    };
+
+    const valuePorcent = porcentValue[count];
+    console.log(valuePorcent);
+    setValidationCount(valuePorcent);
+    setProgressPassword(valuePorcent);
+  };
+
   const [dataToast, setDataToast] = useState({
     show: false,
     severity: "",
     message: "",
+  });
+
+  const validationSchema = Yup.object().shape({
+    password: Yup.string()
+      .required("La contraseña es requerida")
+      .min(8, "La contraseña debe tener al menos 8 caracteres")
+      .matches(
+        /[a-z]/,
+        "La contraseña debe contener al menos una letra minúscula"
+      )
+      .matches(
+        /[A-Z]/,
+        "La contraseña debe contener al menos una letra mayúscula"
+      )
+      .matches(/\d/, "La contraseña debe contener al menos un número")
+      .matches(
+        /[@$!%*#?&_.]/,
+        "La contraseña debe contener al menos un caracter especial: @$!%*#?&_."
+      ),
   });
 
   const {
@@ -57,7 +130,9 @@ function Login() {
     formState: { errors },
     setValue,
     getValues,
-  } = useForm();
+  } = useForm({
+    resolver: yupResolver(validationSchema),
+  });
 
   useEffect(() => {
     console.log(user, "valor del atomo global");
@@ -68,8 +143,6 @@ function Login() {
       if (user.role.id == 1 || user.role.id == 2) {
         navigate("/admin/dashboard");
       }
-
-
 
       console.log(user.role.id);
     }
@@ -115,8 +188,11 @@ function Login() {
     //validar si el usuario está ingresando en el login una clave segura
   };
   const onLogin = async (data) => {
-    if (data.email) {
-      if (!isValidEmail(data.email)) {
+    const email = getValues("email");
+    const password = getValues("password");
+
+    if (email) {
+      if (!isValidEmail(email)) {
         setDataToast({
           show: true,
           severity: "error",
@@ -125,7 +201,7 @@ function Login() {
         return;
       }
       setIsLoading(true);
-      const response = await handleVerifyEmail(data.email);
+      const response = await handleVerifyEmail(email);
       console.log(response);
 
       if (response.success) {
@@ -140,8 +216,11 @@ function Login() {
         });
       }
     }
-    if (data.password) {
-      const response = await handleLogin(data);
+    if (password) {
+      const response = await handleLogin({
+        email: getValues("email"),
+        password: getValues("password"),
+      });
       console.log(response, "respuesta del login");
       if (response.success) {
         setDataToast({
@@ -315,7 +394,7 @@ function Login() {
                       position: "absolute",
                       right: "-1.5rem",
                       bottom: "0",
-                      color: "#FFF"
+                      color: "#FFF",
                     }}
                     onClick={onEdit}
                   >
@@ -330,15 +409,18 @@ function Login() {
               <div
                 style={{
                   display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
                   width: "100%",
                   justifyContent: "center",
                 }}
               >
                 <Input
                   placeholder="**********"
-                  {...register("password", { required: true })}
+                  {...register("password")}
                   type="password"
                   error={errors.password}
+                  onInput={() => countValidations(getValues("password"))}
                   helpertext={errors.password && "Contraseña requerida"}
                   sx={{
                     marginTop: "1rem",
@@ -350,6 +432,24 @@ function Login() {
                     },
                   }}
                 />
+                {errors.password && (
+                  <>
+                    <Typography sx={{ color: "red", maxWidth: "80%" }}>
+                      {errors.password.message}
+                    </Typography>
+                    <Box sx={{ width: "100%" }}>
+                      <LinearProgress
+                        variant="determinate"
+                        value={progressPassword}
+                        sx={{
+                          backgroundColor:
+                            progressPassword < 30 ? "red" : "black",
+                        }}
+                      />
+                    </Box>
+                    <p>{JSON.stringify(progressPassword)}</p>
+                  </>
+                )}
               </div>
             )}
             {!isLoading ? (
@@ -365,7 +465,7 @@ function Login() {
                     background: "#19B8C3",
                   },
                 }}
-                onClick={onLogin}
+                // onClick={onLogin}
               >
                 Entrar
               </Button>
