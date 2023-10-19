@@ -9,6 +9,7 @@ import {
   BsList,
   BsArrowBarRight,
   BsArrowBarLeft,
+  BsPeople,
 } from "react-icons/bs";
 import { Button, IconButton } from "@mui/material";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -50,6 +51,12 @@ const Aside = () => {
       role: ["manager"],
       label: "Solicitudes",
       icon: <BsFileText />,
+    },
+    {
+      path: "/admin/dashboard/manager-users",
+      role: ["manager"],
+      label: "Gestionar Usuarios",
+      icon: <BsPeople />,
     },
   ];
 

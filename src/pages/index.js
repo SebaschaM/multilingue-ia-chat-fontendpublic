@@ -1,5 +1,6 @@
 export { default as Dashboard } from "./admin/Dashboard";
 export { default as DashboardChat } from "./admin/DashboardChat";
+export { default as DashboardManagerUser } from "./admin/DashboardManagerUser";
 export { default as DashboardMetrics } from "./admin/DashboardMetrics";
 export { default as DashboardRequests } from "./admin/DashboardRequests";
 export { default as AboutMe_Register } from "./admin/auth/AboutMe_Register";
@@ -14,5 +15,4 @@ export { default as HomeChat2 } from "./chat/HomeChat2";
 export { default as PanelChat } from "./chat/PanelChat";
 export { default as SalasDisponibles } from "./chat/SalasDisponibles";
 export { default as UsersOnline } from "./chat/UsersOnline";
-export * from "./index";
 export { default as Home } from "./main/Home";

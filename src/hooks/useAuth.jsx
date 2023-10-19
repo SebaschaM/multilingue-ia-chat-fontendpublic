@@ -18,7 +18,7 @@ export const useAuth = () => {
   //TODO: PODEMOS MANEJARLO CON MULTIPART DATA PARA EL ENVIO DE IMAGENES
   //TODO: POR CORREGIR
   const handleRegister = async (dataRegister) => {
-    const { data } = await ApiJson.post("/register", dataRegister);
+    const { data } = await ApiJson.post("/admin/auth/register", dataRegister);
     return data;
   };
 
