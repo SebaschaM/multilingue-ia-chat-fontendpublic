@@ -6,6 +6,7 @@ import { ArrowBackIos, Google } from "@mui/icons-material";
 import { Link } from "react-router-dom";
 
 function Verify_Email() {
+
   return (
     <div className={styles.container}>
       <img
@@ -30,7 +31,7 @@ function Verify_Email() {
         </Link>
       </div>
 
-      <h1 className={styles.title_page}>Verfica tu correo</h1>
+      <h1 className={styles.title_page}>Cuenta verificada ✅</h1>
       <Card
         sx={{
           minWidth: "30rem",
@@ -53,32 +54,27 @@ function Verify_Email() {
             </Typography>
 
             {/* COMPONENT */}
-            <Button
-              variant="contained"
-              sx={{
-                display: "flex",
-                columnGap: "0.8rem",
-                background: "#17C3CE",
-                marginTop: "1.4rem",
-                padding: "0.8rem 1.8rem",
-                width: "auto",
-                "&:hover": {
-                  background: "#19B8C3",
-                },
-              }}
-            >
-              <Google
+            <Link to={"/"}>
+              <Button
+                variant="contained"
                 sx={{
-                  width: "1.5rem",
+                  display: "flex",
+                  columnGap: "0.8rem",
+                  background: "#17C3CE",
+                  marginTop: "1.4rem",
+                  padding: "0.8rem 1.8rem",
+                  width: "auto",
+                  "&:hover": {
+                    background: "#19B8C3",
+                  },
                 }}
-              />
-              Abir Gmail
-            </Button>
+              >
+                Home
+              </Button>
+            </Link>
           </form>
           <p className={styles.text_link}>
-            <Link to={"/verify-email"} className={styles.link}>
-              Reenviar correo electrónico
-            </Link>
+            <Link to={"/"} className={styles.link}></Link>
           </p>
         </CardContent>
       </Card>

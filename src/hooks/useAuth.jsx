@@ -22,18 +22,23 @@ export const useAuth = () => {
     return data;
   };
 
-  const handleVerifyEmail = async (dataVerifyEmail) => {
-    console.log(dataVerifyEmail);
-    try {
-      const { data } = await ApiJson.post("/admin/auth/verify-email-exists", {
-        email: dataVerifyEmail,
-      });
-      console.log(data);
-      return data;
-    } catch (error) {
-      return { success: false, message: error.response.data.error };
-    }
-  };
+  // const handleVerifyEmail = async (dataVerifyEmail, authToken) => {
+  //   console.log(dataVerifyEmail);
+  //   try {
+  //     const { data } = await ApiJson.post("/admin/auth/verify-email-exists", {
+
+  //     }, {
+  //       headers: {
+  //         Authorization: `Bearer ${authToken}` // Agrega el token de autenticación en el encabezado
+  //       }
+  //     });
+  //     console.log(data);
+  //     return data;
+  //   } catch (error) {
+  //     return { success: false, message: error.response.data.error };
+  //   }
+  // };
+  
 
   const handleLogout = () => {
     localStorage.removeItem("userData");
@@ -59,7 +64,7 @@ export const useAuth = () => {
   return {
     handleLogin,
     handleRegister,
-    handleVerifyEmail,
+    // handleVerifyEmail,
     handleLogout,
     setUserAtom,
     user,
