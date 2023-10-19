@@ -187,7 +187,9 @@ function Login() {
   const isValidPassword = (password) => {
     //validar si el usuario está ingresando en el login una clave segura
   };
+
   const onLogin = async (data) => {
+    console.log("asd");
     const email = getValues("email");
     const password = getValues("password");
 
@@ -202,7 +204,6 @@ function Login() {
       }
       setIsLoading(true);
       const response = await handleVerifyEmail(email);
-      console.log(response);
 
       if (response.success) {
         setInputPassword(true);
@@ -398,7 +399,6 @@ function Login() {
                     }}
                     onClick={onEdit}
                   >
-                    {" "}
                     Editar
                   </Button>
                 </>
@@ -454,7 +454,7 @@ function Login() {
             )}
             {!isLoading ? (
               <Button
-                type="submit"
+                type="button"
                 variant="contained"
                 sx={{
                   marginTop: "1.8rem",
@@ -465,7 +465,7 @@ function Login() {
                     background: "#19B8C3",
                   },
                 }}
-                // onClick={onLogin}
+                onClick={onLogin}
               >
                 Entrar
               </Button>
@@ -474,9 +474,8 @@ function Login() {
             )}
           </form>
           <p className={styles.text_link}>
-            ¿No tienes cuenta?{" "}
+            ¿No tienes cuenta?
             <Link to={"/register"} className={styles.link}>
-              {" "}
               Registrate aquí
             </Link>
           </p>

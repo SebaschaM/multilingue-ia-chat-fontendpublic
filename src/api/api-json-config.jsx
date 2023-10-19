@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const ApiJson = axios.create({
-  baseURL: "https://exe-service.onrender.com/api",
+  // baseURL: "https://exe-service.onrender.com/api",
+  baseURL: "http://localhost:5000/api",
   headers: {
     "Content-Type": "application/json",
   },
