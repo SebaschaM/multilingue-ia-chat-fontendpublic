@@ -44,6 +44,7 @@ const DashboardManagerUser = () => {
     handleSubmit,
     register,
     formState: { errors },
+    getValues,
     reset,
   } = useForm();
 
@@ -54,6 +55,15 @@ const DashboardManagerUser = () => {
       language_id: 1,
       role_id: data.role,
     };
+
+    if (data.password !== data.confirm_password) {
+      setIsLoadingRequest(false);
+      setModalResponse({
+        show: true,
+        message: "Las contraseñas no coinciden",
+      });
+      return;
+    }
 
     try {
       const response = await handleRegister(dataRegister);
@@ -145,6 +155,30 @@ const DashboardManagerUser = () => {
                 />
                 {errors.password && (
                   <Typography color="red">{errors.password.message}</Typography>
+                )}
+              </Box>
+              <Box>
+                <TextField
+                  fullWidth
+                  id="outlined-password-input"
+                  label="Confirmar password"
+                  type="password"
+                  color={errors.confirm_password ? "error" : "primary"}
+                  {...register("confirm_password", {
+                    required: { value: true, message: "Campo requerido" },
+                    minLength: { value: 8, message: "Minimo 8 caracteres" },
+                    validate: (value) => {
+                      return (
+                        value === getValues("password") ||
+                        "Las contraseñas no coinciden"
+                      );
+                    },
+                  })}
+                />
+                {errors.confirm_password && (
+                  <Typography color="red">
+                    {errors.confirm_password.message}
+                  </Typography>
                 )}
               </Box>
               <Box>
