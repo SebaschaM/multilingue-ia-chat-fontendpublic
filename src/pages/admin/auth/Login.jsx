@@ -61,28 +61,7 @@ function Login() {
 
   const emailRegExp = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
-  const validationSchema = Yup.object().shape({
-    email: Yup.string()
-    .required("Email is required 123")
-    .matches(emailRegExp, "Email is not valid"),
-
-    password: Yup.string()
-      .required("La contraseña es requerida")
-      .min(8, "La contraseña debe tener al menos 8 caracteres")
-      .matches(
-        /[a-z]/,
-        "La contraseña debe contener al menos una letra minúscula"
-      )
-      .matches(
-        /[A-Z]/,
-        "La contraseña debe contener al menos una letra mayúscula"
-      )
-      .matches(/\d/, "La contraseña debe contener al menos un número")
-      .matches(
-        /[@$!%*#?&_.]/,
-        "La contraseña debe contener al menos un caracter especial: @$!%*#?&_."
-      ),
-  });
+  
 
   const {
     register,
@@ -91,7 +70,7 @@ function Login() {
     setValue,
     getValues,
   } = useForm({
-    resolver: yupResolver(validationSchema),
+
   });
 
   useEffect(() => {
@@ -194,7 +173,7 @@ function Login() {
         setDataToast({
           show: true,
           severity: "success",
-          message: errors.email.message,
+          message: response.message,
         });
         setUserAtom(response.user);
       } else {
