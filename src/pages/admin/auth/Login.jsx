@@ -13,6 +13,7 @@ import {
   Stack,
   Box,
   LinearProgress,
+  TextField,
 } from "@mui/material";
 import { ArrowBackIos } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
@@ -52,60 +53,19 @@ function Login() {
     status: "",
   });
 
-  const countValidations = (password) => {
-    let count = 0;
-
-    if (password.length === 0) {
-      count = 0;
-    }
-
-    if (password.length > 0) {
-      count++;
-    }
-
-    if (password.length >= 8) {
-      count++;
-    }
-
-    if (/[a-z]/.test(password)) {
-      count++;
-    }
-
-    if (/[A-Z]/.test(password)) {
-      count++;
-    }
-
-    if (/\d/.test(password)) {
-      count++;
-    }
-
-    if (/[@$!%*#?&_.]/.test(password)) {
-      count++;
-    }
-
-    const porcentValue = {
-      0: 0,
-      1: 10,
-      2: 30,
-      3: 50,
-      4: 70,
-      5: 90,
-      6: 100,
-    };
-
-    const valuePorcent = porcentValue[count];
-    console.log(valuePorcent);
-    setValidationCount(valuePorcent);
-    setProgressPassword(valuePorcent);
-  };
-
   const [dataToast, setDataToast] = useState({
     show: false,
     severity: "",
     message: "",
   });
 
+  const emailRegExp = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
   const validationSchema = Yup.object().shape({
+    email: Yup.string()
+    .required("Email is required 123")
+    .matches(emailRegExp, "Email is not valid"),
+
     password: Yup.string()
       .required("La contraseña es requerida")
       .min(8, "La contraseña debe tener al menos 8 caracteres")
@@ -189,7 +149,6 @@ function Login() {
   };
 
   const onLogin = async (data) => {
-    console.log("asd");
     const email = getValues("email");
     const password = getValues("password");
 
@@ -202,21 +161,29 @@ function Login() {
         });
         return;
       }
-      setIsLoading(true);
-      const response = await handleVerifyEmail(email);
+    setIsLoading(true);
+    const response = await handleVerifyEmail(email);
 
-      if (response.success) {
-        setInputPassword(true);
-        setIsLoading(false);
-      } else {
-        setIsLoading(false);
-        setDataToast({
-          show: true,
-          severity: "error",
-          message: response.message,
-        });
-      }
+    if (response.success) {
+      setInputPassword(true);
+      setIsLoading(false);
+    } else {
+      setIsLoading(false);
+      setDataToast({
+        show: true,
+        severity: "error",
+        message: response.message,
+      });
     }
+  }
+    else{
+      setDataToast({
+        show: true,
+        severity: "error",
+        message: "El email es requerido",
+      });
+    }
+
     if (password) {
       const response = await handleLogin({
         email: getValues("email"),
@@ -227,7 +194,7 @@ function Login() {
         setDataToast({
           show: true,
           severity: "success",
-          message: response.message,
+          message: errors.email.message,
         });
         setUserAtom(response.user);
       } else {
@@ -356,22 +323,7 @@ function Login() {
                 placeholder="email@example.com"
                 disabled={inputPassword}
                 type="email"
-                {...register("email", {
-                  required: true,
-                  maxLength: 50,
-                  minLength: 3,
-                })}
-                error={errors.email}
-                helpertext={errors.email && "email requerido"}
-                // sx={{
-                //   marginTop: "1rem",
-                //   height: "2.1rem",
-                //   borderColor: "#17C3CE",
-
-                //   ":after": {
-                //     borderBottom: "3px solid #17C3CE",
-                //   },
-                // }}
+                {...register("email", {required: { value: true, message: "email requerido 123" }})}
                 sx={{
                   marginTop: "1rem",
                   height: "2.1rem",
@@ -382,6 +334,10 @@ function Login() {
                   },
                 }}
               />
+                {errors.email && (
+                  <Typography color="red">{errors.email.message}</Typography>
+                )}
+
               {inputPassword && (
                 <>
                   <Button
