@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { LayoutDashboard, LayoutDashboardContent } from "../../layout";
+import * as Yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+
 import {
   Box,
   Button,
   FormControl,
   InputLabel,
+  LinearProgress,
   MenuItem,
   Modal,
   Select,
@@ -40,13 +44,101 @@ const DashboardManagerUser = () => {
     message: "",
   });
   const [isLoadingRequest, setIsLoadingRequest] = useState(false);
+
+  const validationSchema = Yup.object().shape({
+    password: Yup.string()
+      .required("La contraseña es requerida")
+      .min(8, "La contraseña debe tener al menos 8 caracteres")
+      .matches(
+        /[a-z]/,
+        "La contraseña debe contener al menos una letra minúscula"
+      )
+      .matches(
+        /[A-Z]/,
+        "La contraseña debe contener al menos una letra mayúscula"
+      )
+      .matches(/\d/, "La contraseña debe contener al menos un número")
+      .matches(
+        /[@$!%*#?&_.]/,
+        "La contraseña debe contener al menos un caracter especial: @$!%*#?&_."
+      ),
+    email: Yup.string()
+      .required("El email es requerido")
+      .email("El email debe ser válido"),
+    confirm_password: Yup.string().oneOf(
+      [Yup.ref("password"), null],
+      "Las contraseñas no coinciden"
+    ),
+    fullname: Yup.string()
+      .required("El nombre es requerido")
+      .min(8, "El nombre debe tener al menos 8 caracteres"),
+    cellphone: Yup.string()
+      .required("El número de teléfono es requerido")
+      .matches(/^\d{9}$/, "El número de teléfono debe tener 9 dígitos"),
+    role: Yup.string().required("El rol es requerido"),
+  });
+
   const {
     handleSubmit,
     register,
     formState: { errors },
     getValues,
     reset,
-  } = useForm();
+  } = useForm({
+    resolver: yupResolver(validationSchema),
+  });
+
+  const countValidations = (password) => {
+    console.log(password);
+    let count = 0;
+
+    if (password.length === 0) {
+      count = 0;
+    }
+
+    if (password.length > 0) {
+      count++;
+    }
+
+    if (password.length >= 8) {
+      count++;
+    }
+
+    if (/[a-z]/.test(password)) {
+      count++;
+    }
+
+    if (/[A-Z]/.test(password)) {
+      count++;
+    }
+
+    if (/\d/.test(password)) {
+      count++;
+    }
+
+    if (/[@$!%*#?&_.]/.test(password)) {
+      count++;
+    }
+
+    const porcentValue = {
+      0: 0,
+      1: 10,
+      2: 30,
+      3: 50,
+      4: 70,
+      5: 90,
+      6: 100,
+    };
+
+    const valuePorcent = porcentValue[count];
+    setValidationCount(valuePorcent);
+    setProgressPassword(valuePorcent);
+    console.log(validationCount, progressPassword);
+  };
+
+  const [validationCount, setValidationCount] = useState(0);
+  const [progressPassword, setProgressPassword] = useState(validationCount);
+  const [porcent, setPorcent] = useState(0);
 
   const onLogin = async (data) => {
     setIsLoadingRequest(true);
@@ -147,6 +239,11 @@ const DashboardManagerUser = () => {
                   id="outlined-password-input"
                   label="Password"
                   type="password"
+                  onInput={(e) => {
+                    const password = e.target.value;
+                    console.log(errors);
+                    countValidations(password);
+                  }}
                   color={errors.password ? "error" : "primary"}
                   {...register("password", {
                     required: { value: true, message: "Campo requerido" },
@@ -156,6 +253,29 @@ const DashboardManagerUser = () => {
                 {errors.password && (
                   <Typography color="red">{errors.password.message}</Typography>
                 )}
+                <div>
+                  <Typography
+                    sx={{ color: "red", maxWidth: "80%" }}
+                  ></Typography>
+                  <br />
+                  <Box sx={{ width: "100%" }}>
+                    <LinearProgress
+                      variant="determinate"
+                      value={progressPassword}
+                      sx={{
+                        backgroundColor:
+                          progressPassword < 30
+                            ? "#FF0000"
+                            : progressPassword < 70
+                            ? "#FFA500"
+                            : "#00FF00",
+                      }}
+                    />
+                  </Box>
+                  {progressPassword == 100 && (
+                    <Typography color="green">Contraseña segura</Typography>
+                  )}
+                </div>
               </Box>
               <Box>
                 <TextField

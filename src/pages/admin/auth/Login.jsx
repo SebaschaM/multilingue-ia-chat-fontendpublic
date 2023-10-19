@@ -420,7 +420,7 @@ function Login() {
                   {...register("password")}
                   type="password"
                   error={errors.password}
-                  onInput={() => countValidations(getValues("password"))}
+                  // onInput={() => countValidations(getValues("password"))}
                   helpertext={errors.password && "Contraseña requerida"}
                   sx={{
                     marginTop: "1rem",
@@ -432,24 +432,7 @@ function Login() {
                     },
                   }}
                 />
-                {errors.password && (
-                  <>
-                    <Typography sx={{ color: "red", maxWidth: "80%" }}>
-                      {errors.password.message}
-                    </Typography>
-                    <Box sx={{ width: "100%" }}>
-                      <LinearProgress
-                        variant="determinate"
-                        value={progressPassword}
-                        sx={{
-                          backgroundColor:
-                            progressPassword < 30 ? "red" : "black",
-                        }}
-                      />
-                    </Box>
-                    <p>{JSON.stringify(progressPassword)}</p>
-                  </>
-                )}
+                {errors.password && <p>{errors.password.message}</p>}
               </div>
             )}
             {!isLoading ? (

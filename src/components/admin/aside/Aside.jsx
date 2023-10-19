@@ -26,6 +26,8 @@ const Aside = () => {
   const [broken, setBroken] = useState(false);
   const [toggled, setToggled] = useState(false);
   const { user, handleLogout } = useAuth();
+  const [validateRole, setValidateRole ] = useState();
+
 
   const routes = [
     {
@@ -66,7 +68,14 @@ const Aside = () => {
     router(path);
   };
 
-  console.log(linkSelected);
+useEffect(() => {
+  const user = localStorage.getItem("userData");
+  if (user) {
+    const userParse = JSON.parse(user);
+    setValidateRole(userParse.role.name_role);
+  }
+},[]);
+
 
   useEffect(() => {
     const collapseLocal = localStorage.getItem("collapse");
@@ -122,7 +131,7 @@ const Aside = () => {
           <div style={{ flex: 1 }}>
             <Menu className={styles.sidebar_menu} closeOnClick={false}>
               {routes.map((route) => {
-                const roleMatch = route.role.includes(user.role.name_role);
+                const roleMatch = route.role.includes(validateRole);
                 if (roleMatch) {
                   return (
                     <MenuItem
