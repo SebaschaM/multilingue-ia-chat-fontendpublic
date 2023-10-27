@@ -8,12 +8,7 @@ import {
   Typography,
   CircularProgress,
   Alert,
-  AlertTitle,
   Snackbar,
-  Stack,
-  Box,
-  LinearProgress,
-  TextField,
 } from "@mui/material";
 import { ArrowBackIos } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
@@ -22,29 +17,15 @@ import { useForm } from "react-hook-form";
 import { useAuth } from "../../../hooks/useAuth";
 import { socketAtom, userAtom } from "../../../store/store";
 import { useAtom } from "jotai";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as Yup from "yup";
 
 function Login() {
   const navigate = useNavigate();
-  const [validationCount, setValidationCount] = useState(0);
-  const [progressPassword, setProgressPassword] = useState(validationCount);
-  const [porcent, setPorcent] = useState(0);
 
-  const {
-    handleLogin,
-    handleVerifyEmail,
-    user,
-    setUserAtom,
-    handleVerifyMaintenance,
-  } = useAuth();
-  // const [socket] = useAtom(socketAtom);
-  // console.log(socket, "valor del atomo global socket")
-
+  /*  Estados   */
+  const [showCounterIntent, setShowCounterIntent] = useState(false);
+  const [counterIntent, setCounterIntent] = useState(3);
   const [inputPassword, setInputPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [counterIntent, setCounterIntent] = useState(3);
-  const [showCounterIntent, setShowCounterIntent] = useState(false);
   const [dataVerifyMaintenance, setDatatVerifyMaintenance] = useState({
     id: "",
     message_notification: "",
@@ -52,29 +33,32 @@ function Login() {
     date_end: "",
     status: "",
   });
-
   const [dataToast, setDataToast] = useState({
     show: false,
     severity: "",
     message: "",
   });
-
-  const emailRegExp = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-
-  
-
+  /*  Estados para el formulario   */
   const {
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
     getValues,
-  } = useForm({
+  } = useForm({});
 
-  });
+  /*  Hooks   */
+  const {
+    handleLogin,
+    handleCheckEmailExists,
+    user,
+    setUserAtom,
+    handleVerifyMaintenance,
+  } = useAuth();
+  // const [socket] = useAtom(socketAtom);
+  // console.log(socket, "valor del atomo global socket")
 
+  /*  useEffects   */
   useEffect(() => {
-    console.log(user, "valor del atomo global");
     if (user != null) {
       navigate("/home-chat");
     }
@@ -82,16 +66,18 @@ function Login() {
       if (user.role.id == 1 || user.role.id == 2) {
         navigate("/admin/dashboard");
       }
-
-      console.log(user.role.id);
     }
   }, [user, navigate]);
 
+  useEffect(() => {
+    handleValidateMaintenance();
+  }, []);
+
+  /*  Función que valida si el sistema está en mantenimiento   */
   const handleValidateMaintenance = async () => {
     const response = await handleVerifyMaintenance();
     if (response) {
       setDatatVerifyMaintenance(response);
-      console.log(response);
       return response;
     } else {
       setDataToast({
@@ -101,10 +87,6 @@ function Login() {
       });
     }
   };
-
-  useEffect(() => {
-    handleValidateMaintenance();
-  }, []);
 
   if (dataVerifyMaintenance.status === "active") {
     return (
@@ -118,14 +100,13 @@ function Login() {
     );
   }
 
+  /*  Validador de email ( evaluar eliminar)   */
   const isValidEmail = (email) => {
     const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i;
     return regex.test(email);
   };
 
-  const isValidPassword = (password) => {
-    //validar si el usuario está ingresando en el login una clave segura
-  };
+  /*  Función de login, valida si el email existe y luego valida la cuenta, cuando valida la cuenta aplica el contador de intentos   */
 
   const onLogin = async (data) => {
     const email = getValues("email");
@@ -140,22 +121,21 @@ function Login() {
         });
         return;
       }
-    setIsLoading(true);
-    const response = await handleVerifyEmail(email);
+      setIsLoading(true);
+      const response = await handleCheckEmailExists(email);
 
-    if (response.success) {
-      setInputPassword(true);
-      setIsLoading(false);
+      if (response.success) {
+        setInputPassword(true);
+        setIsLoading(false);
+      } else {
+        setIsLoading(false);
+        setDataToast({
+          show: true,
+          severity: "error",
+          message: response.message,
+        });
+      }
     } else {
-      setIsLoading(false);
-      setDataToast({
-        show: true,
-        severity: "error",
-        message: response.message,
-      });
-    }
-  }
-    else{
       setDataToast({
         show: true,
         severity: "error",
@@ -168,7 +148,7 @@ function Login() {
         email: getValues("email"),
         password: getValues("password"),
       });
-      console.log(response, "respuesta del login");
+
       if (response.success) {
         setDataToast({
           show: true,
@@ -182,6 +162,7 @@ function Login() {
           severity: "error",
           message: response.error,
         });
+        /*  Acá refactorizar por que está mal declarado*/
         if (counterIntent > 0) {
           setCounterIntent(counterIntent - 1);
         } else {
@@ -192,12 +173,14 @@ function Login() {
     }
   };
 
+  /*  Aquí es donde el usuario presiona el editar en caso quiera ingresar con otro correo, esto cambiar por que está mal   */
   const onEdit = () => {
     // setValue("email", "");
     setInputPassword(false);
   };
 
   return (
+    /*  REFACTORIZAR 1 */
     <div className={styles.container}>
       <Snackbar
         open={showCounterIntent}
@@ -218,6 +201,7 @@ function Login() {
         </Alert>
       </Snackbar>
 
+      {/*Este código es para validar la respuesta del backend */}
       <Snackbar
         open={counterIntent > 0 && dataToast.show}
         autoHideDuration={3000}
@@ -254,6 +238,7 @@ function Login() {
         alt="vector_right"
         className={styles.vector_img_left}
       />
+      {/* Estilos de la página, más no del card del login*/}
       <div className={styles.container_button_back}>
         <ArrowBackIos
           sx={{
@@ -266,6 +251,8 @@ function Login() {
         </Link>
       </div>
       <h1 className={styles.title_page}>Iniciar sesión</h1>
+
+      {/* Declaración de una card*/}
       <Card
         sx={{
           minWidth: "30rem",
@@ -276,6 +263,7 @@ function Login() {
           justifyContent: "center",
         }}
       >
+        {/* Contenido de una card*/}
         <CardContent>
           <form
             onSubmit={handleSubmit(onLogin)}
@@ -302,7 +290,9 @@ function Login() {
                 placeholder="email@example.com"
                 disabled={inputPassword}
                 type="email"
-                {...register("email", {required: { value: true, message: "email requerido 123" }})}
+                {...register("email", {
+                  required: { value: true, message: "email requerido 123" },
+                })}
                 sx={{
                   marginTop: "1rem",
                   height: "2.1rem",
@@ -313,9 +303,9 @@ function Login() {
                   },
                 }}
               />
-                {errors.email && (
-                  <Typography color="red">{errors.email.message}</Typography>
-                )}
+              {errors.email && (
+                <Typography color="red">{errors.email.message}</Typography>
+              )}
 
               {inputPassword && (
                 <>
@@ -391,12 +381,15 @@ function Login() {
               <CircularProgress />
             )}
           </form>
+
+          {/* Botón para registrarse*/}
           <p className={styles.text_link}>
             ¿No tienes cuenta?
             <Link to={"/register"} className={styles.link}>
               Registrate aquí
             </Link>
           </p>
+
         </CardContent>
       </Card>
     </div>
