@@ -11,7 +11,7 @@ export const useAuth = () => {
       const { data } = await ApiJson.post("/admin/auth/login", dataLogin);
       return data;
     } catch (error) {
-      return { error: error.response.data.error, success: false };
+      return { error: error.response.data.error, success: false, intents: error.response.data.intents };
     }
   };
 

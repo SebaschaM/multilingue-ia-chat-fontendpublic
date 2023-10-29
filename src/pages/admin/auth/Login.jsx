@@ -23,9 +23,10 @@ function Login() {
 
   /*  Estados   */
   const [showCounterIntent, setShowCounterIntent] = useState(false);
-  const [counterIntent, setCounterIntent] = useState(3);
+  const [counterIntent, setCounterIntent] = useState();
   const [inputPassword, setInputPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [typeBottom, setTypeBottom] = useState("onClick");
   const [dataVerifyMaintenance, setDatatVerifyMaintenance] = useState({
     id: "",
     message_notification: "",
@@ -36,6 +37,10 @@ function Login() {
   const [dataToast, setDataToast] = useState({
     show: false,
     severity: "",
+    message: "",
+  });
+  const [dataIntent, setDataIntent] = useState({
+    intents: "",
     message: "",
   });
   /*  Estados para el formulario   */
@@ -54,8 +59,6 @@ function Login() {
     setUserAtom,
     handleVerifyMaintenance,
   } = useAuth();
-  // const [socket] = useAtom(socketAtom);
-  // console.log(socket, "valor del atomo global socket")
 
   /*  useEffects   */
   useEffect(() => {
@@ -64,17 +67,17 @@ function Login() {
     }
     if (user) {
       if (user.role.id == 1 || user.role.id == 2) {
-        navigate("/admin/dashboard");
+        navigate("/home-chat");
       }
     }
   }, [user, navigate]);
 
   useEffect(() => {
-    handleValidateMaintenance();
+    onValidateMaintenance();
   }, []);
 
   /*  Función que valida si el sistema está en mantenimiento   */
-  const handleValidateMaintenance = async () => {
+  const onValidateMaintenance = async () => {
     const response = await handleVerifyMaintenance();
     if (response) {
       setDatatVerifyMaintenance(response);
@@ -100,50 +103,16 @@ function Login() {
     );
   }
 
-  /*  Validador de email ( evaluar eliminar)   */
-  const isValidEmail = (email) => {
-    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i;
-    return regex.test(email);
-  };
-
   /*  Función de login, valida si el email existe y luego valida la cuenta, cuando valida la cuenta aplica el contador de intentos   */
-
-  const onLogin = async (data) => {
+  const onLogin = async () => {
     const email = getValues("email");
     const password = getValues("password");
 
-    if (email) {
-      if (!isValidEmail(email)) {
-        setDataToast({
-          show: true,
-          severity: "error",
-          message: "El email no es válido",
-        });
-        return;
-      }
-      setIsLoading(true);
-      const response = await handleCheckEmailExists(email);
-
-      if (response.success) {
-        setInputPassword(true);
-        setIsLoading(false);
-      } else {
-        setIsLoading(false);
-        setDataToast({
-          show: true,
-          severity: "error",
-          message: response.message,
-        });
-      }
-    } else {
-      setDataToast({
-        show: true,
-        severity: "error",
-        message: "El email es requerido",
-      });
+    if (email && !inputPassword) {
+      await onCheckEmailExists(email);
     }
 
-    if (password) {
+    if (password && inputPassword) {
       const response = await handleLogin({
         email: getValues("email"),
         password: getValues("password"),
@@ -162,20 +131,60 @@ function Login() {
           severity: "error",
           message: response.error,
         });
-        /*  Acá refactorizar por que está mal declarado*/
-        if (counterIntent > 0) {
-          setCounterIntent(counterIntent - 1);
-        } else {
-          setCounterIntent(0);
-        }
-        setShowCounterIntent(true);
+        validateCounter(response.intents, response.error);
       }
     }
   };
 
+  const validateCounter = async (counterIntent, messageError) => {
+    setDataIntent({
+      intents: counterIntent,
+      message: messageError,
+    });
+    if (dataIntent.intents > 0) {
+      setShowCounterIntent(true);
+    }
+    else {
+      setCounterIntent(0);
+      setShowCounterIntent(true);
+    }
+    return
+  };
+ 
+
+  /* Función para validar si el correo existe  */
+  const onCheckEmailExists = async (email) => {
+    if (email) {
+      setIsLoading(true);
+      const response = await handleCheckEmailExists(email);
+
+      if (response.success) {
+        setInputPassword(true);
+        setIsLoading(false);
+        setTypeBottom("onSubmit");
+        return true;
+      } else {
+        setIsLoading(false);
+        setDataToast({
+          show: true,
+          severity: "error",
+          message: response.message,
+        });
+        return false;
+      }
+    } else {
+      setDataToast({
+        show: true,
+        severity: "error",
+        message: "El email es requerido",
+      });
+    }
+    return false;
+  };
+
   /*  Aquí es donde el usuario presiona el editar en caso quiera ingresar con otro correo, esto cambiar por que está mal   */
   const onEdit = () => {
-    // setValue("email", "");
+    setTypeBottom("onClick");
     setInputPassword(false);
   };
 
@@ -193,17 +202,14 @@ function Login() {
           severity="error"
           sx={{ width: "100%" }}
         >
-          {counterIntent === 0 ? (
-            <>Vuelvelo a intentarlo en 1 hora</>
-          ) : (
-            <>Te quedan {counterIntent} intentos</>
-          )}
+          {dataIntent.intents > 0 ?  ( <> Te quedan {dataIntent.intents} intentos </>) :  <> {dataIntent.message} </>}
+
         </Alert>
       </Snackbar>
 
       {/*Este código es para validar la respuesta del backend */}
       <Snackbar
-        open={counterIntent > 0 && dataToast.show}
+        open={dataIntent.intents >= 0 && dataIntent.message}
         autoHideDuration={3000}
         onClose={() =>
           setDataToast({
@@ -226,7 +232,7 @@ function Login() {
         >
           {dataToast.message}
         </Alert>
-      </Snackbar>
+      </Snackbar> 
 
       <img
         src="https://res.cloudinary.com/dvzjgzqbn/image/upload/v1694734856/Otros/Vector_right_qtg8j1.png"
@@ -280,8 +286,10 @@ function Login() {
             </Typography>
             <div
               style={{
-                display: "flex",
                 width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
                 position: "relative",
                 justifyContent: "center",
               }}
@@ -290,8 +298,14 @@ function Login() {
                 placeholder="email@example.com"
                 disabled={inputPassword}
                 type="email"
+                error={errors.email ? true : false}
                 {...register("email", {
-                  required: { value: true, message: "email requerido 123" },
+                  required: { value: true, message: "Campo requerido" },
+                  validate: (value) => {
+                    const regex =
+                      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i;
+                    return regex.test(value) || "Email invalido";
+                  },
                 })}
                 sx={{
                   marginTop: "1rem",
@@ -304,7 +318,13 @@ function Login() {
                 }}
               />
               {errors.email && (
-                <Typography color="red">{errors.email.message}</Typography>
+                <Typography
+                  color="red"
+                  sx={{ width: "80%" }}
+                  textAlign={"left"}
+                >
+                  {errors.email.message}
+                </Typography>
               )}
 
               {inputPassword && (
@@ -342,7 +362,12 @@ function Login() {
               >
                 <Input
                   placeholder="**********"
-                  {...register("password")}
+                  {...register("password", {
+                    required: {
+                      value: true,
+                      message: "La contraseña es requerida",
+                    },
+                  })}
                   type="password"
                   error={errors.password}
                   // onInput={() => countValidations(getValues("password"))}
@@ -357,12 +382,21 @@ function Login() {
                     },
                   }}
                 />
-                {errors.password && <p>{errors.password.message}</p>}
+                {errors.password && (
+                  <Typography
+                    color="red"
+                    sx={{ width: "80%" }}
+                    textAlign={"left"}
+                  >
+                    {errors.password.message}
+                  </Typography>
+                )}
               </div>
             )}
+
             {!isLoading ? (
               <Button
-                type="button"
+                type={typeBottom}
                 variant="contained"
                 sx={{
                   marginTop: "1.8rem",
@@ -373,7 +407,6 @@ function Login() {
                     background: "#19B8C3",
                   },
                 }}
-                onClick={onLogin}
               >
                 Entrar
               </Button>
@@ -386,10 +419,10 @@ function Login() {
           <p className={styles.text_link}>
             ¿No tienes cuenta?
             <Link to={"/register"} className={styles.link}>
+              {" "}
               Registrate aquí
             </Link>
           </p>
-
         </CardContent>
       </Card>
     </div>
