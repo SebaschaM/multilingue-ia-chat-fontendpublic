@@ -16,7 +16,7 @@ export const AppRouter = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/home-chat" element={<HomeChat />} />
+        {/* <Route path="/home-chat" element={<HomeChat />} /> */}
         <Route path="/verify-email" element={<Verify_Email />} />
         <Route path="/aboutme-register" element={<AboutMe_Register />} />
         <Route path="/panel-chat" element={<PanelChat />} />

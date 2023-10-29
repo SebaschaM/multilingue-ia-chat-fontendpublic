@@ -11,10 +11,10 @@ import { ThemeProvider } from "@mui/material";
 import theme from "../theme.js";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <ContextSocketProvider>
-    <ThemeProvider theme={theme}>
-      {/* <CssBaseline /> */}
-      <App />
-    </ThemeProvider>
-  </ContextSocketProvider>
+  // <ContextSocketProvider>
+  <ThemeProvider theme={theme}>
+    {/* <CssBaseline /> */}
+    <App />
+  </ThemeProvider>
+  // </ContextSocketProvider>
 );

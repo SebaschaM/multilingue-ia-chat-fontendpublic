@@ -3,11 +3,9 @@ import { atom, useAtom } from "jotai";
 import { socketAtom, userAtom } from "./store";
 import io from "socket.io-client";
 
-
 export const ContextSocketProvider = ({ children }) => {
   const [user, setUser] = useAtom(userAtom);
   const [socket, setSocket] = useAtom(socketAtom); // Agrega socket a los átomos que utilizas
-
 
   useEffect(() => {
     // Intenta cargar el usuario desde localStorage al iniciar la aplicación
@@ -23,7 +21,7 @@ export const ContextSocketProvider = ({ children }) => {
         reconnection: false, // Desactivar la reconexión automática
         reconnectionAttempts: 0, // Número de intentos de reconexión (0 significa ilimitado)
       });
-      
+
       // Escucha eventos del socket aquí, por ejemplo:
       newSocket.on("connect", () => {
         console.log("Conectado al servidor de sockets");
@@ -35,9 +33,6 @@ export const ContextSocketProvider = ({ children }) => {
       newSocket.on("connect_error", (error) => {
         console.error("Error de conexión:", error);
       });
-      
-   
-      
 
       // Actualiza el átomo socketAtom con la instancia del socket
       setSocket(newSocket);
@@ -47,9 +42,7 @@ export const ContextSocketProvider = ({ children }) => {
         newSocket.disconnect();
       };
     }
-  }, [user, setUser, setSocket])
-  
-
+  }, [user, setUser, setSocket]);
 
   // Cuando el usuario cambia, actualiza los datos en localStorage
   useEffect(() => {
