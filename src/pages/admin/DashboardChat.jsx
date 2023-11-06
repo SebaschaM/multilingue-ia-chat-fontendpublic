@@ -20,6 +20,8 @@ import {
   Typography,
 } from "@mui/material";
 import { Conversation, MessageFrom, MessageMe } from "../../components";
+import { useChat } from "../../hooks/useChat";
+import { set } from "react-hook-form";
 
 const style = {
   position: "absolute",
@@ -38,6 +40,8 @@ const style = {
 };
 
 const DashboardChat = () => {
+  const { getConversationsByID, getMessageByIdConversation } = useChat();
+  const [allConversations, setAllConversations] = useState([]);
   const [dataChat, setDataChat] = useState([]);
   const [conversationSelected, setConversationSelected] = useState({});
   const [openModalRequestAgendar, setOpenModalRequestAgendar] = useState(false);
@@ -46,8 +50,21 @@ const DashboardChat = () => {
   const [showOptionsRequest, setshowOptionsRequest] = useState(false);
 
   const socketRef = useRef();
-  const username = localStorage.getItem("username");
+  const userData = JSON.parse(localStorage.getItem("userData"));
+  const fullname = userData?.fullname;
   const room_name = uuidv4();
+
+  const onGetAllConversations = async () => {
+    const { data, error } = await getConversationsByID(
+      "f9713506-0abe-4616-9690-f93b64410d01"
+    );
+    setAllConversations(data.conversation);
+  };
+
+  const onGetMessagesByIdConversation = async (idConversation) => {
+    const { data, error } = await getMessageByIdConversation(idConversation);
+    setDataChat(data.messages);
+  };
 
   const onSendMessage = async (e) => {
     e.preventDefault();
@@ -56,9 +73,9 @@ const DashboardChat = () => {
     const inputElement = e.target.elements.message;
 
     const newMessage = {
-      id: uuidv4(),
+      id: userData.id,
       room_name: "cuartito2",
-      username: username,
+      fullname: fullname,
       message: dataInputMessage,
       date: new Date().toLocaleString(),
     };
@@ -76,8 +93,16 @@ const DashboardChat = () => {
 
       socket.emit("assign_user_to_room", {
         room_name: roomName,
-        username: username,
+        user: userData,
       });
+    });
+
+    socket.on("error_joining_room", (error) => {
+      console.log(error);
+    });
+
+    socket.on("error_send_message", (error) => {
+      console.log(error);
     });
 
     socket.on("get_messages", (messages) => {
@@ -87,7 +112,7 @@ const DashboardChat = () => {
     socket.on("disconnect", () => {
       socket.emit("close_room", {
         room_name: "cuartito2",
-        username: username,
+        user: userData,
       });
 
       socket.on("private_room_closed", () => {
@@ -99,6 +124,20 @@ const DashboardChat = () => {
       socket.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    onGetAllConversations();
+
+    return () => {
+      setAllConversations([]);
+    };
+  }, []);
+
+  useEffect(() => {
+    onGetMessagesByIdConversation("30fafef2-da18-42df-9c3b-2ca07051af7b");
+  }, [conversationSelected]);
+
+  console.log(dataChat);
 
   return (
     <LayoutDashboard title="Overall Holding">
@@ -155,6 +194,7 @@ const DashboardChat = () => {
               isDesktop={true}
               setConversation={setConversationSelected}
               setDataChat={setDataChat}
+              dataAllConversations={allConversations}
             />
           </Grid>
           <Grid
@@ -167,7 +207,12 @@ const DashboardChat = () => {
               },
             }}
           >
-            <Conversation isDesktop={false} />
+            <Conversation
+              isDesktop={false}
+              setConversation={setConversationSelected}
+              setDataChat={setDataChat}
+              dataAllConversations={allConversations}
+            />
           </Grid>
           <Grid
             item
@@ -198,7 +243,7 @@ const DashboardChat = () => {
             }}
           >
             {/* Header */}
-            {conversationSelected.username && (
+            {conversationSelected?.client_conversation?.fullname && (
               <>
                 <Box
                   sx={{
@@ -209,7 +254,7 @@ const DashboardChat = () => {
                 >
                   <Box sx={{ display: "flex", flexDirection: "column" }}>
                     <Typography variant="h6" component="h3">
-                      {conversationSelected.username}
+                      {conversationSelected?.client_conversation?.fullname}
                     </Typography>
                     <div
                       style={{
@@ -218,7 +263,7 @@ const DashboardChat = () => {
                         gap: "5px",
                       }}
                     >
-                      {conversationSelected.username && (
+                      {conversationSelected?.client_conversation?.fullname && (
                         <>
                           <span
                             style={{
@@ -321,26 +366,23 @@ const DashboardChat = () => {
                       overflowY: "auto",
                     }}
                   >
-                    {dataChat?.map((chat) =>
-                      chat.username === username ? (
-                        <MessageMe
-                          key={chat.id}
-                          message={chat.message}
-                          date={chat.date}
-                        />
-                      ) : (
-                        <MessageFrom
-                          key={chat.id}
-                          message={chat.message}
-                          date={chat.date}
-                        />
-                      )
-                    )}
-                    {/* Message Other*/}
-                    {/* <MessageFrom /> */}
-
-                    {/* Message Me */}
-                    {/* <MessageMe /> */}
+                    {dataChat &&
+                      dataChat?.map((chat) =>
+                        chat?.id_user_receiver ===
+                        "f9713506-0abe-4616-9690-f93b64410d01" ? (
+                          <MessageMe
+                            key={chat.uuid}
+                            message={chat.message_text}
+                            date={chat.created_at}
+                          />
+                        ) : (
+                          <MessageFrom
+                            key={chat.id}
+                            message={chat.message_text}
+                            date={chat.created_at}
+                          />
+                        )
+                      )}
                   </Box>
 
                   {/* Input */}

@@ -8,36 +8,45 @@ import {
 } from "@mui/material";
 import React from "react";
 
-const Conversation = ({ isDesktop = true, setConversation, setDataChat }) => {
-  const conversations = [
-    {
-      username: "Jorge",
-      id: 1,
-      message: "Hola causa",
-      all_messages: [
-        {
-          id: 1,
-          message: "Hola causa",
-          date: "2021-10-10, 10:00:00",
-          username: "Jorge",
-        },
-        {
-          id: 2,
-          message: "Holaaaaa",
-          date: "2021-10-10, 10:00:00",
-          username: "Sebas",
-        },
-      ],
-    },
-    {
-      username: "Chaquila",
-      id: 2,
-      message: "Hola tengo una duda",
-    },
-  ];
+const Conversation = ({
+  isDesktop = true,
+  setConversation,
+  setDataChat,
+  dataAllConversations,
+}) => {
+  console.log(dataAllConversations);
+  const conversations = dataAllConversations || [];
+  // [
+  //   {
+  //     fullname: "Jorge",
+  //     id: 1,
+  //     message: "Hola causa",
+  //     all_messages: [
+  //       {
+  //         id: 1,
+  //         message: "Hola causa",
+  //         date: "2021-10-10, 10:00:00",
+  //         fullname: "Jorge",
+  //       },
+  //       {
+  //         id: 2,
+  //         message: "Holaaaaa",
+  //         date: "2021-10-10, 10:00:00",
+  //         fullname: "Sebas",
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     fullname: "Chaquila",
+  //     id: 2,
+  //     message: "Hola tengo una duda",
+  //   },
+  // ];
 
   const onSelectConversation = (conversation) => {
+    console.log(conversation);
     setConversation(conversation);
+    // * Aqui setear la conversaciones
     setDataChat(conversation.all_messages);
   };
 
@@ -59,7 +68,7 @@ const Conversation = ({ isDesktop = true, setConversation, setDataChat }) => {
       >
         {conversations.map((conversation) => (
           <Card
-            key={conversation.id}
+            key={conversation.uuid}
             onClick={() => onSelectConversation(conversation)}
             sx={{
               width: "90%",
@@ -108,7 +117,7 @@ const Conversation = ({ isDesktop = true, setConversation, setDataChat }) => {
                     },
                   }}
                 >
-                  {conversation.username}
+                  {conversation.client_conversation.fullname}
                 </Typography>
                 <Typography
                   variant="body2"
@@ -120,7 +129,7 @@ const Conversation = ({ isDesktop = true, setConversation, setDataChat }) => {
                     },
                   }}
                 >
-                  {conversation.message}
+                  {conversation.last_message.message_text}
                 </Typography>
                 <Box
                   sx={{
@@ -166,95 +175,99 @@ const Conversation = ({ isDesktop = true, setConversation, setDataChat }) => {
         width: "fit-content",
       }}
     >
-      <Card
-        sx={{
-          width: "100%",
-          margin: "auto",
-          marginTop: "20px",
-          backgroundColor: "transparent",
-          boxShadow: "none",
-        }}
-      >
-        <CardActionArea
+      {conversations.map((conversation) => (
+        <Card
+          key={conversation.uuid}
+          onClick={() => onSelectConversation(conversation)}
           sx={{
-            display: "flex",
-            // alignItems: "start",
-            gap: "1rem",
-            padding: "10px",
-            flexDirection: {
-              xs: "column",
-              md: "row",
-            },
-            justifyContent: "center",
-            alignItems: {
-              xs: "center",
-              md: "start",
-            },
+            width: "100%",
+            margin: "auto",
+            marginTop: "20px",
+            backgroundColor: "transparent",
+            boxShadow: "none",
           }}
         >
-          <Avatar
+          <CardActionArea
             sx={{
-              width: "45px",
-              height: "45px",
-              backgroundColor: "#666666",
+              display: "flex",
+              // alignItems: "start",
+              gap: "1rem",
+              padding: "10px",
+              flexDirection: {
+                xs: "column",
+                md: "row",
+              },
+              justifyContent: "center",
+              alignItems: {
+                xs: "center",
+                md: "start",
+              },
             }}
-            variant="rounded"
-            src="/avatar_user.jpg"
-          />
-          <Box>
-            <Typography
-              variant="body1"
-              component="p"
-              fontWeight={"bold"}
+          >
+            <Avatar
               sx={{
-                textAlign: {
-                  xs: "center",
-                  md: "start",
-                },
+                width: "45px",
+                height: "45px",
+                backgroundColor: "#666666",
               }}
-            >
-              Elmer Laverty
-            </Typography>
-            <Typography
-              variant="body2"
-              component="p"
-              sx={{
-                display: {
-                  xs: "none",
-                  md: "block",
-                },
-              }}
-            >
-              Lorem ipsum dolor sit amet consectetur adipisicing elit.
-            </Typography>
-            <Box
-              sx={{
-                display: "flex",
-                gap: "10px",
-              }}
-            >
-              <Chip
-                label="Cotizacion"
-                size="small"
+              variant="rounded"
+              src="/avatar_user.jpg"
+            />
+            <Box>
+              <Typography
+                variant="body1"
+                component="p"
+                fontWeight={"bold"}
                 sx={{
-                  backgroundColor: "#feebc8",
-                  color: "#e38340",
-                  fontWeight: "bold",
+                  textAlign: {
+                    xs: "center",
+                    md: "start",
+                  },
                 }}
-              />
-              <Chip
-                label="Contratar"
-                size="small"
+              >
+                {conversation.client_conversation.fullname}
+              </Typography>
+              <Typography
+                variant="body2"
+                component="p"
                 sx={{
-                  backgroundColor: "#c6f6d5",
-                  color: "#38a169",
-                  fontWeight: "bold",
+                  display: {
+                    xs: "none",
+                    md: "block",
+                  },
                 }}
-              />
+              >
+                {conversation.last_message.message_text}
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: "10px",
+                }}
+              >
+                <Chip
+                  label="Cotizacion"
+                  size="small"
+                  sx={{
+                    backgroundColor: "#feebc8",
+                    color: "#e38340",
+                    fontWeight: "bold",
+                  }}
+                />
+                <Chip
+                  label="Contratar"
+                  size="small"
+                  sx={{
+                    backgroundColor: "#c6f6d5",
+                    color: "#38a169",
+                    fontWeight: "bold",
+                  }}
+                />
+              </Box>
             </Box>
-          </Box>
-        </CardActionArea>
-      </Card>
+          </CardActionArea>
+        </Card>
+      ))}
     </Box>
   );
 };
