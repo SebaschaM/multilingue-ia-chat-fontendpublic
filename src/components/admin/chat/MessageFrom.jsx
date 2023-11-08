@@ -1,10 +1,11 @@
 import { Box, Typography } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
+import { format } from "date-fns";
 
 const MessageFrom = ({ message, date }) => {
-  const dateFormat = date.split(",");
-  const dateDay = dateFormat[0];
-  const dateHour = dateFormat[1];
+  const dateToDate = new Date(date);
+  const dateFormat = format(dateToDate, "dd/MM/yyyy");
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <Box
@@ -14,13 +15,17 @@ const MessageFrom = ({ message, date }) => {
         gap: "10px",
         width: "fit-content",
         maxWidth: "50%",
+        position: "relative",
       }}
     >
       <Box
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         sx={{
           backgroundColor: "#e5e5e5",
           padding: "10px",
           borderRadius: "10px",
+          transition: "0.3s",
         }}
       >
         <Typography variant="body2" component="p">
@@ -32,13 +37,19 @@ const MessageFrom = ({ message, date }) => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          transition: "0.3s",
+          opacity: isHovered ? "1" : "0",
+          position: "absolute",
+          bottom: "-1.2rem",
+          right: "0",
+          left: "0",
         }}
       >
         {/* <Typography variant="body2" component="p" sx={{ color: "#707070" }}>
           {date}
         </Typography> */}
         <Typography variant="body2" component="p" sx={{ color: "#707070" }}>
-          {dateHour.slice(0, 6)}
+          {dateFormat}
         </Typography>
       </Box>
     </Box>

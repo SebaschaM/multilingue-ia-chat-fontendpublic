@@ -63,11 +63,11 @@ function Login() {
   /*  useEffects   */
   useEffect(() => {
     if (user != null) {
-      navigate("/home-chat");
+      navigate("/admin/dashboard");
     }
     if (user) {
       if (user.role.id == 1 || user.role.id == 2) {
-        navigate("/home-chat");
+        navigate("/admin/dashboard");
       }
     }
   }, [user, navigate]);
@@ -143,14 +143,12 @@ function Login() {
     });
     if (dataIntent.intents > 0) {
       setShowCounterIntent(true);
-    }
-    else {
+    } else {
       setCounterIntent(0);
       setShowCounterIntent(true);
     }
-    return
+    return;
   };
- 
 
   /* Función para validar si el correo existe  */
   const onCheckEmailExists = async (email) => {
@@ -202,8 +200,11 @@ function Login() {
           severity="error"
           sx={{ width: "100%" }}
         >
-          {dataIntent.intents > 0 ?  ( <> Te quedan {dataIntent.intents} intentos </>) :  <> {dataIntent.message} </>}
-
+          {dataIntent.intents > 0 ? (
+            <> Te quedan {dataIntent.intents} intentos </>
+          ) : (
+            <> {dataIntent.message} </>
+          )}
         </Alert>
       </Snackbar>
 
@@ -232,7 +233,7 @@ function Login() {
         >
           {dataToast.message}
         </Alert>
-      </Snackbar> 
+      </Snackbar>
 
       <img
         src="https://res.cloudinary.com/dvzjgzqbn/image/upload/v1694734856/Otros/Vector_right_qtg8j1.png"

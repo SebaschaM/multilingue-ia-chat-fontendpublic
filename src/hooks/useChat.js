@@ -24,8 +24,7 @@ export const useChat = () => {
       const response = await ApiJson.get(
         `/admin/messages/get-user-messages/${uuid_conversation}`
       );
-
-      console.log(response.data);
+      // console.log(response.data);
 
       return {
         data: response.data,

@@ -14,37 +14,9 @@ const Conversation = ({
   setDataChat,
   dataAllConversations,
 }) => {
-  console.log(dataAllConversations);
   const conversations = dataAllConversations || [];
-  // [
-  //   {
-  //     fullname: "Jorge",
-  //     id: 1,
-  //     message: "Hola causa",
-  //     all_messages: [
-  //       {
-  //         id: 1,
-  //         message: "Hola causa",
-  //         date: "2021-10-10, 10:00:00",
-  //         fullname: "Jorge",
-  //       },
-  //       {
-  //         id: 2,
-  //         message: "Holaaaaa",
-  //         date: "2021-10-10, 10:00:00",
-  //         fullname: "Sebas",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     fullname: "Chaquila",
-  //     id: 2,
-  //     message: "Hola tengo una duda",
-  //   },
-  // ];
 
   const onSelectConversation = (conversation) => {
-    console.log(conversation);
     setConversation(conversation);
     // * Aqui setear la conversaciones
     setDataChat(conversation.all_messages);

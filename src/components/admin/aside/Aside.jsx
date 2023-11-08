@@ -16,6 +16,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../../hooks/useAuth";
 import styles from "./Aside.module.css";
+import routes from "../../../utils/dataAside";
 
 const Aside = () => {
   const { pathname } = useLocation();
@@ -26,41 +27,7 @@ const Aside = () => {
   const [broken, setBroken] = useState(false);
   const [toggled, setToggled] = useState(false);
   const { user, handleLogout } = useAuth();
-  const [validateRole, setValidateRole ] = useState();
-
-
-  const routes = [
-    {
-      path: "/admin/dashboard",
-      role: ["manager"],
-      label: "Dashboard",
-      icon: <BsBarChartLine />,
-    },
-    {
-      path: "/admin/dashboard/metrics",
-      role: ["manager"],
-      label: "Metricas del agente",
-      icon: <BsClipboard2Pulse />,
-    },
-    {
-      path: "/admin/dashboard/chats",
-      role: ["manager", "agent"],
-      label: "Gestion de chats",
-      icon: <BsChatLeftDots />,
-    },
-    {
-      path: "/admin/dashboard/requests",
-      role: ["manager"],
-      label: "Solicitudes",
-      icon: <BsFileText />,
-    },
-    {
-      path: "/admin/dashboard/manager-users",
-      role: ["manager"],
-      label: "Gestionar Usuarios",
-      icon: <BsPeople />,
-    },
-  ];
+  const [validateRole, setValidateRole] = useState();
 
   const onClickLink = (path) => {
     setLinkSelected(path);
@@ -68,14 +35,13 @@ const Aside = () => {
     router(path);
   };
 
-useEffect(() => {
-  const user = localStorage.getItem("userData");
-  if (user) {
-    const userParse = JSON.parse(user);
-    setValidateRole(userParse.role.name_role);
-  }
-},[]);
-
+  useEffect(() => {
+    const user = localStorage.getItem("userData");
+    if (user) {
+      const userParse = JSON.parse(user);
+      setValidateRole(userParse.user.role.name_role);
+    }
+  }, []);
 
   useEffect(() => {
     const collapseLocal = localStorage.getItem("collapse");
@@ -182,8 +148,8 @@ useEffect(() => {
           <div className={styles.navbar_user}>
             <img src="/avatar.jpg" alt="avatar" />
             <div className={styles.navbar_user_data}>
-              <h3>Sebastian</h3>
-              <span>sebas@gmail.com</span>
+              <h3>{user.fullname}</h3>
+              <span>{user.email}</span>
             </div>
 
             <div

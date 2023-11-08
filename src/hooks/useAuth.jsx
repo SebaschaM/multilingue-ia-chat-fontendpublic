@@ -9,9 +9,19 @@ export const useAuth = () => {
   const handleLogin = async (dataLogin) => {
     try {
       const { data } = await ApiJson.post("/admin/auth/login", dataLogin);
+      const { jwt_token, user } = data;
+      setUserAtom({
+        jwt_token,
+        user,
+      });
+      localStorage.setItem("userData", JSON.stringify({ jwt_token, user }));
       return data;
     } catch (error) {
-      return { error: error.response.data.error, success: false, intents: error.response.data.intents };
+      return {
+        error: error.response.data.error,
+        success: false,
+        intents: error.response.data.intents,
+      };
     }
   };
 
@@ -34,7 +44,6 @@ export const useAuth = () => {
       return { success: false, message: error.response.data.error };
     }
   };
-  
 
   const handleLogout = () => {
     localStorage.removeItem("userData");

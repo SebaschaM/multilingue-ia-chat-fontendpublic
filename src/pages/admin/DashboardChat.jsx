@@ -12,6 +12,7 @@ import {
   Badge,
   Box,
   Button,
+  CircularProgress,
   Divider,
   Grid,
   IconButton,
@@ -40,9 +41,11 @@ const style = {
 };
 
 const DashboardChat = () => {
+  const [isLoadingConversation, setIsLoadingConversation] = useState(false);
   const { getConversationsByID, getMessageByIdConversation } = useChat();
   const [allConversations, setAllConversations] = useState([]);
   const [dataChat, setDataChat] = useState([]);
+  const [inputSearchMessage, setInputSearchMessage] = useState("");
   const [conversationSelected, setConversationSelected] = useState({});
   const [openModalRequestAgendar, setOpenModalRequestAgendar] = useState(false);
   const [openModalRequestTipificar, setOpenModalRequestTipificar] =
@@ -51,14 +54,15 @@ const DashboardChat = () => {
 
   const socketRef = useRef();
   const userData = JSON.parse(localStorage.getItem("userData"));
-  const fullname = userData?.fullname;
+  const userID = userData.user.id;
+  const fullname = userData.user.fullname;
   const room_name = uuidv4();
 
   const onGetAllConversations = async () => {
-    const { data, error } = await getConversationsByID(
-      "f9713506-0abe-4616-9690-f93b64410d01"
-    );
+    setIsLoadingConversation(true);
+    const { data, error } = await getConversationsByID(userID);
     setAllConversations(data.conversation);
+    setIsLoadingConversation(false);
   };
 
   const onGetMessagesByIdConversation = async (idConversation) => {
@@ -74,7 +78,7 @@ const DashboardChat = () => {
 
     const newMessage = {
       id: userData.id,
-      room_name: "cuartito2",
+      room_name: "cuartito2", // !Esperar a que el cliente cree el room
       fullname: fullname,
       message: dataInputMessage,
       date: new Date().toLocaleString(),
@@ -89,7 +93,7 @@ const DashboardChat = () => {
 
     socket.on("connect", () => {
       console.log("Socket conectado en CHAT");
-      const roomName = "cuartito2";
+      const roomName = "cuartito2"; // !Esperar a que el cliente cree el room
 
       socket.emit("assign_user_to_room", {
         room_name: roomName,
@@ -137,8 +141,6 @@ const DashboardChat = () => {
     onGetMessagesByIdConversation("30fafef2-da18-42df-9c3b-2ca07051af7b");
   }, [conversationSelected]);
 
-  console.log(dataChat);
-
   return (
     <LayoutDashboard title="Overall Holding">
       <LayoutDashboardContent title="Gestion de Chats">
@@ -170,7 +172,7 @@ const DashboardChat = () => {
               <Typography variant="h6" component="h3" textAlign="center">
                 Mensajes
               </Typography>
-              <Badge badgeContent={12} color="secondary" />
+              <Badge badgeContent={allConversations.length} color="secondary" />
             </Box>
 
             {/* Input search conversation */}
@@ -185,17 +187,44 @@ const DashboardChat = () => {
                 variant="outlined"
                 size="small"
                 placeholder="Buscar mensajes..."
+                onChange={(e) => setInputSearchMessage(e.target.value)}
+                defaultValue={inputSearchMessage}
                 sx={{ width: "100%" }}
               />
             </Box>
 
             {/* Conversation Desktop  */}
-            <Conversation
-              isDesktop={true}
-              setConversation={setConversationSelected}
-              setDataChat={setDataChat}
-              dataAllConversations={allConversations}
-            />
+            {isLoadingConversation ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginTop: "20px",
+                }}
+              >
+                <CircularProgress />
+              </Box>
+            ) : (
+              <Conversation
+                isDesktop={true}
+                setConversation={setConversationSelected}
+                setDataChat={setDataChat}
+                dataAllConversations={allConversations.filter(
+                  (conversation) => {
+                    if (inputSearchMessage === "") {
+                      return conversation;
+                    } else if (
+                      conversation?.client_conversation?.fullname
+                        ?.toLowerCase()
+                        .includes(inputSearchMessage.toLowerCase())
+                    ) {
+                      return conversation;
+                    }
+                  }
+                )}
+              />
+            )}
           </Grid>
           <Grid
             sx={{
@@ -304,6 +333,7 @@ const DashboardChat = () => {
                           position: "absolute",
                           left: "-5.5rem",
                           top: "3rem",
+                          zIndex: "100",
                         }}
                       >
                         <Button
@@ -368,8 +398,7 @@ const DashboardChat = () => {
                   >
                     {dataChat &&
                       dataChat?.map((chat) =>
-                        chat?.id_user_receiver ===
-                        "f9713506-0abe-4616-9690-f93b64410d01" ? (
+                        chat?.id_user_receiver !== userID ? (
                           <MessageMe
                             key={chat.uuid}
                             message={chat.message_text}
@@ -377,7 +406,7 @@ const DashboardChat = () => {
                           />
                         ) : (
                           <MessageFrom
-                            key={chat.id}
+                            key={chat.uuid}
                             message={chat.message_text}
                             date={chat.created_at}
                           />
