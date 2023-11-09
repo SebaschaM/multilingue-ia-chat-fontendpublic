@@ -1,3 +1,6 @@
+
+
+/*LANDINGPAGE*/
 .fondo1{
     background-size: cover;
     background-repeat: no-repeat;
@@ -23,9 +26,10 @@
 
 .bot {
   position: absolute;
-  top: 85%;
-  left: 93%;
+  top: 93%;
+  left: 95%;
   transform: translate(-50%, -50%);
+  width: 150px;
   cursor: pointer;
   }
 
@@ -238,6 +242,8 @@ section {
 
 
 
+
+/* CHATBOT PRINCIPAL
 .chatbot{
   position: fixed;
   right: 40px;
@@ -331,4 +337,141 @@ section {
   margin-left: 20px;
   margin-top: 15px;
   cursor: pointer;
+} */
+
+
+/*CHATBOT LENGUAJE*/
+.chatbot{
+  position: fixed;
+  right: 40px;
+  bottom: 40px;
+  width: 420px;
+  overflow: hidden;
+  background: #EEEEEE;
+  border-radius: 10px;
+  box-shadow: 0 0 128px 0 rgba(0,0,0,0.1),
+              0 32px 64px -48px rgba(0,0,0,0.5);
+}
+
+.chatbot header{
+  display: flex;
+  flex-direction: row;
+  background: #17C3CE;
+}
+
+.h2s{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.chatbot header h2 {
+  font-size: 13px;
+  color: #fff;
+  padding: 10px 0 0 5px;
+} 
+
+.chatbot header img{
+  width: 83px;
+  height: 80px;
+}
+
+.chatbot .chatbox{
+  height: 510px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  row-gap: 30px;
+}
+
+
+.chatincoming{
+  display: flex;
+}
+
+.texto{
+  font-size: 13px;
+  margin-left: 20%;
+  margin-top: 20%;
+}
+.idiomas {
+  margin-left: 25%;
+  margin-right: 25%;
+  padding: 10px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  row-gap: 5px;
+  align-items: center;
+  background-color: #D9D9D9;
+}
+.linea2{
+  height: 50%;
+}
+
+.chatoutgoing p{
+  margin-right: 20px;
+  padding: 12px 16px;
+  border-radius: 10px 10px 0 10px;
+  background: #AEE9ED;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.linea{
+  margin-top: 50px;
+}
+
+.guardar{
+  background-color: #17C3CE;
+  margin-top: 30%;
+  margin-left: 10%;
+  margin-right: 10%;
+  padding-left: 13%;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  border-radius: 10px;
+}
+
+.guardar p{
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.barras{
+  width: 30px;
+  height: 30px;
+  margin-left: 20px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.lenguaje{
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+}
+.lenguaje .bandera{
+  padding-left: 10px;
+}
+.español{
+  padding-left: 18px;
+}
+.arabe{
+  padding-left: 33px;
+}
+.ruso{
+  padding-left: 38px;
+}
+.frances{
+  padding-left: 17px;
+}
+.flechabajo{
+  height: 13px;
+  padding-left: 65px;
+  padding-top: 5px;
+}
+.ingles{
+  padding-left: 70px;
 }

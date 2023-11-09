@@ -2,10 +2,23 @@ import React, { useState, useEffect } from "react";
 import styles from "./Home.module.css";
 import { Button } from "@mui/material";
 import { Link } from "react-router-dom";
-
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import Box from '@mui/material/Box';
 function Home() {
 
   const [activePage, setActivePage] = useState(1);
+  const [buttonChat, setButtonChat] = useState(false);
+  const [buttonChatDisable, setButtonChatDisable] = useState(true);
+  const [selectLanguage, setSelectLanguage] = useState("")
+
+  const ChatbotView = () => {
+    setButtonChat(!buttonChat);
+    setButtonChatDisable(false);
+  };
+  
 
   const handleScroll = () => {
     const scrollPosition = window.scrollY;
@@ -33,7 +46,7 @@ function Home() {
       <section className={activePage === 1 ? styles.active : ""}>
       <img className={styles.fondo1} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698270354/exe%20digital/vmmpglnqkjmof2bcqbz8.jpg" alt="fondo1" />
       <img className={styles.logo} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698270673/exe%20digital/uubwmilnxnlahvgj6ufl.png" alt="logo" />
-      <img className={styles.bot} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698271161/exe%20digital/bkncyocxtsg3oeywvrjr.png" alt="bot" />
+      {buttonChatDisable && <img className={styles.bot} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698271161/exe%20digital/bkncyocxtsg3oeywvrjr.png" alt="bot" onClick={ChatbotView} />}
       </section>
       <section className={activePage === 2 ? styles.active : ""}>
         <img className={styles.fondo2} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698346151/exe%20digital/hy7fpughyyqvflxmzz96.jpg" alt="fondo2" />
@@ -65,7 +78,7 @@ function Home() {
         <p className={styles.text4} >PERÚ • ECUADOR • MÉXICO</p>
       </section>
 
-      <div class={styles.chatbot}>
+      {/* {buttonChat && <div class={styles.chatbot}>
         <header>
           <img className={styles.minibot} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698271161/exe%20digital/bkncyocxtsg3oeywvrjr.png"/>
           <div className={styles.h2s}>
@@ -90,8 +103,88 @@ function Home() {
         <img className={styles.barras} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699070715/exe%20digital/fyczge5dyxnvxsbz6xyb.png"/>
         </div>
         </ul>
-        
+      </div>} */}
+    
+      <div class={styles.chatbot}>
+        <header>
+          <img className={styles.minibot} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698271161/exe%20digital/bkncyocxtsg3oeywvrjr.png"/>
+          <div className={styles.h2s}>
+          <h2>Exe Digital</h2>
+          <h2>Exe@digital.exe</h2>
+          </div>
+        </header>
+        <ul className={styles.chatbox}>
+        <li className={styles.chatincoming}>
+          <p className={styles.texto}>SELECCIONA TU IDIOMA DE PREFERENCIA</p>
+        </li>
+        <Box sx={{width: "15rem", margin: "0 auto"}}>
+        <FormControl fullWidth>
+  <InputLabel id="demo-simple-select-label">Idioma</InputLabel>
+  <Select
+    labelId="demo-simple-select-label"
+    id="demo-simple-select"
+    value={selectLanguage}
+    label="Idioma"
+    onChange={(e)=>{
+      setSelectLanguage(e.target.value)
+      
+    }}
+  >
+    <MenuItem value={1}>
+    <img className={styles.bandera} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699551589/exe%20digital/cbjpsjklj86jxntxtuan.png" alt="españa" /> <span style={{marginLeft: '1rem'}}>
+      Inglés
+    </span>
+    </MenuItem>
+    <MenuItem value={2}>Español</MenuItem>
+    <MenuItem value={3}>Chino</MenuItem>
+    <MenuItem value={4}>Ruso</MenuItem>
+    <MenuItem value={5}>Árabe</MenuItem>
+    <MenuItem value={6}>Quechua</MenuItem>
+    <MenuItem value={7}>Japones</MenuItem>
+    <MenuItem value={8}>Portugués</MenuItem>
+    <MenuItem value={9}>Frances</MenuItem>
+    <MenuItem value={10}>Koreano</MenuItem>
+    
+  </Select>
+</FormControl>
+</Box>
+        {/* <li className={styles.idiomas}>
+          <div className={styles.lenguaje}>
+            <p className={styles.ingles}>Inglés</p>
+            <img className={styles.flechabajo} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699553762/exe%20digital/mchde1gdqjknwpxzuojv.png" alt="asd" />
+          </div>
+          <div className={styles.lenguaje}>
+            <p className={styles.español}>Español</p>
+            <img className={styles.bandera} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699551589/exe%20digital/cbjpsjklj86jxntxtuan.png" alt="españa" />
+          </div>
+          <div className={styles.lenguaje}>
+            <p className={styles.arabe} >Árabe</p>
+            <img className={styles.bandera} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699551590/exe%20digital/aczkvsyzglzelhm0vvuv.png" alt="arabe" />
+          </div>
+          <div className={styles.lenguaje}>
+            <p className={styles.ruso}>Ruso</p>
+            <img className={styles.bandera} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699551591/exe%20digital/cmyzlidn16bahhodemqi.png" alt="ruso" />
+          </div>
+          <div className={styles.lenguaje}>
+            <p className={styles.frances}>Francés</p>
+            <img className={styles.bandera} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699551592/exe%20digital/zpjpm590yv88tewbm9qp.png" alt="frances" />
+          </div>
+          <div className={styles.lenguaje}>
+            <p className={styles.portugues}>Portugués</p>
+            <img className={styles.bandera} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699551593/exe%20digital/xnp2kzoiykbfcx2mx3s6.png" alt="portugues" />
+          </div>
+          <hr className={styles.linea2} />
+        </li> */}
+        <div className={styles.guardar} onClick={()=>localStorage.setItem("idLenguaje", selectLanguage)}>
+          <p>GUARDAR CONFIGURACIÓN</p>
+        </div>
+        <div className={styles.area}>
+        <hr className={styles.linea} />
+        <img className={styles.barras} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699070715/exe%20digital/fyczge5dyxnvxsbz6xyb.png"/>
+        </div>
+        </ul>
       </div>
+      
     </div>
 
   );
