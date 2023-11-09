@@ -236,6 +236,8 @@ section {
   scroll-snap-align: start; /* Alinea cada sección al inicio de la vista */
 }
 
+
+
 .chatbot{
   position: fixed;
   right: 40px;
