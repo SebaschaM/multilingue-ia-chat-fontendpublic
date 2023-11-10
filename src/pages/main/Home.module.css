@@ -1,59 +1,477 @@
-.vector_img_right {
-    position: absolute;
-    width: 18rem;
-    height: 8rem;
-    top: 0;
-    right: 0;
+
+
+/*LANDINGPAGE*/
+.fondo1{
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+    width: 100%;
 }
 
-.vector_img_left {
-    position: absolute;
-    width: 16rem;
-    height: 8rem;
-    bottom: 0;
-    left: 0;
+.fondo2{
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-attachment: fixed;
+  width: 100%;
 }
 
-.landing_img {
-    position: absolute;
-    top: 19rem;
-    right: 7rem;
-    width: 38rem;
-    height: 18rem;
+.logo {
+  position: absolute;
+  top: 12%;
+  left: 12%;
+  transform: translate(-50%, -50%);
+  }
 
+.bot {
+  position: absolute;
+  top: 93%;
+  left: 95%;
+  transform: translate(-50%, -50%);
+  width: 150px;
+  cursor: pointer;
+  }
+
+.text1 {
+  position: absolute;
+  top: 150%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 45px;
+  color: #59D5F0;
 }
 
-.form {
-    position: absolute;
-    top: 26rem;
-    left: 9rem;
-   
-}
-.form p {
-    font-size: 1.8rem;
-}
-
-.title_page {
-    position: absolute;
-    top: 14rem;
-    left: 9rem;
-    color: #17C3CE;
-    font-size: 3.6rem;
-    font-style: "bold",
-
+.text2 {
+  position: absolute;
+  top: 155%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 45px;
+  color: #35579A;
 }
 
-.form button {
-    background:#17C3CE;
-    margin: 2rem 5rem 2rem 0;
-    padding: 1.3rem 5rem;
-    color: rgb(255, 255, 255);
-    font-size: 1.2rem;
-    border-radius: 0.8rem;
-    width: auto;
+.text3 {
+  position: absolute;
+  top: 195%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 30px;
+  color: #5A8BE9;
 }
 
-.form button:hover {
-    background:#19B8C3;
-    border-bottom: 3px solid #077981;
+.text4 {
+  position: absolute;
+  top: 295%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 30px;
+  color: #5A8BE9;
+}
+
+.text5 {
+  position: absolute;
+  top: 220%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 50px;
+  color: #59D5F0;
+}
+
+.text6 {
+  position: absolute;
+  top: 228%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 50px;
+  color: #35579A;
+}
+
+.branding {
+  position: absolute;
+  top: 139%;
+  left: 38%;
+  transform: translate(-50%, -50%);
+}
+
+.campañas {
+  position: absolute;
+  top: 130%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.sistemas {
+  position: absolute;
+  top: 140%;
+  left: 61%;
+  transform: translate(-50%, -50%);
+}
+
+.ecommerce {
+  position: absolute;
+  top: 158%;
+  left: 65%;
+  transform: translate(-50%, -50%);
+}
+
+.produccion {
+  position: absolute;
+  top: 172%;
+  left: 57%;
+  transform: translate(-50%, -50%);
+}
+
+.sitioweb {
+  position: absolute;
+  top: 174%;
+  left: 43%;
+  transform: translate(-50%, -50%);
+}
+
+.social {
+  position: absolute;
+  top: 158%;
+  left: 35%;
+  transform: translate(-50%, -50%);
+}
+
+.farmacia {
+  position: absolute;
+  top: 250%;
+  left: 20%;
+  transform: translate(-50%, -50%);
+}
+
+.universidad {
+  position: absolute;
+  top: 270%;
+  left: 20%;
+  transform: translate(-50%, -50%);
+}
+
+.kativa {
+  position: absolute;
+  top: 250%;
+  left: 38%;
+  transform: translate(-50%, -50%);
+}
+
+.fos {
+  position: absolute;
+  top: 270%;
+  left: 38%;
+  transform: translate(-50%, -50%);
+}
+
+.ucv {
+  position: absolute;
+  top: 250%;
+  left: 55%;
+  transform: translate(-50%, -50%);
+}
+
+.bengala {
+  position: absolute;
+  top: 270%;
+  left: 55%;
+  transform: translate(-50%, -50%);
+}
+
+.ekono {
+  position: absolute;
+  top: 250%;
+  left: 70%;
+  transform: translate(-50%, -50%);
+}
+
+.opcion {
+  position: absolute;
+  top: 270%;
+  left: 70%;
+  transform: translate(-50%, -50%);
+}
+
+.olva {
+  position: absolute;
+  top: 250%;
+  left: 85%;
+  transform: translate(-50%, -50%);
+}
+
+.b{
+  position: absolute;
+  top: 270%;
+  left: 85%;
+  transform: translate(-50%, -50%);
+}
+
+section {
+  height: 100vh;
+  transition: opacity 0.5s ease;
+  opacity: 0;
+}
+
+/* Define la clase active para la sección visible */
+.active {
+  opacity: 1;
+}
+
+/* Establece estilos específicos de cada página */
+.page1 {
+  background-color: #f0f0f0;
+}
+
+.page2 {
+  background-color: #e0e0e0;
+}
+
+.page3 {
+  background-color: #d0d0d0;
+}
+
+.container {
+  height: 100vh; /* Asegura que el contenedor tenga la altura de la pantalla */
+  scroll-snap-type: y mandatory; /* Hace que las secciones se adhieran al scroll vertical */
+}
+
+section {
+  height: 100vh; /* Asegura que cada sección tenga la altura de la pantalla */
+  scroll-snap-align: start; /* Alinea cada sección al inicio de la vista */
+}
+
+
+
+
+/* CHATBOT PRINCIPAL
+.chatbot{
+  position: fixed;
+  right: 40px;
+  bottom: 40px;
+  width: 420px;
+  overflow: hidden;
+  background: #EEEEEE;
+  border-radius: 10px;
+  box-shadow: 0 0 128px 0 rgba(0,0,0,0.1),
+              0 32px 64px -48px rgba(0,0,0,0.5);
+}
+
+.chatbot header{
+  display: flex;
+  flex-direction: row;
+  background: #17C3CE;
+}
+
+.h2s{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.chatbot header h2 {
+  font-size: 13px;
+  color: #fff;
+  padding: 10px 0 0 5px;
+} 
+
+.chatbot header img{
+  width: 83px;
+  height: 80px;
+}
+
+.chatbot .chatbox{
+  height: 510px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  row-gap: 30px;
+}
+
+.minibot2{
+  margin-top: 20px;
+  margin-left: 20px;
+  width: 20px;
+  height: 20px;
+  background-color: #E5E5E5;
+  padding: 1%;
+  border-radius: 4px;
+}
+
+.chatincoming{
+  display: flex;
+}
+
+.texto{
+  margin-top: 30px;
+  margin-left: 10px;
+  padding: 12px 16px;
+  border-radius: 0 10px 10px 10px;
+  background: #D9D9D9;
+  font-size: 12px;
+  width: 50%;
+}
+.chatoutgoing {
+  display: flex;
+  flex-direction: column;
+  row-gap: 5px;
+  align-items: flex-end;
+}
+
+
+.chatoutgoing p{
+  margin-right: 20px;
+  padding: 12px 16px;
+  border-radius: 10px 10px 0 10px;
+  background: #AEE9ED;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.linea{
+  margin-top: 80px;
+}
+
+.barras{
+  width: 30px;
+  height: 30px;
+  margin-left: 20px;
+  margin-top: 15px;
+  cursor: pointer;
+} */
+
+
+/*CHATBOT LENGUAJE*/
+.chatbot{
+  position: fixed;
+  right: 40px;
+  bottom: 40px;
+  width: 420px;
+  overflow: hidden;
+  background: #EEEEEE;
+  border-radius: 10px;
+  box-shadow: 0 0 128px 0 rgba(0,0,0,0.1),
+              0 32px 64px -48px rgba(0,0,0,0.5);
+}
+
+.chatbot header{
+  display: flex;
+  flex-direction: row;
+  background: #17C3CE;
+}
+
+.h2s{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.chatbot header h2 {
+  font-size: 13px;
+  color: #fff;
+  padding: 10px 0 0 5px;
+} 
+
+.chatbot header img{
+  width: 83px;
+  height: 80px;
+}
+
+.chatbot .chatbox{
+  height: 510px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  row-gap: 30px;
+}
+
+
+.chatincoming{
+  display: flex;
+}
+
+.texto{
+  font-size: 13px;
+  margin-left: 20%;
+  margin-top: 20%;
+}
+.idiomas {
+  margin-left: 25%;
+  margin-right: 25%;
+  padding: 10px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  row-gap: 5px;
+  align-items: center;
+  background-color: #D9D9D9;
+}
+.linea2{
+  height: 50%;
+}
+
+.chatoutgoing p{
+  margin-right: 20px;
+  padding: 12px 16px;
+  border-radius: 10px 10px 0 10px;
+  background: #AEE9ED;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.linea{
+  margin-top: 50px;
+}
+
+.guardar{
+  background-color: #17C3CE;
+  margin-top: 30%;
+  margin-left: 10%;
+  margin-right: 10%;
+  padding-left: 13%;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  border-radius: 10px;
+}
+
+.guardar p{
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.barras{
+  width: 30px;
+  height: 30px;
+  margin-left: 20px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.lenguaje{
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+}
+.lenguaje .bandera{
+  padding-left: 10px;
+}
+.español{
+  padding-left: 18px;
+}
+.arabe{
+  padding-left: 33px;
+}
+.ruso{
+  padding-left: 38px;
+}
+.frances{
+  padding-left: 17px;
+}
+.flechabajo{
+  height: 13px;
+  padding-left: 65px;
+  padding-top: 5px;
+}
+.ingles{
+  padding-left: 70px;
 }
