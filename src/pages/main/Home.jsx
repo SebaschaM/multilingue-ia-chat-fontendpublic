@@ -105,7 +105,7 @@ function Home() {
         </ul>
       </div>} */}
     
-      <div class={styles.chatbot}>
+    {buttonChat && <div class={styles.chatbot}>
         <header>
           <img className={styles.minibot} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698271161/exe%20digital/bkncyocxtsg3oeywvrjr.png"/>
           <div className={styles.h2s}>
@@ -145,36 +145,10 @@ function Home() {
     <MenuItem value={9}>Frances</MenuItem>
     <MenuItem value={10}>Koreano</MenuItem>
     
-  </Select>
-</FormControl>
-</Box>
-        {/* <li className={styles.idiomas}>
-          <div className={styles.lenguaje}>
-            <p className={styles.ingles}>Inglés</p>
-            <img className={styles.flechabajo} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699553762/exe%20digital/mchde1gdqjknwpxzuojv.png" alt="asd" />
-          </div>
-          <div className={styles.lenguaje}>
-            <p className={styles.español}>Español</p>
-            <img className={styles.bandera} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699551589/exe%20digital/cbjpsjklj86jxntxtuan.png" alt="españa" />
-          </div>
-          <div className={styles.lenguaje}>
-            <p className={styles.arabe} >Árabe</p>
-            <img className={styles.bandera} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699551590/exe%20digital/aczkvsyzglzelhm0vvuv.png" alt="arabe" />
-          </div>
-          <div className={styles.lenguaje}>
-            <p className={styles.ruso}>Ruso</p>
-            <img className={styles.bandera} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699551591/exe%20digital/cmyzlidn16bahhodemqi.png" alt="ruso" />
-          </div>
-          <div className={styles.lenguaje}>
-            <p className={styles.frances}>Francés</p>
-            <img className={styles.bandera} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699551592/exe%20digital/zpjpm590yv88tewbm9qp.png" alt="frances" />
-          </div>
-          <div className={styles.lenguaje}>
-            <p className={styles.portugues}>Portugués</p>
-            <img className={styles.bandera} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699551593/exe%20digital/xnp2kzoiykbfcx2mx3s6.png" alt="portugues" />
-          </div>
-          <hr className={styles.linea2} />
-        </li> */}
+    </Select>
+    </FormControl>
+    </Box>
+
         <div className={styles.guardar} onClick={()=>localStorage.setItem("idLenguaje", selectLanguage)}>
           <p>GUARDAR CONFIGURACIÓN</p>
         </div>
@@ -183,7 +157,7 @@ function Home() {
         <img className={styles.barras} src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699070715/exe%20digital/fyczge5dyxnvxsbz6xyb.png"/>
         </div>
         </ul>
-      </div>
+      </div>}
       
     </div>
 
