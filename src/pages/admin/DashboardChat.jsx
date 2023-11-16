@@ -172,7 +172,7 @@ const DashboardChat = () => {
               <Typography variant="h6" component="h3" textAlign="center">
                 Mensajes
               </Typography>
-              <Badge badgeContent={allConversations.length} color="secondary" />
+              {/* <Badge badgeContent={allConversations.length} color="secondary" /> */}
             </Box>
 
             {/* Input search conversation */}
@@ -210,7 +210,7 @@ const DashboardChat = () => {
                 isDesktop={true}
                 setConversation={setConversationSelected}
                 setDataChat={setDataChat}
-                dataAllConversations={allConversations.filter(
+                dataAllConversations={allConversations && allConversations.length > 0 && allConversations.filter(
                   (conversation) => {
                     if (inputSearchMessage === "") {
                       return conversation;

@@ -4,3 +4,5 @@ export { default as MessageFrom } from "./admin/chat/MessageFrom";
 export { default as MessageMe } from "./admin/chat/MessageMe";
 export { default as ModalCustom } from "./admin/modal/ModalCustom";
 export { default as TableCustom } from "./admin/table/TableCustom";
+export { default as TableCustomForUserManagment } from "./admin/table/TableCustomForUserManagment";
+
