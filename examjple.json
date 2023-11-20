@@ -1,0 +1,23 @@
+{
+  "messagges": [
+    {
+      "message": {
+        "from": "bot",
+        "text": "Hi, is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been . Ihe"
+      }
+    },
+    {
+      "message": {
+        "from": "user",
+        "text": "Emision y preventa",
+        "opcion": 1
+      }
+    },
+    {
+      "message": {
+        "from": "bot",
+        "text": "Informacion de emision y preventa"
+      }
+    }
+  ]
+}
