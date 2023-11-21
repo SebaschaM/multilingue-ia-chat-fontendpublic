@@ -59,7 +59,6 @@ const DashboardManagerUser = () => {
   const [isLoadingRequest, setIsLoadingRequest] = useState(false);
   const searchInputRef = useRef(null);
 
-
   //Estados del Dashboard Request example
   const [valueSearch, setValueSearch] = useState("");
   const [valueState, setValueState] = useState("active");
@@ -304,6 +303,7 @@ const DashboardManagerUser = () => {
         }));
 
         setUsers(mappedUsers);
+        console.log(mappedUsers);
       } else {
         console.error(
           'La propiedad "users" no existe o no es un array en la respuesta del backend:',

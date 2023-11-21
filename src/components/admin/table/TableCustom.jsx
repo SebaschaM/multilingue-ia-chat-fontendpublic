@@ -8,21 +8,26 @@ const TableCustom = ({
   setShowModalView,
   setShowModalEdit,
   setShowModalDelete,
+  DataForTableCustomForRequestManagment,
+  setRequestSelectedId,
+  valueSearch,
 }) => {
+  console.log(DataForTableCustomForRequestManagment);
   const columns = [
+    /*
     {
       field: "id",
       headerName: "ID",
-      width: 100,
+      width: 180,
       sortable: false,
       align: "center",
       headerAlign: "center",
       type: "number",
-    },
+    },*/
     {
       field: "cliente",
       headerName: "Cliente",
-      width: 300,
+      width: 340,
       sortable: false,
       align: "center",
       headerAlign: "center",
@@ -31,7 +36,7 @@ const TableCustom = ({
     {
       field: "fecha_registro",
       headerName: "Fecha de registro",
-      width: 200,
+      width: 260,
       sortable: false,
       align: "center",
       headerAlign: "center",
@@ -39,7 +44,7 @@ const TableCustom = ({
     {
       field: "tipo",
       headerName: "Tipo",
-      width: 200,
+      width: 260,
       sortable: false,
       align: "center",
       headerAlign: "center",
@@ -49,7 +54,7 @@ const TableCustom = ({
       field: "estado",
       headerName: "Estado",
       sortable: false,
-      width: 200,
+      width: 260,
       align: "center",
       type: "string",
       headerAlign: "center",
@@ -81,7 +86,7 @@ const TableCustom = ({
       field: "acciones",
       headerName: "Acciones",
       sortable: false,
-      width: 200,
+      width: 253,
       align: "center",
       headerAlign: "center",
 
@@ -95,6 +100,7 @@ const TableCustom = ({
               columnGap: "0.5rem",
             }}
           >
+            {/*
             <IconButton onClick={() => setShowModalView(true)}>
               <BsEye size={22} color="#FF7A00" />
             </IconButton>
@@ -103,6 +109,25 @@ const TableCustom = ({
             </IconButton>
             <IconButton onClick={() => setShowModalDelete(true)}>
               <BsTrash3 size={22} color="#A30D11" />
+            </IconButton>  */}
+            <IconButton onClick={() => setShowModalView(true)}>
+              <BsEye size={22} color="#FF7A00" />
+            </IconButton>
+            <IconButton
+              onClick={() => {
+                setShowModalEdit(true);
+                setRequestSelectedId(params.row.id);
+              }}
+            >
+              <BsPencilSquare size={22} color="#624DE3" />
+            </IconButton>
+            <IconButton
+              onClick={() => {
+                setShowModalDelete(true);
+                setRequestSelectedId(params.row.id);
+              }}
+            >
+              <BsTrash3 size={22} color="#A30D11" />
             </IconButton>
           </Box>
         );
@@ -110,10 +135,15 @@ const TableCustom = ({
     },
   ];
 
+  const filteredData = DataForTableCustomForRequestManagment.filter((request) =>
+    Object.values(request).some((value) =>
+      String(value).toLowerCase().includes(valueSearch.toLowerCase())
+    )
+  );
   return (
-    <div style={{ height: "fit-content", width: "95%" }}>
+    <div style={{ height: "fit-content", width: "100%" }}>
       <DataGrid
-        rows={rows}
+        rows={filteredData}
         columns={columns}
         disableColumnFilter
         disableColumnMenu

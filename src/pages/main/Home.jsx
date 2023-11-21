@@ -6,6 +6,7 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import Box from "@mui/material/Box";
 import { category, responseInit } from "../../utils/dataChatbot";
+import { Button } from "@mui/material";
 
 function Home() {
   const [activePage, setActivePage] = useState(1);
@@ -19,6 +20,21 @@ function Home() {
     messages: [],
   });
 
+  const [modalExit, setModalExit] = useState(false);
+
+  const modalExitView = () => {
+    setModalExit(!modalExit);
+  };
+
+  const removeLanguage = () => {
+    localStorage.removeItem("idLenguaje");
+    setSelectLanguage(null);
+    setView("language");
+    setCategoriaSeleccionadaId(null);
+    setPreguntasSeleccionadas([]);
+    setChatMensajesFrecuentes({ messages: [] });
+  };
+
   //SIRVE PARA MOSTRAR LA RESPUESTA A LA CATEGORUA SELECCIONADA
   const showQuestions = (id) => {
     setCategoriaSeleccionadaId(id);
@@ -27,8 +43,6 @@ function Home() {
     const responseForConsult = category.find((response) =>
       response.categoria.hasOwnProperty(selectLanguage)
     );
-
-    console.log(responseForConsult.respuesta[selectLanguage]);
 
     // Modificamos el json de chatMensajeFrecuentes para el bot
     setChatMensajesFrecuentes((prev) => {
@@ -64,7 +78,7 @@ function Home() {
     });
   };
 
-  console.log(chatMensajesFrecuentes);
+  //console.log(chatMensajesFrecuentes);
 
   const setIdLocalStorageLanguage = () => {
     localStorage.setItem("idLenguaje", selectLanguage);
@@ -137,9 +151,6 @@ function Home() {
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
   }, []);
 
   useEffect(() => {
@@ -169,7 +180,10 @@ function Home() {
             className={styles.bot}
             src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698271161/exe%20digital/bkncyocxtsg3oeywvrjr.png"
             alt="bot"
-            onClick={ChatbotView}
+            onClick={() => {
+              ChatbotView();
+              modalExitView();
+            }}
           />
         )}
       </section>
@@ -294,7 +308,7 @@ function Home() {
           </header>
 
           {view === "language" ? (
-            <ul className={`${styles.chatbox} ${styles.asd}`}>
+            <ul className={styles.chatbox}>
               <p className={styles.text_select_lang}>
                 SELECCIONA TU IDIOMA DE PREFERENCIA
               </p>
@@ -397,70 +411,89 @@ function Home() {
 
               <div
                 className={styles.guardar}
-                onClick={setIdLocalStorageLanguage}
+                onClick={() => {
+                  setIdLocalStorageLanguage();
+                  setModalExit(false);
+                }}
               >
                 <p>GUARDAR CONFIGURACIÓN</p>
-              </div>
-              <div className={styles.footer_area}>
-                <img
-                  className={styles.barras}
-                  src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699070715/exe%20digital/fyczge5dyxnvxsbz6xyb.png"
-                />
               </div>
             </ul>
           ) : (
             // Chat de mensajes frecuentes
-            <ul className={styles.chatbox}>
-              {chatMensajesFrecuentes.messages.map((message) => (
-                <>
-                  {message.message.from === "bot" && (
-                    <li
-                      className={styles.chatincoming}
-                      key={message.message.id}
+            <>
+              <ul className={styles.chatbox}>
+                {chatMensajesFrecuentes.messages.map((message) => (
+                  <>
+                    {message.message.from === "bot" && (
+                      <li
+                        className={styles.chatincoming}
+                        key={message.message.id}
+                      >
+                        <img
+                          className={styles.minibot2}
+                          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699065957/exe%20digital/unbrk0uzq1pdvwysiqpg.png"
+                          alt="Bot Avatar"
+                        />
+
+                        <p className={styles.texto}>{message.message.text}</p>
+                      </li>
+                    )}
+
+                    {message.message.from === "user" && (
+                      <ul
+                        className={styles.chatoutgoing}
+                        key={message.message.id}
+                      >
+                        {message.message.text ? (
+                          <p className={styles.chatoutgoing_response}>
+                            {message.message.text}
+                          </p>
+                        ) : (
+                          <>
+                            {message.message.opciones.map((pregunta) => (
+                              <li
+                                key={pregunta.id}
+                                onClick={() => showQuestions(pregunta.id)}
+                              >
+                                {pregunta.pregunta}
+                              </li>
+                            ))}
+                          </>
+                        )}
+                      </ul>
+                    )}
+                  </>
+                ))}
+
+                <div className={styles.footer_area}>
+                  <img
+                    className={styles.barras}
+                    src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699070715/exe%20digital/fyczge5dyxnvxsbz6xyb.png"
+                    onClick={() => {
+                      modalExitView();
+                    }}
+                  />
+                </div>
+              </ul>
+              {modalExit && (
+                <div className={styles.container_modal}>
+                  <div className={styles.modal}>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={() => {
+                        ChatbotView();
+                        removeLanguage();
+                        setButtonChatDisable(true);
+                      }}
                     >
-                      <img
-                        className={styles.minibot2}
-                        src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699065957/exe%20digital/unbrk0uzq1pdvwysiqpg.png"
-                        alt="Bot Avatar"
-                      />
-
-                      <p className={styles.texto}>{message.message.text}</p>
-                    </li>
-                  )}
-
-                  {message.message.from === "user" && (
-                    <ul
-                      className={styles.chatoutgoing}
-                      key={message.message.id}
-                    >
-                      {message.message.text ? (
-                        <p className={styles.chatoutgoing_response}>
-                          {message.message.text}
-                        </p>
-                      ) : (
-                        <>
-                          {message.message.opciones.map((pregunta) => (
-                            <li
-                              key={pregunta.id}
-                              onClick={() => showQuestions(pregunta.id)}
-                            >
-                              {pregunta.pregunta}
-                            </li>
-                          ))}
-                        </>
-                      )}
-                    </ul>
-                  )}
-                </>
-              ))}
-
-              <div className={styles.footer_area}>
-                <img
-                  className={styles.barras}
-                  src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699070715/exe%20digital/fyczge5dyxnvxsbz6xyb.png"
-                />
-              </div>
-            </ul>
+                      SALIR
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}

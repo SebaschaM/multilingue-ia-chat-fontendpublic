@@ -288,14 +288,13 @@ section {
 
 /*CHATBOT LENGUAJE*/
 .chatbot {
-  position: fixed;
-  right: 40px;
-  bottom: 40px;
-  width: 420px;
+  position: absolute;
+  overflow: auto;
+  width: 25rem;
+  right: 2rem;
+  top: 30.5rem;
   background: #eeeeee;
   border-radius: 10px;
-  box-shadow: 0 0 128px 0 rgba(0, 0, 0, 0.1),
-    0 32px 64px -48px rgba(0, 0, 0, 0.5);
 }
 
 .chatbot header {
@@ -388,6 +387,7 @@ section {
   margin-top: 80px;
 }
 .footer_area {
+  z-index: 100000000;
   position: absolute;
   border-top: 2px solid #d8d8d8;
   padding-bottom: 0.8rem;
@@ -429,4 +429,27 @@ section {
 .bandera {
   width: 1.5rem;
   height: 1.5rem;
+}
+
+/*MODAL EXIT*/
+.container_modal {
+  z-index: 1000000;
+  top: 0;
+  position: absolute;
+  background-color: rgba(44, 44, 44, 0.5);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  background-color: #ffffff;
+  border-radius: 1.8rem;
+  width: 13rem;
+  height: 9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BsPersonAdd, BsSearch } from "react-icons/bs";
 
 import {
@@ -16,6 +16,7 @@ import {
 
 import { ModalCustom, TableCustom } from "../../components";
 import { LayoutDashboard, LayoutDashboardContent } from "../../layout";
+import { handleRequestManagment } from "../../hooks/useRequestManagment";
 
 const DashboardRequests = () => {
   const [valueSearch, setValueSearch] = useState("");
@@ -24,6 +25,46 @@ const DashboardRequests = () => {
   const [showModalView, setShowModalView] = useState(false);
   const [showModalEdit, setShowModalEdit] = useState(false);
   const [showModalDelete, setShowModalDelete] = useState(false);
+  const { handleGetAllRequests } = handleRequestManagment();
+  const [requestSelectedId, setRequestSelectedId] = useState(null);
+  const [request, setRequest] = useState([]);
+
+  const getAllRequests = async () => {
+    try {
+      const response = await handleGetAllRequests();
+
+      if (response.requests && Array.isArray(response.requests)) {
+        const mappedRequests = response.requests.map((request) => ({
+          id: request.client.id,
+          cliente: request.client.fullname,
+          fecha_registro: formatearFecha(request.created_at),
+          tipo: "Agendamiento",
+          estado: request.status.name_status,
+        }));
+
+        setRequest(mappedRequests);
+      } else {
+        console.error(
+          'La propiedad "client" no existe o no es un array en la respuesta del backend:',
+          response
+        );
+      }
+    } catch (error) {
+      console.error("Error al obtener las solicitudes:", error);
+    }
+  };
+
+  function formatearFecha(fechaString) {
+    return new Date(fechaString).toLocaleDateString("es-PE", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  }
+
+  useEffect(() => {
+    getAllRequests();
+  }, []);
 
   return (
     <LayoutDashboard title="Exe Digital | Solicitudes">
@@ -117,6 +158,9 @@ const DashboardRequests = () => {
           setShowModalView={setShowModalView}
           setShowModalEdit={setShowModalEdit}
           setShowModalDelete={setShowModalDelete}
+          DataForTableCustomForRequestManagment={request}
+          setRequestSelectedId={setRequestSelectedId}
+          valueSearch={valueSearch}
         />
 
         <ModalCustom openModal={openModal} setOpenModal={setOpenModal}>
