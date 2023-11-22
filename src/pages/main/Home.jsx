@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./Home.module.css";
+import io from "socket.io-client";
+import { v4 as uuidv4 } from "uuid";
 
 import {
   Box,
@@ -16,6 +18,7 @@ import { category, responseInit, formTo2Cap } from "../../utils/dataChatbot";
 import { useChatClient } from "../../hooks/useChatClient.JSX";
 
 function Home() {
+  const socketRef = useRef();
   const [activePage, setActivePage] = useState(1);
   const [buttonChat, setButtonChat] = useState(false);
   const [buttonChatDisable, setButtonChatDisable] = useState(true);
@@ -31,10 +34,10 @@ function Home() {
   const [dataForm, setDataForm] = useState({
     form: [],
   });
-
+  const [dataSaveUser, setDataSaveUser] = useState({});
   const { handleRegisterUserChat } = useChatClient(); //HOOK PARA REGISTRO EN FORMULARIO
-  const [saveData, setSaveData] = useState(null); //HOOK PARA REGISTRO EN FORMULARIO
   const { register, handleSubmit, setValue } = useForm();
+  const room_name = uuidv4();
 
   const onSubmit = async (data) => {
     try {
@@ -47,12 +50,69 @@ function Home() {
         language_id: languageIdLocalStorage,
       };
       const dataSave = await handleRegisterUserChat(dataRegister);
-      console.log(dataSave);
+      //console.log(dataSave.user);
+      setDataSaveUser(dataSave);
       setShowCap(3);
+      connectSocket();
     } catch (error) {
       console.error("Error al subir el formulario:", error);
     }
   };
+
+  const connectSocket = () => {
+    const socket = io.connect("http://localhost:5000", { reconnection: true });
+    socketRef.current = socket;
+
+    socket.on("connect", () => {
+      console.log("Socket conectado en CHAT");
+      //const roomName = "asd"; // DEBE SER ALEATORIO room_name
+
+      // Obtener el valor actual desde localStorage
+      const roomName = localStorage.getItem("idRoom");
+
+      // Verificar si hay un valor y si tiene una longitud mayor a 1
+      if (roomName && roomName.length > 0) {
+        localStorage.setItem("idRoom", room_name);
+      } else {
+        // Si no hay un valor o tiene longitud 0 o 1, generarlo y almacenarlo en localStorage
+        const newRoomName = room_name;
+        localStorage.setItem("idRoom", newRoomName);
+        console.log(
+          "Nuevo ID generado y almacenado en localStorage:",
+          newRoomName
+        );
+      }
+
+      socket.emit("assign_user_to_room", {
+        room_name: roomName,
+        user: dataSaveUser,
+      });
+    });
+
+    socket.on("error_joining_room", (error) => {
+      console.log(error);
+    });
+
+    socket.on("error_send_message", (error) => {
+      console.log(error);
+    });
+
+    socket.on("get_messages", (messages) => {
+      setDataChat((prev) => [...prev, messages]);
+    });
+
+    socket.on("disconnect", () => {
+      socket.emit("close_room", {
+        room_name: "cuartito2",
+        user: userData,
+      });
+
+      socket.on("private_room_closed", () => {
+        console.log("Sala privada cerrada");
+      });
+    });
+  };
+
   const modalExitView = () => {
     setModalExit(!modalExit);
   };
@@ -204,6 +264,11 @@ function Home() {
     }
   };
 
+  useEffect(() => {
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
   }, []);
