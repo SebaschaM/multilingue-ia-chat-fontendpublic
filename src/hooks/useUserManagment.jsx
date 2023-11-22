@@ -1,7 +1,4 @@
-// import { useEffect, useState } from "react";
-import { useAtom } from "jotai";
 import ApiJson from "../api/api-json-config";
-import { userAtom } from "../store/store";
 
 export const useUserManagment = () => {
   const handleGetUsers = async () => {

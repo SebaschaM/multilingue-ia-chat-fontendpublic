@@ -1,92 +1,81 @@
 import React, { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
 import styles from "./Home.module.css";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
-import Box from "@mui/material/Box";
-import { category, responseInit } from "../../utils/dataChatbot";
-import { Button } from "@mui/material";
+
+import {
+  Box,
+  TextField,
+  Select,
+  FormControl,
+  MenuItem,
+  InputLabel,
+  Button,
+} from "@mui/material";
+
+import { category, responseInit, formTo2Cap } from "../../utils/dataChatbot";
+import { useChatClient } from "../../hooks/useChatClient.JSX";
 
 function Home() {
   const [activePage, setActivePage] = useState(1);
   const [buttonChat, setButtonChat] = useState(false);
   const [buttonChatDisable, setButtonChatDisable] = useState(true);
-  const [selectLanguage, setSelectLanguage] = useState();
+  const [selectLanguage, setSelectLanguage] = useState(2);
   const [view, setView] = useState("language");
   const [categoriaSeleccionadaId, setCategoriaSeleccionadaId] = useState(null);
-  const [preguntasSeleccionadas, setPreguntasSeleccionadas] = useState([]);
+  const [, setPreguntasSeleccionadas] = useState([]);
   const [chatMensajesFrecuentes, setChatMensajesFrecuentes] = useState({
     messages: [],
   });
-
   const [modalExit, setModalExit] = useState(false);
+  const [showCap, setShowCap] = useState(0);
+  const [dataForm, setDataForm] = useState({
+    form: [],
+  });
 
+  const { handleRegisterUserChat } = useChatClient(); //HOOK PARA REGISTRO EN FORMULARIO
+  const [saveData, setSaveData] = useState(null); //HOOK PARA REGISTRO EN FORMULARIO
+  const { register, handleSubmit, setValue } = useForm();
+
+  const onSubmit = async (data) => {
+    try {
+      const languageIdLocalStorage = localStorage.getItem("idLenguaje");
+      const dataRegister = {
+        email: data.email,
+        fullname: data.fullname,
+        cellphone: data.cellphone,
+        //consult: data.consult,
+        language_id: languageIdLocalStorage,
+      };
+      const dataSave = await handleRegisterUserChat(dataRegister);
+      console.log(dataSave);
+      setShowCap(3);
+    } catch (error) {
+      console.error("Error al subir el formulario:", error);
+    }
+  };
   const modalExitView = () => {
     setModalExit(!modalExit);
   };
 
   const removeLanguage = () => {
     localStorage.removeItem("idLenguaje");
-    setSelectLanguage(null);
+    //setSelectLanguage(null);
     setView("language");
     setCategoriaSeleccionadaId(null);
     setPreguntasSeleccionadas([]);
     setChatMensajesFrecuentes({ messages: [] });
+    setShowCap(0);
   };
-
-  //SIRVE PARA MOSTRAR LA RESPUESTA A LA CATEGORUA SELECCIONADA
-  const showQuestions = (id) => {
-    setCategoriaSeleccionadaId(id);
-    const categoryFind = category.find((categoria) => categoria.id === id);
-
-    const responseForConsult = category.find((response) =>
-      response.categoria.hasOwnProperty(selectLanguage)
-    );
-
-    // Modificamos el json de chatMensajeFrecuentes para el bot
-    setChatMensajesFrecuentes((prev) => {
-      return {
-        ...prev,
-        messages: [
-          ...prev.messages,
-          {
-            message: {
-              from: "bot",
-              text: categoryFind.categoria[selectLanguage],
-            },
-          },
-        ],
-      };
-    });
-
-    // Modificamos el json de chatMensajeFrecuentes para el usuario
-    setChatMensajesFrecuentes((prev) => {
-      return {
-        ...prev,
-        messages: [
-          ...prev.messages,
-          {
-            message: {
-              from: "user",
-              text: responseForConsult.respuesta[selectLanguage] || null,
-              opciones: [categoryFind.respuesta[selectLanguage]],
-            },
-          },
-        ],
-      };
-    });
-  };
-
-  //console.log(chatMensajesFrecuentes);
 
   const setIdLocalStorageLanguage = () => {
+    //SALUDO DEL BOT DE ACUERDO AL IDIOMA - LISTA CATEGORIAS
     localStorage.setItem("idLenguaje", selectLanguage);
     setSelectLanguage(selectLanguage);
 
     const responseForLanguage = responseInit.find((response) =>
       response.respuesta.hasOwnProperty(selectLanguage)
     );
+    console.log(responseForLanguage);
 
     // Modificamos el json de chatMensajeFrecuentes para el bot
     setChatMensajesFrecuentes((prev) => {
@@ -103,6 +92,8 @@ function Home() {
         ],
       };
     });
+
+    // Modificamos el json de chatMensajeFrecuentes para el usuario
     setChatMensajesFrecuentes((prev) => {
       return {
         ...prev,
@@ -120,7 +111,71 @@ function Home() {
         ],
       };
     });
-    handleTabChange("main");
+  };
+
+  const showQuestions = (id) => {
+    //REPETIR LA SELECCION - DAR LAS RESPUESTA DE ACUERDO AL IDIOMA
+    setCategoriaSeleccionadaId(id);
+    const categoryFind = category.find((categoria) => categoria.id === id);
+    const idCategoria = categoryFind.id;
+
+    // Modificamos el json de chatMensajeFrecuentes para el bot
+    setChatMensajesFrecuentes((prev) => {
+      return {
+        ...prev,
+        messages: [
+          ...prev.messages,
+          {
+            message: {
+              from: "bot",
+              text: categoryFind.categoria[selectLanguage],
+            },
+          },
+        ],
+      };
+    });
+
+    setChatMensajesFrecuentes((prev) => {
+      return {
+        ...prev,
+        messages: [
+          ...prev.messages,
+          {
+            message: {
+              from: "user",
+              id: idCategoria,
+              text: [categoryFind.respuesta[selectLanguage] || null],
+            },
+          },
+        ],
+      };
+    });
+  };
+
+  const showForm = () => {
+    //MOSTRAR FORMULARIO
+    const formTo2CapFind = formTo2Cap.find((form) =>
+      form.titleForm.hasOwnProperty(selectLanguage)
+    );
+
+    setDataForm((prev) => {
+      return {
+        ...prev,
+        form: [
+          ...prev.form,
+          {
+            form: {
+              from: "form",
+              title: formTo2CapFind.titleForm[selectLanguage],
+              fullanme: formTo2CapFind.form.fullaname[selectLanguage],
+              consult: formTo2CapFind.form.consult[selectLanguage],
+              email: formTo2CapFind.form.email[selectLanguage],
+              phone: formTo2CapFind.form.phone[selectLanguage],
+            },
+          },
+        ],
+      };
+    });
   };
 
   const categoriaSeleccionada = category.find(
@@ -160,7 +215,7 @@ function Home() {
         ...Object.values(categoriaSeleccionada.respuesta),
       ]);
     }
-  }, [categoriaSeleccionada]);
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -307,7 +362,8 @@ function Home() {
             </div>
           </header>
 
-          {view === "language" ? (
+          {showCap === 0 && (
+            //CHOOSE LANGUAGE
             <ul className={styles.chatbox}>
               <p className={styles.text_select_lang}>
                 SELECCIONA TU IDIOMA DE PREFERENCIA
@@ -409,18 +465,33 @@ function Home() {
                 </FormControl>
               </Box>
 
-              <div
-                className={styles.guardar}
-                onClick={() => {
-                  setIdLocalStorageLanguage();
-                  setModalExit(false);
-                }}
-              >
-                <p>GUARDAR CONFIGURACIÓN</p>
+              <div className={styles.container_button}>
+                <div
+                  className={styles.guardar}
+                  onClick={() => {
+                    setIdLocalStorageLanguage();
+                    setModalExit(false);
+                    setShowCap(1);
+                  }}
+                >
+                  <p>GUARDAR CONFIGURACIÓN</p>
+                </div>
+
+                <div
+                  className={styles.guardar}
+                  onClick={() => {
+                    ChatbotView();
+                    removeLanguage();
+                    setButtonChatDisable(true);
+                  }}
+                >
+                  <p>CANCELAR</p>
+                </div>
               </div>
             </ul>
-          ) : (
-            // Chat de mensajes frecuentes
+          )}
+          {showCap === 1 && (
+            //CHATBOT CAP1
             <>
               <ul className={styles.chatbox}>
                 {chatMensajesFrecuentes.messages.map((message) => (
@@ -447,7 +518,22 @@ function Home() {
                       >
                         {message.message.text ? (
                           <p className={styles.chatoutgoing_response}>
-                            {message.message.text}
+                            {message.message.id === 5 ? (
+                              <>
+                                {message.message.text}
+
+                                <button
+                                  onClick={() => {
+                                    setShowCap(2);
+                                    showForm();
+                                  }}
+                                >
+                                  Chatear ahora
+                                </button>
+                              </>
+                            ) : (
+                              message.message.text
+                            )}
                           </p>
                         ) : (
                           <>
@@ -479,17 +565,176 @@ function Home() {
               {modalExit && (
                 <div className={styles.container_modal}>
                   <div className={styles.modal}>
-                    <Button
-                      variant="contained"
-                      color="error"
+                    <div
+                      className={styles.modal_button}
                       onClick={() => {
                         ChatbotView();
                         removeLanguage();
                         setButtonChatDisable(true);
                       }}
                     >
-                      SALIR
-                    </Button>
+                      <span className={styles.text_button_modal}>
+                        TERMINAR CHAT
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+          {showCap === 2 && (
+            //FORM
+            <ul className={styles.chatbox}>
+              {dataForm.form.map((data) => {
+                return (
+                  <>
+                    {data.form.from === "form" && (
+                      <form
+                        className={styles.form_container}
+                        key={data.form.id}
+                        onSubmit={handleSubmit(onSubmit)}
+                      >
+                        <span className={styles.form_tittle}>
+                          {data.form.title}
+                        </span>
+                        <TextField
+                          id="standard-basic"
+                          sx={{ width: "100%" }}
+                          label={data.form.fullanme}
+                          type="text"
+                          variant="standard"
+                          {...register("fullname")}
+                        />
+
+                        <TextField
+                          id="standard-basic"
+                          sx={{ width: "100%" }}
+                          label={data.form.phone}
+                          type="text"
+                          variant="standard"
+                          {...register("cellphone")}
+                        />
+
+                        <TextField
+                          id="standard-basic"
+                          sx={{ width: "100%" }}
+                          label={data.form.email}
+                          variant="standard"
+                          type="email"
+                          {...register("email")}
+                        />
+                        <TextField
+                          id="standard-multiline-static"
+                          label={data.form.consult}
+                          sx={{ width: "100%" }}
+                          multiline
+                          rows={3}
+                          type="text"
+                          variant="standard"
+                          //{...register("consult")}
+                        />
+                        <div className={styles.btn_container}>
+                          <Button
+                            variant="contained"
+                            type="submit"
+                            sx={{
+                              width: "100%",
+                              color: "white",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            ENVIAR
+                          </Button>
+                          <Button
+                            variant="contained"
+                            sx={{
+                              width: "100%",
+                              color: "white",
+                              fontWeight: "bold",
+                            }}
+                            onClick={() => setShowCap(1)}
+                          >
+                            CANCELAR
+                          </Button>
+                        </div>
+                      </form>
+                    )}
+                  </>
+                );
+              })}
+            </ul>
+          )}
+          {showCap === 3 && (
+            //CHAT IA CAP2
+            <></>
+          )}
+          {showCap === 4 && (
+            //CHATIA ASESOR
+            <>
+              <ul className={styles.chatbox}>
+                {chatMensajesFrecuentes.messages.map((message) => (
+                  <>
+                    {message.message.from === "bot" && (
+                      <li
+                        className={styles.chatincoming}
+                        key={message.message.id}
+                      >
+                        <img
+                          className={styles.minibot2}
+                          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699065957/exe%20digital/unbrk0uzq1pdvwysiqpg.png"
+                          alt="Bot Avatar"
+                        />
+
+                        <p className={styles.texto}>{message.message.text}</p>
+                      </li>
+                    )}
+
+                    {message.message.from === "user" && (
+                      <ul
+                        className={styles.chatoutgoing}
+                        key={message.message.id}
+                      >
+                        {message.message.text && (
+                          <p className={styles.chatoutgoing_response}>
+                            {message.message.id === 5 && (
+                              <>
+                                {message.message.text}
+                                <button onClick={() => setShowCap(2)}>
+                                  {message.message.text}
+                                </button>
+                              </>
+                            )}
+                          </p>
+                        )}
+                      </ul>
+                    )}
+                  </>
+                ))}
+              </ul>
+              <div className={styles.footer_area}>
+                <img
+                  className={styles.barras}
+                  src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699070715/exe%20digital/fyczge5dyxnvxsbz6xyb.png"
+                  onClick={() => {
+                    modalExitView();
+                  }}
+                />
+              </div>
+              {modalExit && (
+                <div className={styles.container_modal}>
+                  <div className={styles.modal}>
+                    <div
+                      className={styles.modal_button}
+                      onClick={() => {
+                        ChatbotView();
+                        removeLanguage();
+                        setButtonChatDisable(true);
+                      }}
+                    >
+                      <span className={styles.text_button_modal}>
+                        TERMINAR CHAT
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}
