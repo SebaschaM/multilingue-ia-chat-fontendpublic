@@ -135,6 +135,22 @@ export const category = [
       10: "다른 문의에 대한 답변 1",
     },
   },
+  /*
+  {
+    id: 6,
+    buttonToForm: {
+      1: "Start chatting",
+      2: "Comenzar a chatear",
+      3: "开始聊天",
+      4: "Начать чат",
+      5: "ابدأ الدردشة",
+      6: "Kamisaraki kani",
+      7: "チャットを開始する",
+      8: "Iniciar chat",
+      9: "Commencer à chatter",
+      10: "채팅 시작",
+    },
+  },*/
 ];
 
 export const responseInit = [
@@ -170,18 +186,7 @@ export const formTo2Cap = [
       9: "Contactez-nous",
       10: "문의하기",
     },
-    buttonToForm: {
-      1: "Start chatting",
-      2: "Comenzar a chatear",
-      3: "开始聊天",
-      4: "Начать чат",
-      5: "ابدأ الدردشة",
-      6: "Kamisaraki kani",
-      7: "チャットを開始する",
-      8: "Iniciar chat",
-      9: "Commencer à chatter",
-      10: "채팅 시작",
-    },
+
     form: {
       id: 1,
       fullaname: {

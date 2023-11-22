@@ -519,7 +519,7 @@ function Home() {
                         {message.message.text ? (
                           <p className={styles.chatoutgoing_response}>
                             {message.message.id === 5 ? (
-                              <>
+                              <div>
                                 {message.message.text}
 
                                 <button
@@ -530,7 +530,7 @@ function Home() {
                                 >
                                   Chatear ahora
                                 </button>
-                              </>
+                              </div>
                             ) : (
                               message.message.text
                             )}
@@ -666,7 +666,7 @@ function Home() {
           )}
           {showCap === 3 && (
             //CHAT IA CAP2
-            <></>
+            <>CHAT IA CAP2 </>
           )}
           {showCap === 4 && (
             //CHATIA ASESOR
