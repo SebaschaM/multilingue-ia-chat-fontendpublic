@@ -12,7 +12,6 @@ const TableCustom = ({
   setRequestSelectedId,
   valueSearch,
 }) => {
-  console.log(DataForTableCustomForRequestManagment);
   const columns = [
     /*
     {
@@ -139,7 +138,7 @@ const TableCustom = ({
     Object.values(request).some((value) =>
       String(value).toLowerCase().includes(valueSearch.toLowerCase())
     )
-  );
+  ).map((request, index) => ({ ...request, id: index }));
   return (
     <div style={{ height: "fit-content", width: "100%" }}>
       <DataGrid

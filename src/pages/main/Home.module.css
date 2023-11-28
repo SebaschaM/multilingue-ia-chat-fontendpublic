@@ -289,7 +289,7 @@ section {
   width: 26rem;
   height: 38rem;
   right: 2rem;
-  top: 30.5rem;
+  top: 20rem;
   background: #eeeeee;
   border-radius: 10px;
 }
@@ -397,6 +397,18 @@ section {
   width: 100%;
   background: #eeeeee;
 }
+.footer_area_cap2 {
+  z-index: 100000000;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  column-gap: 0.8rem;
+  border-top: 2px solid #d8d8d8;
+  padding: 0.8rem;
+  bottom: 0;
+  width: 100%;
+  background: #eeeeee;
+}
 .lenguaje {
   display: flex;
   flex-direction: row;
@@ -490,3 +502,5 @@ section {
   width: 100%;
   justify-content: center;
 }
+
+/*CAP 2*/

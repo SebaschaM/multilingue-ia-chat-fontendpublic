@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./Home.module.css";
-import io from "socket.io-client";
+import { io } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
+import { LandingPart3, LandingPart2 } from "../../components/index";
 
 import {
   Box,
@@ -14,30 +15,48 @@ import {
   Button,
 } from "@mui/material";
 
+import SendIcon from "@mui/icons-material/Send";
+
 import { category, responseInit, formTo2Cap } from "../../utils/dataChatbot";
 import { useChatClient } from "../../hooks/useChatClient.JSX";
 
 function Home() {
-  const socketRef = useRef();
+  //LANDING
   const [activePage, setActivePage] = useState(1);
-  const [buttonChat, setButtonChat] = useState(false);
   const [buttonChatDisable, setButtonChatDisable] = useState(true);
+  const [buttonChat, setButtonChat] = useState(false);
+  const [showCap, setShowCap] = useState(0);
+
+  //MODAL
+  const [modalExit, setModalExit] = useState(false);
+
+  //0 CAPAS
   const [selectLanguage, setSelectLanguage] = useState(2);
-  const [view, setView] = useState("language");
-  const [categoriaSeleccionadaId, setCategoriaSeleccionadaId] = useState(null);
-  const [, setPreguntasSeleccionadas] = useState([]);
+
+  //1 CAP
+  const [, setCategoriaSeleccionadaId] = useState(null);
   const [chatMensajesFrecuentes, setChatMensajesFrecuentes] = useState({
     messages: [],
   });
-  const [modalExit, setModalExit] = useState(false);
-  const [showCap, setShowCap] = useState(0);
+
+  //HOOK - CAPA FORMULARIO
+  const { handleRegisterUserChat } = useChatClient(); //HOOK PARA REGISTRO EN FORMULARIO
+  const { register, handleSubmit } = useForm(); //FORMULARIO VALIDACIONES Y GUARDADO
+
   const [dataForm, setDataForm] = useState({
     form: [],
   });
-  const [dataSaveUser, setDataSaveUser] = useState({});
-  const { handleRegisterUserChat } = useChatClient(); //HOOK PARA REGISTRO EN FORMULARIO
-  const { register, handleSubmit, setValue } = useForm();
-  const room_name = uuidv4();
+
+  //SOCKET
+  const socketRef = useRef(); //usar
+
+  //2 CAP
+  const [textFieldValue, setTextFieldValue] = useState("");
+  const [chat, setChat] = useState([]);
+
+  const handleChange = (e) => {
+    setTextFieldValue(e.target.value);
+  };
 
   const onSubmit = async (data) => {
     try {
@@ -46,46 +65,44 @@ function Home() {
         email: data.email,
         fullname: data.fullname,
         cellphone: data.cellphone,
-        //consult: data.consult,
         language_id: languageIdLocalStorage,
       };
       const dataSave = await handleRegisterUserChat(dataRegister);
-      //console.log(dataSave.user);
-      setDataSaveUser(dataSave);
+
+      connectSocket(dataSave.user, data.consult);
+      enviarPrimerMensaje(dataSave.user, data.consult);
       setShowCap(3);
-      connectSocket();
     } catch (error) {
       console.error("Error al subir el formulario:", error);
     }
   };
 
-  const connectSocket = () => {
-    const socket = io.connect("http://localhost:5000", { reconnection: true });
+  const connectSocket = (dataSaveUser, dataConsultForm) => {
+    const socket = io.connect("http://localhost:5000", {
+      reconnection: true,
+    });
     socketRef.current = socket;
+    let idRoomLocal = localStorage.getItem("idRoom");
 
     socket.on("connect", () => {
       console.log("Socket conectado en CHAT");
-      //const roomName = "asd"; // DEBE SER ALEATORIO room_name
+      let roomName = localStorage.getItem("idRoom");
+      let room_name = uuidv4();
 
-      // Obtener el valor actual desde localStorage
-      const roomName = localStorage.getItem("idRoom");
-
-      // Verificar si hay un valor y si tiene una longitud mayor a 1
       if (roomName && roomName.length > 0) {
+        localStorage.removeItem("idRoom");
         localStorage.setItem("idRoom", room_name);
       } else {
-        // Si no hay un valor o tiene longitud 0 o 1, generarlo y almacenarlo en localStorage
-        const newRoomName = room_name;
-        localStorage.setItem("idRoom", newRoomName);
-        console.log(
-          "Nuevo ID generado y almacenado en localStorage:",
-          newRoomName
-        );
+        // UUID
+        //setRoomNameGlobal(room_name);
+        localStorage.setItem("idRoom", room_name);
       }
 
+      //const roomNameLocal = localStorage.getItem("idRoom");
       socket.emit("assign_user_to_room", {
-        room_name: roomName,
         user: dataSaveUser,
+        room_name: idRoomLocal,
+        message: dataConsultForm,
       });
     });
 
@@ -101,10 +118,11 @@ function Home() {
       setDataChat((prev) => [...prev, messages]);
     });
 
+    //const roomNameLocal = localStorage.getItem("idRoom");
     socket.on("disconnect", () => {
       socket.emit("close_room", {
-        room_name: "cuartito2",
-        user: userData,
+        room_name: idRoomLocal,
+        user: dataSaveUser,
       });
 
       socket.on("private_room_closed", () => {
@@ -113,29 +131,159 @@ function Home() {
     });
   };
 
-  const modalExitView = () => {
-    setModalExit(!modalExit);
+  // Primer mensaje que envia el usuario en el textarea
+  const enviarPrimerMensaje = (dataSaveUser, dataConsultForm) => {
+    const idRoomName = localStorage.getItem("idRoom");
+    setChat((prev) => [
+      ...prev,
+      {
+        message: dataConsultForm, // " todo bien"
+        user: dataSaveUser,
+        room_name: idRoomName,
+      },
+    ]);
+
+    socketRef.current.emit("respuesta_de_bot", {
+      message: dataConsultForm,
+      room_name: idRoomName,
+    });
   };
 
-  const removeLanguage = () => {
-    localStorage.removeItem("idLenguaje");
-    //setSelectLanguage(null);
-    setView("language");
-    setCategoriaSeleccionadaId(null);
-    setPreguntasSeleccionadas([]);
-    setChatMensajesFrecuentes({ messages: [] });
-    setShowCap(0);
+  const enviarMensajeUsuario = (dataSaveUser) => {
+    //FUNCION DONDE USA CUANDO EL CLIENTE MANDA ALGUN MENSAJE EN LA CAPA 2
+    const idRoomName = localStorage.getItem("idRoom");
+    setChat((prev) => [
+      ...prev,
+      {
+        message: textFieldValue, // " todo bien"
+        user: dataSaveUser,
+        room_name: idRoomName,
+      },
+    ]);
+
+    socketRef.current.emit("respuesta_de_bot", {
+      message: textFieldValue,
+      room_name: idRoomName,
+    });
+  };
+
+  socketRef.current.on("response_bot", (data) => {
+    // setear el setChat
+    setChat((prev) => [
+      ...prev,
+      {
+        message: data.message,
+        user: data.user,
+        room_name: data.room_name,
+      },
+    ]);
+  });
+
+  useEffect(() => {
+    return () => {
+      socketRef.current.disconnect();
+    };
+  }, []);
+
+  console.log("conversacion", chat);
+
+  //console.log("chat", chat);
+  /*
+  const enviarMensajeUsuario = () => {
+    //FUNCION DONDE USA CUANDO EL CLIENTE MANDA ALGUN MENSAJE EN LA CAPA 2
+    const roomNameLocalS = localStorage.getItem("idRoom");
+    setChat((prev) => [
+      ...prev,
+      {
+        message: textFieldValue, // " todo bien"
+        user: "dataSaveUser",
+        room_name: roomNameLocalS,
+      },
+    ]);
+
+    socketRef.current.emit("respuesta_de_bot", {
+      message: "mensaje",
+      room_name: roomNameLocalS,
+    });
+
+    socketRef.current.on("response_bot", (data) => {
+      // setear el setChat
+      setChat((prev) => [
+        ...prev,
+        {
+          message: data.message,
+          user: data.user,
+          room_name: data.room_name,
+        },
+      ]);
+      console.log("response_bot", data);
+    });
+  };
+
+
+
+  const handleTabChange = (tab) => {
+    setView(tab);
+  };
+
+ 
+  useEffect(() => {
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+  }, []);
+
+   const categoriaSeleccionada = category.find(
+    (categoria) => categoria.id === categoriaSeleccionadaId
+  );
+  useEffect(() => {
+    if (categoriaSeleccionada) {
+      setPreguntasSeleccionadas((prevPreguntas) => [
+        ...prevPreguntas,
+        ...Object.values(categoriaSeleccionada.respuesta),
+      ]);
+    }
+  }, []);
+
+*/
+
+  const showForm = () => {
+    //MOSTRAR FORMULARIO DE ACUERDO AL IDIOMA
+    const formTo2CapFind = formTo2Cap.find((form) =>
+      form.titleForm.hasOwnProperty(selectLanguage)
+    );
+
+    setDataForm((prev) => {
+      return {
+        ...prev,
+        form: [
+          ...prev.form,
+          {
+            form: {
+              from: "form",
+              title: formTo2CapFind.titleForm[selectLanguage],
+              fullanme: formTo2CapFind.form.fullaname[selectLanguage],
+              consult: formTo2CapFind.form.consult[selectLanguage],
+              email: formTo2CapFind.form.email[selectLanguage],
+              phone: formTo2CapFind.form.phone[selectLanguage],
+            },
+          },
+        ],
+      };
+    });
   };
 
   const setIdLocalStorageLanguage = () => {
     //SALUDO DEL BOT DE ACUERDO AL IDIOMA - LISTA CATEGORIAS
     localStorage.setItem("idLenguaje", selectLanguage);
     setSelectLanguage(selectLanguage);
-
+    console.log(selectLanguage);
     const responseForLanguage = responseInit.find((response) =>
       response.respuesta.hasOwnProperty(selectLanguage)
     );
-    console.log(responseForLanguage);
 
     // Modificamos el json de chatMensajeFrecuentes para el bot
     setChatMensajesFrecuentes((prev) => {
@@ -188,6 +336,7 @@ function Home() {
           {
             message: {
               from: "bot",
+              id: new Date().getTime(),
               text: categoryFind.categoria[selectLanguage],
             },
           },
@@ -212,43 +361,25 @@ function Home() {
     });
   };
 
-  const showForm = () => {
-    //MOSTRAR FORMULARIO
-    const formTo2CapFind = formTo2Cap.find((form) =>
-      form.titleForm.hasOwnProperty(selectLanguage)
-    );
-
-    setDataForm((prev) => {
-      return {
-        ...prev,
-        form: [
-          ...prev.form,
-          {
-            form: {
-              from: "form",
-              title: formTo2CapFind.titleForm[selectLanguage],
-              fullanme: formTo2CapFind.form.fullaname[selectLanguage],
-              consult: formTo2CapFind.form.consult[selectLanguage],
-              email: formTo2CapFind.form.email[selectLanguage],
-              phone: formTo2CapFind.form.phone[selectLanguage],
-            },
-          },
-        ],
-      };
-    });
+  const cleanChatBot = () => {
+    //removeLanguage
+    //setCategoriaSeleccionadaId(null);
+    //setPreguntasSeleccionadas([]);
+    setChatMensajesFrecuentes({ messages: [] });
+    setButtonChatDisable(true);
+    setButtonChat(false);
   };
 
-  const categoriaSeleccionada = category.find(
-    (categoria) => categoria.id === categoriaSeleccionadaId
-  );
+  /*
+  const modalExitView = () => {
+    setModalExit(!modalExit);
+  };*/
 
   const ChatbotView = () => {
-    setButtonChat(!buttonChat);
-    setButtonChatDisable(false);
-  };
-
-  const handleTabChange = (tab) => {
-    setView(tab);
+    setButtonChat(true);
+    setShowCap(0);
+    setModalExit(false);
+    setButtonChatDisable(false); //observacion
   };
 
   const handleScroll = () => {
@@ -265,23 +396,8 @@ function Home() {
   };
 
   useEffect(() => {
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
-  useEffect(() => {
     window.addEventListener("scroll", handleScroll);
   }, []);
-
-  useEffect(() => {
-    if (categoriaSeleccionada) {
-      setPreguntasSeleccionadas((prevPreguntas) => [
-        ...prevPreguntas,
-        ...Object.values(categoriaSeleccionada.respuesta),
-      ]);
-    }
-  }, []);
-
   return (
     <div className={styles.container}>
       <section className={activePage === 1 ? styles.active : ""}>
@@ -302,117 +418,14 @@ function Home() {
             alt="bot"
             onClick={() => {
               ChatbotView();
-              modalExitView();
             }}
           />
         )}
       </section>
-      <section className={activePage === 2 ? styles.active : ""}>
-        <img
-          className={styles.fondo2}
-          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698346151/exe%20digital/hy7fpughyyqvflxmzz96.jpg"
-          alt="fondo2"
-        />
 
-        <img
-          className={styles.branding}
-          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698348441/exe%20digital/tudykqggm5nqfqgsuttr.png"
-          alt="branding"
-        />
-        <img
-          className={styles.campañas}
-          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698348443/exe%20digital/nwetcptylam5itcmovo9.png"
-          alt="campañas"
-        />
-        <img
-          className={styles.sistemas}
-          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698348444/exe%20digital/srfs6r308v98wgac61dl.png"
-          alt="sistemas"
-        />
-        <img
-          className={styles.ecommerce}
-          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698348450/exe%20digital/vuyxw4qbly9hxylzzyv4.png"
-          alt="ecommerce"
-        />
-        <img
-          className={styles.produccion}
-          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698348448/exe%20digital/zuwklkiockl9qr63leyj.png"
-          alt="produccion"
-        />
-        <img
-          className={styles.sitioweb}
-          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698348447/exe%20digital/w4canhfdj0bwvmjneugj.png"
-          alt="sitioweb"
-        />
-        <img
-          className={styles.social}
-          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698348446/exe%20digital/l6hvnfktlfjh2e2faxpd.png"
-          alt="social"
-        />
-        <p className={styles.text1}>LO QUE</p>
-        <p className={styles.text2}>HACEMOS</p>
-        <p className={styles.text3}>PERÚ • ECUADOR • MÉXICO</p>
-      </section>
-      <section className={activePage === 3 ? styles.active : ""}>
-        <img
-          className={styles.fondo2}
-          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698346151/exe%20digital/hy7fpughyyqvflxmzz96.jpg"
-          alt="fondo2"
-        />
-        <img
-          className={styles.farmacia}
-          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698382655/exe%20digital/wwlwcemxdvjwhlvjpz8q.png"
-          alt="farmacia"
-        />
-        <img
-          className={styles.kativa}
-          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698382660/exe%20digital/hv7rg0ko2iamyyzimvfs.png"
-          alt="kativa"
-        />
-        <img
-          className={styles.ucv}
-          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698382663/exe%20digital/pb5cuelsqa4z73ozgnt2.png"
-          alt="ucv"
-        />
-        <img
-          className={styles.ekono}
-          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698382721/exe%20digital/gk8imgmtblvqy799fooz.png"
-          alt="ekono"
-        />
-        <img
-          className={styles.olva}
-          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698393748/exe%20digital/avmmttjhg69xxjujmps7.png"
-          alt="olva"
-        />
-        <img
-          className={styles.universidad}
-          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698382669/exe%20digital/kdyglsrb0ciihg652oga.png"
-          alt="universidad"
-        />
-        <img
-          className={styles.fos}
-          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698382671/exe%20digital/gwgnmrhpcfq38axmjrtz.png"
-          alt="fos"
-        />
-        <img
-          className={styles.bengala}
-          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698382673/exe%20digital/b6o6zksnlvpvhleigfzk.png"
-          alt="bengala"
-        />
-        <img
-          className={styles.opcion}
-          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698382675/exe%20digital/tk0dcc0m6l1vbqgczz0l.png"
-          alt="opcion"
-        />
-        <img
-          className={styles.b}
-          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1698382677/exe%20digital/yuzxkf0w5fpjnadpfd2r.png"
-          alt="b"
-        />
-        <p className={styles.text5}>MARCAS QUE</p>
-        <p className={styles.text6}>CONFÍAN EN NOSOTROS</p>
-        <p className={styles.text4}>PERÚ • ECUADOR • MÉXICO</p>
-      </section>
+      <LandingPart2 activePage={activePage} />
+
+      <LandingPart3 activePage={activePage} />
 
       {buttonChat && (
         <div className={styles.chatbot}>
@@ -440,7 +453,7 @@ function Home() {
                   <Select
                     labelId="demo-simple-select-label"
                     id="demo-simple-select"
-                    defaultValue={selectLanguage}
+                    value={selectLanguage}
                     label="IDIOMA"
                     onChange={(e) => {
                       setSelectLanguage(e.target.value);
@@ -535,7 +548,6 @@ function Home() {
                   className={styles.guardar}
                   onClick={() => {
                     setIdLocalStorageLanguage();
-                    setModalExit(false);
                     setShowCap(1);
                   }}
                 >
@@ -545,8 +557,7 @@ function Home() {
                 <div
                   className={styles.guardar}
                   onClick={() => {
-                    ChatbotView();
-                    removeLanguage();
+                    setButtonChat(!buttonChat);
                     setButtonChatDisable(true);
                   }}
                 >
@@ -560,12 +571,10 @@ function Home() {
             <>
               <ul className={styles.chatbox}>
                 {chatMensajesFrecuentes.messages.map((message) => (
-                  <>
+                  <div key={message.id}>
+                    <pre>{JSON.stringify(message.id)}</pre>
                     {message.message.from === "bot" && (
-                      <li
-                        className={styles.chatincoming}
-                        key={message.message.id}
-                      >
+                      <li className={styles.chatincoming}>
                         <img
                           className={styles.minibot2}
                           src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699065957/exe%20digital/unbrk0uzq1pdvwysiqpg.png"
@@ -582,7 +591,10 @@ function Home() {
                         key={message.message.id}
                       >
                         {message.message.text ? (
-                          <p className={styles.chatoutgoing_response}>
+                          <p
+                            className={styles.chatoutgoing_response}
+                            key={message.message.id}
+                          >
                             {message.message.id === 5 ? (
                               <div>
                                 {message.message.text}
@@ -614,7 +626,7 @@ function Home() {
                         )}
                       </ul>
                     )}
-                  </>
+                  </div>
                 ))}
 
                 <div className={styles.footer_area}>
@@ -622,7 +634,7 @@ function Home() {
                     className={styles.barras}
                     src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699070715/exe%20digital/fyczge5dyxnvxsbz6xyb.png"
                     onClick={() => {
-                      modalExitView();
+                      setModalExit(!modalExit);
                     }}
                   />
                 </div>
@@ -633,9 +645,7 @@ function Home() {
                     <div
                       className={styles.modal_button}
                       onClick={() => {
-                        ChatbotView();
-                        removeLanguage();
-                        setButtonChatDisable(true);
+                        cleanChatBot();
                       }}
                     >
                       <span className={styles.text_button_modal}>
@@ -696,7 +706,7 @@ function Home() {
                           rows={3}
                           type="text"
                           variant="standard"
-                          //{...register("consult")}
+                          {...register("consult")}
                         />
                         <div className={styles.btn_container}>
                           <Button
@@ -731,7 +741,84 @@ function Home() {
           )}
           {showCap === 3 && (
             //CHAT IA CAP2
-            <>CHAT IA CAP2 </>
+            <>
+              <ul className={styles.chatbox}>
+                {chatMensajesFrecuentes.messages.map((message) => (
+                  <>
+                    {message.message.from === "bot" && (
+                      <li
+                        className={styles.chatincoming}
+                        key={message.message.id}
+                      >
+                        <img
+                          className={styles.minibot2}
+                          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699065957/exe%20digital/unbrk0uzq1pdvwysiqpg.png"
+                          alt="Bot Avatar"
+                        />
+
+                        <p className={styles.texto}>{message.message.text}</p>
+                      </li>
+                    )}
+
+                    {message.message.from === "user" && (
+                      <ul
+                        className={styles.chatoutgoing}
+                        key={message.message.id}
+                      >
+                        {message.message.text && (
+                          <p className={styles.chatoutgoing_response}>
+                            {message.message.id === 5 && (
+                              <>
+                                {message.message.text}
+                                <button onClick={() => setShowCap(2)}>
+                                  {message.message.text}
+                                </button>
+                              </>
+                            )}
+                          </p>
+                        )}
+                      </ul>
+                    )}
+                  </>
+                ))}
+              </ul>
+              <div className={styles.footer_area_cap2}>
+                <img
+                  className={styles.barras}
+                  src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699070715/exe%20digital/fyczge5dyxnvxsbz6xyb.png"
+                  onClick={() => {
+                    setModalExit(!modalExit);
+                  }}
+                />
+                <TextField
+                  id="standard-basic"
+                  variant="standard"
+                  placeholder="Escribe tu mensaje"
+                  sx={{ width: "100%" }}
+                  onChange={handleChange}
+                />
+                <SendIcon
+                  onClick={enviarMensajeUsuario}
+                  sx={{ cursor: "pointer" }}
+                />
+              </div>
+              {modalExit && (
+                <div className={styles.container_modal}>
+                  <div className={styles.modal}>
+                    <div
+                      className={styles.modal_button}
+                      onClick={() => {
+                        cleanChatBot();
+                      }}
+                    >
+                      <span className={styles.text_button_modal}>
+                        TERMINAR CHAT
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           )}
           {showCap === 4 && (
             //CHATIA ASESOR
@@ -781,7 +868,7 @@ function Home() {
                   className={styles.barras}
                   src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699070715/exe%20digital/fyczge5dyxnvxsbz6xyb.png"
                   onClick={() => {
-                    modalExitView();
+                    setModalExit(!modalExit);
                   }}
                 />
               </div>
@@ -791,9 +878,7 @@ function Home() {
                     <div
                       className={styles.modal_button}
                       onClick={() => {
-                        ChatbotView();
-                        removeLanguage();
-                        setButtonChatDisable(true);
+                        cleanChatBot();
                       }}
                     >
                       <span className={styles.text_button_modal}>

@@ -10,10 +10,10 @@ const ModalCustom = ({ openModal, setOpenModal, children }) => {
     width: 800,
     maxWidth: "90%",
     bgcolor: "background.paper",
-    border: "2px solid #000",
     boxShadow: 24,
     p: 4,
     display: "flex",
+    alignItems: "center",
     flexDirection: "column",
     gap: "1rem",
   };
