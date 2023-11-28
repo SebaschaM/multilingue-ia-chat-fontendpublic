@@ -42,7 +42,7 @@ function Home() {
 
   //HOOK - CAPA FORMULARIO
   const { handleRegisterUserChat } = useChatClient(); //HOOK PARA REGISTRO EN FORMULARIO
-  const { register, handleSubmit } = useForm(); //FORMULARIO VALIDACIONES Y GUARDADO
+  const { register, handleSubmit, reset } = useForm(); //FORMULARIO VALIDACIONES Y GUARDADO
 
   const [dataForm, setDataForm] = useState({
     form: [],
@@ -54,6 +54,7 @@ function Home() {
   //2 CAP
   const [textFieldValue, setTextFieldValue] = useState("");
   const [chat, setChat] = useState([]);
+  const [userCap2, setUserCap2] = useState(null);
 
   const handleChange = (e) => {
     setTextFieldValue(e.target.value);
@@ -69,40 +70,39 @@ function Home() {
         language_id: languageIdLocalStorage,
       };
       const dataSave = await handleRegisterUserChat(dataRegister);
+      setUserCap2(dataSave.user);
 
-      connectSocket(dataSave.user, data.consult);
+      await connectSocket(dataSave.user, data.consult);
       enviarPrimerMensaje(dataSave.user, data.consult);
       setShowCap(3);
+      reset();
     } catch (error) {
       console.error("Error al subir el formulario:", error);
     }
   };
 
-  const connectSocket = (dataSaveUser, dataConsultForm) => {
+  const connectSocket = async (dataSaveUser, dataConsultForm) => {
     const socket = io.connect("http://localhost:5000", {
       reconnection: true,
     });
+
     socketRef.current = socket;
-    let idRoomLocal = localStorage.getItem("idRoom");
+    let roomName = localStorage.getItem("idRoom");
+    let room_name;
+
+    if (roomName && roomName.length > 0) {
+      room_name = roomName;
+    } else {
+      room_name = uuidv4();
+      localStorage.setItem("idRoom", room_name);
+    }
 
     socket.on("connect", () => {
       console.log("Socket conectado en CHAT");
-      let roomName = localStorage.getItem("idRoom");
-      let room_name = uuidv4();
 
-      if (roomName && roomName.length > 0) {
-        localStorage.removeItem("idRoom");
-        localStorage.setItem("idRoom", room_name);
-      } else {
-        // UUID
-        //setRoomNameGlobal(room_name);
-        localStorage.setItem("idRoom", room_name);
-      }
-
-      //const roomNameLocal = localStorage.getItem("idRoom");
       socket.emit("assign_user_to_room", {
         user: dataSaveUser,
-        room_name: idRoomLocal,
+        room_name: room_name,
         message: dataConsultForm,
       });
     });
@@ -119,10 +119,9 @@ function Home() {
       setDataChat((prev) => [...prev, messages]);
     });
 
-    //const roomNameLocal = localStorage.getItem("idRoom");
     socket.on("disconnect", () => {
       socket.emit("close_room", {
-        room_name: idRoomLocal,
+        room_name: room_name,
         user: dataSaveUser,
       });
 
@@ -130,9 +129,10 @@ function Home() {
         console.log("Sala privada cerrada");
       });
     });
+
+    return room_name;
   };
 
-  // Primer mensaje que envia el usuario en el textarea
   const enviarPrimerMensaje = (dataSaveUser, dataConsultForm) => {
     const idRoomName = localStorage.getItem("idRoom");
     setChat((prev) => [
@@ -149,8 +149,9 @@ function Home() {
       room_name: idRoomName,
     });
 
-    socketRef.current.on("response_bot", (data) => {
+    socketRef?.current?.on("response_bot", (data) => {
       // setear el setChat
+      console.log(data);
       setChat((prev) => [
         ...prev,
         {
@@ -159,17 +160,20 @@ function Home() {
           room_name: data.room_name,
         },
       ]);
+
+      socketRef?.current?.off("response_bot");
+      socketRef?.current?.off("respuesta_de_bot");
     });
   };
 
-  const enviarMensajeUsuario = (dataSaveUser) => {
+  const enviarMensajeUsuario = () => {
     //FUNCION DONDE USA CUANDO EL CLIENTE MANDA ALGUN MENSAJE EN LA CAPA 2
     const idRoomName = localStorage.getItem("idRoom");
     setChat((prev) => [
       ...prev,
       {
-        message: textFieldValue, // " todo bien"
-        user: dataSaveUser,
+        message: textFieldValue,
+        user: userCap2,
         room_name: idRoomName,
       },
     ]);
@@ -179,7 +183,9 @@ function Home() {
       room_name: idRoomName,
     });
 
-    socketRef.current.on("response_bot", (data) => {
+    socketRef?.current?.on("response_bot", (data) => {
+      // setear el setChat
+      console.log(data);
       setChat((prev) => [
         ...prev,
         {
@@ -188,83 +194,25 @@ function Home() {
           room_name: data.room_name,
         },
       ]);
+      socketRef?.current?.off("respuesta_de_bot");
+      socketRef?.current?.off("response_bot");
     });
+
+    setTextFieldValue("");
   };
 
-  useEffect(() => {
-    return () => {
-      socketRef.current.disconnect();
-    };
-  }, []);
+  // useEffect(() => {
+  //   return () => {
+  //     socketRef.current.disconnect();
+  //   };
+  // }, []);
 
   console.log("conversacion", chat);
-
-  //console.log("chat", chat);
-  /*
-  const enviarMensajeUsuario = () => {
-    //FUNCION DONDE USA CUANDO EL CLIENTE MANDA ALGUN MENSAJE EN LA CAPA 2
-    const roomNameLocalS = localStorage.getItem("idRoom");
-    setChat((prev) => [
-      ...prev,
-      {
-        message: textFieldValue, // " todo bien"
-        user: "dataSaveUser",
-        room_name: roomNameLocalS,
-      },
-    ]);
-
-    socketRef.current.emit("respuesta_de_bot", {
-      message: "mensaje",
-      room_name: roomNameLocalS,
-    });
-
-    socketRef.current.on("response_bot", (data) => {
-      // setear el setChat
-      setChat((prev) => [
-        ...prev,
-        {
-          message: data.message,
-          user: data.user,
-          room_name: data.room_name,
-        },
-      ]);
-      console.log("response_bot", data);
-    });
-  };
-
-
-
-  const handleTabChange = (tab) => {
-    setView(tab);
-  };
-
- 
-  useEffect(() => {
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-  }, []);
-
-   const categoriaSeleccionada = category.find(
-    (categoria) => categoria.id === categoriaSeleccionadaId
-  );
-  useEffect(() => {
-    if (categoriaSeleccionada) {
-      setPreguntasSeleccionadas((prevPreguntas) => [
-        ...prevPreguntas,
-        ...Object.values(categoriaSeleccionada.respuesta),
-      ]);
-    }
-  }, []);
-
-*/
 
   const showForm = () => {
     //MOSTRAR FORMULARIO DE ACUERDO AL IDIOMA
     const formTo2CapFind = formTo2Cap.find((form) =>
+      // eslint-disable-next-line no-prototype-builtins
       form.titleForm.hasOwnProperty(selectLanguage)
     );
 
@@ -294,6 +242,7 @@ function Home() {
     setSelectLanguage(selectLanguage);
     console.log(selectLanguage);
     const responseForLanguage = responseInit.find((response) =>
+      // eslint-disable-next-line no-prototype-builtins
       response.respuesta.hasOwnProperty(selectLanguage)
     );
 
@@ -755,7 +704,7 @@ function Home() {
             //CHAT IA CAP2
             <>
               <ul className={styles.chatbox}>
-                {chatMensajesFrecuentes.messages.map((message) => (
+                {/* {chatMensajesFrecuentes.messages.map((message) => (
                   <>
                     {message.message.from === "bot" && (
                       <li
@@ -787,6 +736,40 @@ function Home() {
                                 </button>
                               </>
                             )}
+                          </p>
+                        )}
+                      </ul>
+                    )}
+                  </>
+                ))} */}
+
+                {chat.map((message) => (
+                  <>
+                    {/* <pre key={message.id}>{JSON.stringify(message)}</pre> */}
+                    {message.user === "Bot" && (
+                      <li className={styles.chatincoming} key={message.id}>
+                        <img
+                          className={styles.minibot2}
+                          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699065957/exe%20digital/unbrk0uzq1pdvwysiqpg.png"
+                          alt="Bot Avatar"
+                        />
+
+                        <p className={styles.texto}>{message.message}</p>
+                      </li>
+                    )}
+
+                    {typeof message.user == "object" && (
+                      <ul className={styles.chatoutgoing} key={message.id}>
+                        {message.message && (
+                          <p className={styles.chatoutgoing_response}>
+                            {message.message}
+                            {/* {message.id === 5 && (
+                              <>
+                                <button onClick={() => setShowCap(2)}>
+                                  {message.message}
+                                </button>
+                              </>
+                            )} */}
                           </p>
                         )}
                       </ul>

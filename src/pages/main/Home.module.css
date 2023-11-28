@@ -22,15 +22,6 @@
   transform: translate(-50%, -50%);
 }
 
-.bot {
-  position: absolute;
-  top: 93%;
-  left: 95%;
-  transform: translate(-50%, -50%);
-  width: 150px;
-  cursor: pointer;
-}
-
 .text1 {
   position: absolute;
   top: 150%;
@@ -207,12 +198,23 @@
 section {
   height: 100vh;
   transition: opacity 0.5s ease;
-  opacity: 0;
+  opacity: 1;
 }
 
 /* Define la clase active para la sección visible */
 .active {
   opacity: 1;
+}
+
+.bot {
+  position: fixed;
+  top: 93%;
+  left: 95%;
+  transform: translate(-50%, -50%);
+  width: 150px;
+  cursor: pointer;
+  z-index: 9999;
+  opacity: 1 !important;
 }
 
 /* Establece estilos específicos de cada página */
@@ -231,6 +233,7 @@ section {
 .container {
   height: 100vh; /* Asegura que el contenedor tenga la altura de la pantalla */
   scroll-snap-type: y mandatory; /* Hace que las secciones se adhieran al scroll vertical */
+  position: relative;
 }
 
 section {
@@ -284,7 +287,7 @@ section {
 
 /*CHATBOT LENGUAJE*/
 .chatbot {
-  position: absolute;
+  position: fixed;
 
   width: 26rem;
   height: 38rem;
@@ -292,6 +295,7 @@ section {
   top: 20rem;
   background: #eeeeee;
   border-radius: 10px;
+  bottom: 0;
 }
 
 .chatbot header {
