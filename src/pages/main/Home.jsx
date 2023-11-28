@@ -25,6 +25,7 @@ function Home() {
   const [activePage, setActivePage] = useState(1);
   const [buttonChatDisable, setButtonChatDisable] = useState(true);
   const [buttonChat, setButtonChat] = useState(false);
+  const [dataChat, setDataChat] = useState([]);
   const [showCap, setShowCap] = useState(0);
 
   //MODAL
@@ -147,6 +148,18 @@ function Home() {
       message: dataConsultForm,
       room_name: idRoomName,
     });
+
+    socketRef.current.on("response_bot", (data) => {
+      // setear el setChat
+      setChat((prev) => [
+        ...prev,
+        {
+          message: data.message,
+          user: data.user,
+          room_name: data.room_name,
+        },
+      ]);
+    });
   };
 
   const enviarMensajeUsuario = (dataSaveUser) => {
@@ -165,19 +178,18 @@ function Home() {
       message: textFieldValue,
       room_name: idRoomName,
     });
-  };
 
-  socketRef.current.on("response_bot", (data) => {
-    // setear el setChat
-    setChat((prev) => [
-      ...prev,
-      {
-        message: data.message,
-        user: data.user,
-        room_name: data.room_name,
-      },
-    ]);
-  });
+    socketRef.current.on("response_bot", (data) => {
+      setChat((prev) => [
+        ...prev,
+        {
+          message: data.message,
+          user: data.user,
+          room_name: data.room_name,
+        },
+      ]);
+    });
+  };
 
   useEffect(() => {
     return () => {
