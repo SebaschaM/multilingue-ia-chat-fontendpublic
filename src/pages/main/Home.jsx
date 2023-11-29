@@ -17,16 +17,24 @@ import {
 
 import SendIcon from "@mui/icons-material/Send";
 
-import { category, responseInit, formTo2Cap } from "../../utils/dataChatbot";
+import {
+  category,
+  responseInit,
+  formTo2Cap,
+  textModal,
+} from "../../utils/dataChatbot";
 import { useChatClient } from "../../hooks/useChatClient.JSX";
+import { set } from "date-fns";
 
 function Home() {
   //LANDING
   const [activePage, setActivePage] = useState(1);
   const [buttonChatDisable, setButtonChatDisable] = useState(true);
   const [buttonChat, setButtonChat] = useState(false);
-  const [dataChat, setDataChat] = useState([]);
   const [showCap, setShowCap] = useState(0);
+  const [dataModalOptions, setDataModalOptions] = useState({
+    textModal: [],
+  });
 
   //MODAL
   const [modalExit, setModalExit] = useState(false);
@@ -42,7 +50,12 @@ function Home() {
 
   //HOOK - CAPA FORMULARIO
   const { handleRegisterUserChat } = useChatClient(); //HOOK PARA REGISTRO EN FORMULARIO
-  const { register, handleSubmit, reset } = useForm(); //FORMULARIO VALIDACIONES Y GUARDADO
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm(); //FORMULARIO VALIDACIONES Y GUARDADO
 
   const [dataForm, setDataForm] = useState({
     form: [],
@@ -55,6 +68,28 @@ function Home() {
   const [textFieldValue, setTextFieldValue] = useState("");
   const [chat, setChat] = useState([]);
   const [userCap2, setUserCap2] = useState(null);
+  const [showTextField, setShowTextField] = useState(true);
+
+  //3 CAP
+  //const [dataChat, setDataChat] = useState([]); //observacion
+  const [showLoader, setShowLoader] = useState(false);
+
+  const showLoaderTo3Cap = async () => {
+    setModalExit(false);
+    setChat([]);
+    setTimeout(() => {
+      setShowLoader(true);
+      setShowTextField(false);
+    }, 200);
+    setTimeout(() => {
+      setShowLoader(false);
+    }, 3500);
+    setTimeout(() => {
+      setShowCap(4);
+    }, 2000);
+
+    await connectSocket(userCap2, textFieldValue);
+  };
 
   const handleChange = (e) => {
     setTextFieldValue(e.target.value);
@@ -71,7 +106,6 @@ function Home() {
       };
       const dataSave = await handleRegisterUserChat(dataRegister);
       setUserCap2(dataSave.user);
-
       await connectSocket(dataSave.user, data.consult);
       enviarPrimerMensaje(dataSave.user, data.consult);
       setShowCap(3);
@@ -99,7 +133,6 @@ function Home() {
 
     socket.on("connect", () => {
       console.log("Socket conectado en CHAT");
-
       socket.emit("assign_user_to_room", {
         user: dataSaveUser,
         room_name: room_name,
@@ -116,7 +149,7 @@ function Home() {
     });
 
     socket.on("get_messages", (messages) => {
-      setDataChat((prev) => [...prev, messages]);
+      setChat((prev) => [...prev, messages]);
     });
 
     socket.on("disconnect", () => {
@@ -133,6 +166,48 @@ function Home() {
     return room_name;
   };
 
+  //3ERA CAP
+  const EnviarMensajeUsuario3Cap = () => {
+    //FUNCION DONDE USA CUANDO EL CLIENTE MANDA ALGUN MENSAJE EN LA CAPA 3
+    const idRoomName = localStorage.getItem("idRoom");
+    if (textFieldValue.trim() !== "") {
+      setChat((prev) => [
+        ...prev,
+        {
+          message: textFieldValue,
+          user: userCap2,
+          room_name: idRoomName,
+        },
+      ]);
+
+      socketRef.current.emit("send_message", {
+        fullname: userCap2.fullname,
+        id: userCap2.id,
+        date: new Date().toLocaleDateString(),
+        room_name: idRoomName,
+        message: textFieldValue,
+      });
+
+      socketRef?.current?.on("get_messages", (data) => {
+        // setear el setChat
+        setChat((prev) => [
+          ...prev,
+          {
+            message: data.message,
+            user: data.user,
+            room_name: data.room_name,
+          },
+        ]);
+      });
+
+      setTextFieldValue("");
+    } else {
+      // Puedes agregar una alerta o manejar el caso de mensaje vacío de alguna manera
+      console.log("No se puede enviar un mensaje vacío");
+    }
+  };
+
+  //2 CAP
   const enviarPrimerMensaje = (dataSaveUser, dataConsultForm) => {
     const idRoomName = localStorage.getItem("idRoom");
     setChat((prev) => [
@@ -151,7 +226,6 @@ function Home() {
 
     socketRef?.current?.on("response_bot", (data) => {
       // setear el setChat
-      console.log(data);
       setChat((prev) => [
         ...prev,
         {
@@ -169,45 +243,57 @@ function Home() {
   const enviarMensajeUsuario = () => {
     //FUNCION DONDE USA CUANDO EL CLIENTE MANDA ALGUN MENSAJE EN LA CAPA 2
     const idRoomName = localStorage.getItem("idRoom");
-    setChat((prev) => [
-      ...prev,
-      {
-        message: textFieldValue,
-        user: userCap2,
-        room_name: idRoomName,
-      },
-    ]);
-
-    socketRef.current.emit("respuesta_de_bot", {
-      message: textFieldValue,
-      room_name: idRoomName,
-    });
-
-    socketRef?.current?.on("response_bot", (data) => {
-      // setear el setChat
-      console.log(data);
+    if (textFieldValue.trim() !== "") {
       setChat((prev) => [
         ...prev,
         {
-          message: data.message,
-          user: data.user,
-          room_name: data.room_name,
+          message: textFieldValue,
+          user: userCap2,
+          room_name: idRoomName,
         },
       ]);
-      socketRef?.current?.off("respuesta_de_bot");
-      socketRef?.current?.off("response_bot");
-    });
 
-    setTextFieldValue("");
+      socketRef.current.emit("respuesta_de_bot", {
+        message: textFieldValue,
+        room_name: idRoomName,
+      });
+
+      socketRef?.current?.on("response_bot", (data) => {
+        // setear el setChat
+        setChat((prev) => [
+          ...prev,
+          {
+            message: data.message,
+            user: data.user,
+            room_name: data.room_name,
+          },
+        ]);
+        socketRef?.current?.off("respuesta_de_bot");
+        socketRef?.current?.off("response_bot");
+      });
+
+      setTextFieldValue("");
+    } else {
+      // Puedes agregar una alerta o manejar el caso de mensaje vacío de alguna manera
+      console.log("No se puede enviar un mensaje vacío");
+    }
   };
 
-  // useEffect(() => {
-  //   return () => {
-  //     socketRef.current.disconnect();
-  //   };
-  // }, []);
+  const showModalOptions = () => {
+    const textModalOption = textModal.find((option) =>
+      // eslint-disable-next-line no-prototype-builtins
+      option.textModalClose.hasOwnProperty(selectLanguage)
+    );
 
-  console.log("conversacion", chat);
+    setDataModalOptions(() => {
+      return {
+        textModal: {
+          textModalClose: textModalOption.textModalClose[selectLanguage],
+          textModal3Cap: textModalOption.textModal3Cap[selectLanguage],
+        },
+      };
+    });
+  };
 
   const showForm = () => {
     //MOSTRAR FORMULARIO DE ACUERDO AL IDIOMA
@@ -229,6 +315,8 @@ function Home() {
               consult: formTo2CapFind.form.consult[selectLanguage],
               email: formTo2CapFind.form.email[selectLanguage],
               phone: formTo2CapFind.form.phone[selectLanguage],
+              optionSend: formTo2CapFind.form.optionSend[selectLanguage],
+              optionCancel: formTo2CapFind.form.optionCancel[selectLanguage],
             },
           },
         ],
@@ -240,7 +328,6 @@ function Home() {
     //SALUDO DEL BOT DE ACUERDO AL IDIOMA - LISTA CATEGORIAS
     localStorage.setItem("idLenguaje", selectLanguage);
     setSelectLanguage(selectLanguage);
-    console.log(selectLanguage);
     const responseForLanguage = responseInit.find((response) =>
       // eslint-disable-next-line no-prototype-builtins
       response.respuesta.hasOwnProperty(selectLanguage)
@@ -315,6 +402,10 @@ function Home() {
               from: "user",
               id: idCategoria,
               text: [categoryFind.respuesta[selectLanguage] || null],
+              buttonToForm:
+                idCategoria === 5
+                  ? categoryFind.buttonToForm[selectLanguage] || null
+                  : null,
             },
           },
         ],
@@ -323,24 +414,24 @@ function Home() {
   };
 
   const cleanChatBot = () => {
-    //removeLanguage
-    //setCategoriaSeleccionadaId(null);
-    //setPreguntasSeleccionadas([]);
+    setDataForm({ form: [] });
+    setChat([]);
     setChatMensajesFrecuentes({ messages: [] });
     setButtonChatDisable(true);
     setButtonChat(false);
+    setShowTextField(true);
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+    }
+    localStorage.removeItem("idRoom");
+    //localStorage.removeItem("idLenguaje");
   };
-
-  /*
-  const modalExitView = () => {
-    setModalExit(!modalExit);
-  };*/
 
   const ChatbotView = () => {
     setButtonChat(true);
     setShowCap(0);
     setModalExit(false);
-    setButtonChatDisable(false); //observacion
+    setButtonChatDisable(false);
   };
 
   const handleScroll = () => {
@@ -510,6 +601,7 @@ function Home() {
                   onClick={() => {
                     setIdLocalStorageLanguage();
                     setShowCap(1);
+                    showModalOptions();
                   }}
                 >
                   <p>GUARDAR CONFIGURACIÓN</p>
@@ -557,17 +649,30 @@ function Home() {
                             key={message.message.id}
                           >
                             {message.message.id === 5 ? (
-                              <div>
+                              <div
+                                className={
+                                  styles.container_response_button_chat
+                                }
+                              >
                                 {message.message.text}
 
-                                <button
+                                <Button
                                   onClick={() => {
                                     setShowCap(2);
+                                    setDataForm({ form: [] });
                                     showForm();
                                   }}
+                                  sx={{
+                                    fontSize: "0.8rem",
+                                    color: "black",
+                                    "&:hover": {
+                                      backgroundColor: "#17C3CE",
+                                      color: "white",
+                                    },
+                                  }}
                                 >
-                                  Chatear ahora
-                                </button>
+                                  {message.message.buttonToForm}
+                                </Button>
                               </div>
                             ) : (
                               message.message.text
@@ -599,23 +704,29 @@ function Home() {
                     }}
                   />
                 </div>
-              </ul>
-              {modalExit && (
-                <div className={styles.container_modal}>
-                  <div className={styles.modal}>
-                    <div
-                      className={styles.modal_button}
-                      onClick={() => {
-                        cleanChatBot();
-                      }}
-                    >
-                      <span className={styles.text_button_modal}>
-                        TERMINAR CHAT
-                      </span>
+                {modalExit && (
+                  <div className={styles.container_modal}>
+                    <div className={styles.modal}>
+                      <Button
+                        sx={{
+                          backgroundColor: "#17C3CE",
+                          color: "white",
+                          fontWeight: "bold",
+
+                          "&:hover": {
+                            backgroundColor: "#17C3CE",
+                          },
+                        }}
+                        onClick={() => {
+                          cleanChatBot();
+                        }}
+                      >
+                        {dataModalOptions.textModal.textModalClose}
+                      </Button>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </ul>
             </>
           )}
           {showCap === 2 && (
@@ -679,7 +790,7 @@ function Home() {
                               fontWeight: "bold",
                             }}
                           >
-                            ENVIAR
+                            {data.form.optionSend}
                           </Button>
                           <Button
                             variant="contained"
@@ -690,7 +801,7 @@ function Home() {
                             }}
                             onClick={() => setShowCap(1)}
                           >
-                            CANCELAR
+                            {data.form.optionCancel}
                           </Button>
                         </div>
                       </form>
@@ -704,48 +815,8 @@ function Home() {
             //CHAT IA CAP2
             <>
               <ul className={styles.chatbox}>
-                {/* {chatMensajesFrecuentes.messages.map((message) => (
-                  <>
-                    {message.message.from === "bot" && (
-                      <li
-                        className={styles.chatincoming}
-                        key={message.message.id}
-                      >
-                        <img
-                          className={styles.minibot2}
-                          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699065957/exe%20digital/unbrk0uzq1pdvwysiqpg.png"
-                          alt="Bot Avatar"
-                        />
-
-                        <p className={styles.texto}>{message.message.text}</p>
-                      </li>
-                    )}
-
-                    {message.message.from === "user" && (
-                      <ul
-                        className={styles.chatoutgoing}
-                        key={message.message.id}
-                      >
-                        {message.message.text && (
-                          <p className={styles.chatoutgoing_response}>
-                            {message.message.id === 5 && (
-                              <>
-                                {message.message.text}
-                                <button onClick={() => setShowCap(2)}>
-                                  {message.message.text}
-                                </button>
-                              </>
-                            )}
-                          </p>
-                        )}
-                      </ul>
-                    )}
-                  </>
-                ))} */}
-
                 {chat.map((message) => (
                   <>
-                    {/* <pre key={message.id}>{JSON.stringify(message)}</pre> */}
                     {message.user === "Bot" && (
                       <li className={styles.chatincoming} key={message.id}>
                         <img
@@ -763,13 +834,125 @@ function Home() {
                         {message.message && (
                           <p className={styles.chatoutgoing_response}>
                             {message.message}
-                            {/* {message.id === 5 && (
-                              <>
-                                <button onClick={() => setShowCap(2)}>
-                                  {message.message}
-                                </button>
-                              </>
-                            )} */}
+                          </p>
+                        )}
+                      </ul>
+                    )}
+                  </>
+                ))}
+                {showTextField && (
+                  <div className={styles.footer_area_cap2}>
+                    <img
+                      className={styles.barras}
+                      src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699070715/exe%20digital/fyczge5dyxnvxsbz6xyb.png"
+                      onClick={() => {
+                        setModalExit(!modalExit);
+                      }}
+                    />
+                    <TextField
+                      id="standard-basic"
+                      variant="standard"
+                      placeholder="Escribe tu mensaje"
+                      sx={{ width: "100%" }}
+                      onChange={handleChange}
+                      value={textFieldValue}
+                    />
+                    <SendIcon
+                      onClick={enviarMensajeUsuario}
+                      sx={{ cursor: "pointer" }}
+                    />
+                  </div>
+                )}
+
+                {modalExit && (
+                  <div className={styles.container_modal}>
+                    <div className={styles.modal}>
+                      <Button
+                        sx={{
+                          backgroundColor: "#17C3CE",
+                          color: "white",
+                          fontWeight: "bold",
+
+                          "&:hover": {
+                            backgroundColor: "#17C3CE",
+                          },
+                        }}
+                        onClick={() => {
+                          showLoaderTo3Cap();
+                        }}
+                      >
+                        {dataModalOptions.textModal.textModal3Cap}
+                      </Button>
+                      <Button
+                        sx={{
+                          backgroundColor: "#17C3CE",
+                          color: "white",
+                          fontWeight: "bold",
+                          "&:hover": {
+                            backgroundColor: "#17C3CE",
+                          },
+                        }}
+                        onClick={() => {
+                          cleanChatBot();
+                        }}
+                      >
+                        {dataModalOptions.textModal.textModalClose}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                {showLoader && (
+                  <div className={styles.container_modal}>
+                    <div className={styles.loader}>
+                      <div className={`${styles.box} ${styles["box-1"]}`}>
+                        <div className={styles["side-left"]}></div>
+                        <div className={styles["side-right"]}></div>
+                        <div className={styles["side-top"]}></div>
+                      </div>
+                      <div className={`${styles.box} ${styles["box-2"]}`}>
+                        <div className={styles["side-left"]}></div>
+                        <div className={styles["side-right"]}></div>
+                        <div className={styles["side-top"]}></div>
+                      </div>
+                      <div className={`${styles.box} ${styles["box-3"]}`}>
+                        <div className={styles["side-left"]}></div>
+                        <div className={styles["side-right"]}></div>
+                        <div className={styles["side-top"]}></div>
+                      </div>
+                      <div className={`${styles.box} ${styles["box-4"]}`}>
+                        <div className={styles["side-left"]}></div>
+                        <div className={styles["side-right"]}></div>
+                        <div className={styles["side-top"]}></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </ul>
+            </>
+          )}
+          {showCap === 4 && (
+            //CHATIA ASESOR
+            <>
+              <ul className={styles.chatbox}>
+                {chat.map((message) => (
+                  <>
+                    {message.user === "Bot" && (
+                      <li className={styles.chatincoming} key={message.id}>
+                        <img
+                          className={styles.minibot2}
+                          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699065957/exe%20digital/unbrk0uzq1pdvwysiqpg.png"
+                          alt="Bot Avatar"
+                        />
+
+                        <p className={styles.texto}>{message.message}</p>
+                      </li>
+                    )}
+
+                    {typeof message.user == "object" && (
+                      <ul className={styles.chatoutgoing} key={message.id}>
+                        {message.message && (
+                          <p className={styles.chatoutgoing_response}>
+                            {message.message}
                           </p>
                         )}
                       </ul>
@@ -791,95 +974,32 @@ function Home() {
                   placeholder="Escribe tu mensaje"
                   sx={{ width: "100%" }}
                   onChange={handleChange}
+                  value={textFieldValue}
                 />
                 <SendIcon
-                  onClick={enviarMensajeUsuario}
+                  onClick={EnviarMensajeUsuario3Cap}
                   sx={{ cursor: "pointer" }}
                 />
               </div>
               {modalExit && (
                 <div className={styles.container_modal}>
                   <div className={styles.modal}>
-                    <div
-                      className={styles.modal_button}
+                    <Button
+                      sx={{
+                        backgroundColor: "#17C3CE",
+                        color: "white",
+                        fontWeight: "bold",
+
+                        "&:hover": {
+                          backgroundColor: "#17C3CE",
+                        },
+                      }}
                       onClick={() => {
                         cleanChatBot();
                       }}
                     >
-                      <span className={styles.text_button_modal}>
-                        TERMINAR CHAT
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-          {showCap === 4 && (
-            //CHATIA ASESOR
-            <>
-              <ul className={styles.chatbox}>
-                {chatMensajesFrecuentes.messages.map((message) => (
-                  <>
-                    {message.message.from === "bot" && (
-                      <li
-                        className={styles.chatincoming}
-                        key={message.message.id}
-                      >
-                        <img
-                          className={styles.minibot2}
-                          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699065957/exe%20digital/unbrk0uzq1pdvwysiqpg.png"
-                          alt="Bot Avatar"
-                        />
-
-                        <p className={styles.texto}>{message.message.text}</p>
-                      </li>
-                    )}
-
-                    {message.message.from === "user" && (
-                      <ul
-                        className={styles.chatoutgoing}
-                        key={message.message.id}
-                      >
-                        {message.message.text && (
-                          <p className={styles.chatoutgoing_response}>
-                            {message.message.id === 5 && (
-                              <>
-                                {message.message.text}
-                                <button onClick={() => setShowCap(2)}>
-                                  {message.message.text}
-                                </button>
-                              </>
-                            )}
-                          </p>
-                        )}
-                      </ul>
-                    )}
-                  </>
-                ))}
-              </ul>
-              <div className={styles.footer_area}>
-                <img
-                  className={styles.barras}
-                  src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699070715/exe%20digital/fyczge5dyxnvxsbz6xyb.png"
-                  onClick={() => {
-                    setModalExit(!modalExit);
-                  }}
-                />
-              </div>
-              {modalExit && (
-                <div className={styles.container_modal}>
-                  <div className={styles.modal}>
-                    <div
-                      className={styles.modal_button}
-                      onClick={() => {
-                        cleanChatBot();
-                      }}
-                    >
-                      <span className={styles.text_button_modal}>
-                        TERMINAR CHAT
-                      </span>
-                    </div>
+                      {dataModalOptions.textModal.textModalClose}
+                    </Button>
                   </div>
                 </div>
               )}
