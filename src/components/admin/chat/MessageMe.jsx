@@ -4,7 +4,7 @@ import { format } from "date-fns";
 
 const MessageMe = ({ message, date }) => {
   const dateToDate = new Date(date);
-  const dateFormat = format(dateToDate, "dd/MM/yyyy");
+  // const dateFormat = format(dateToDate, "dd/MM/yyyy");
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -50,9 +50,9 @@ const MessageMe = ({ message, date }) => {
         {/* <Typography variant="body2" component="p" sx={{ color: "#707070" }}>
           {dateDay}
         </Typography> */}
-        <Typography variant="body2" component="p" sx={{ color: "#707070" }}>
+        {/* <Typography variant="body2" component="p" sx={{ color: "#707070" }}>
           {dateFormat}
-        </Typography>
+        </Typography> */}
       </Box>
     </Box>
   );

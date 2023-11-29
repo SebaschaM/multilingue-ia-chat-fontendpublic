@@ -59,7 +59,7 @@ const Aside = () => {
   const [collapse, setCollapse] = useState(false);
   const [broken, setBroken] = useState(false);
   const [toggled, setToggled] = useState(false);
-  const { user, handleLogout } = useAuth();
+  const { user, handleLogout, setUserAtom } = useAuth();
   const [validateRole, setValidateRole] = useState();
 
   const onClickLink = (path) => {
@@ -84,6 +84,17 @@ const Aside = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const userData = localStorage.getItem("userData");
+    console.log(userData);
+    if (userData) {
+      const userParse = JSON.parse(userData);
+      console.log(userParse);
+      setUserAtom(userParse.user);
+    }
+  }, []);
+
+  // console.log(user);
   return (
     <div className={styles.container_pr}>
       <Sidebar
@@ -181,8 +192,8 @@ const Aside = () => {
           <div className={styles.navbar_user}>
             <img src="/avatar.jpg" alt="avatar" />
             <div className={styles.navbar_user_data}>
-              <h3>{user.fullname}</h3>
-              <span>{user.email}</span>
+              <h3>{user?.fullname}</h3>
+              <span>{user?.email}</span>
             </div>
 
             <div

@@ -73,6 +73,9 @@ function Home() {
   //3 CAP
   //const [dataChat, setDataChat] = useState([]); //observacion
   const [showLoader, setShowLoader] = useState(false);
+  const [chatCap3, setChatCap3] = useState([]);
+  const [userId, setUserId] = useState(null);
+  // const userData = JSON.parse(localStorage.getItem("userData"));
 
   const showLoaderTo3Cap = async () => {
     setModalExit(false);
@@ -109,11 +112,17 @@ function Home() {
       await connectSocket(dataSave.user, data.consult);
       enviarPrimerMensaje(dataSave.user, data.consult);
       setShowCap(3);
+      localStorage.setItem("userData", JSON.stringify(dataSave.user));
       reset();
     } catch (error) {
       console.error("Error al subir el formulario:", error);
     }
   };
+
+  // socketRef?.current?.on("get_messages", (messages) => {
+  //   console.log(messages);
+  //   setChat((prev) => [...prev, messages]);
+  // });
 
   const connectSocket = async (dataSaveUser, dataConsultForm) => {
     const socket = io.connect("http://localhost:5000", {
@@ -148,10 +157,6 @@ function Home() {
       console.log(error);
     });
 
-    socket.on("get_messages", (messages) => {
-      setChat((prev) => [...prev, messages]);
-    });
-
     socket.on("disconnect", () => {
       socket.emit("close_room", {
         room_name: room_name,
@@ -171,14 +176,14 @@ function Home() {
     //FUNCION DONDE USA CUANDO EL CLIENTE MANDA ALGUN MENSAJE EN LA CAPA 3
     const idRoomName = localStorage.getItem("idRoom");
     if (textFieldValue.trim() !== "") {
-      setChat((prev) => [
-        ...prev,
-        {
-          message: textFieldValue,
-          user: userCap2,
-          room_name: idRoomName,
-        },
-      ]);
+      // setChatCap3((prev) => [
+      //   ...prev,
+      //   {
+      //     message: textFieldValue,
+      //     user: userCap2,
+      //     room_name: idRoomName,
+      //   },
+      // ]);
 
       socketRef.current.emit("send_message", {
         fullname: userCap2.fullname,
@@ -188,24 +193,14 @@ function Home() {
         message: textFieldValue,
       });
 
-      socketRef?.current?.on("get_messages", (data) => {
-        // setear el setChat
-        setChat((prev) => [
-          ...prev,
-          {
-            message: data.message,
-            user: data.user,
-            room_name: data.room_name,
-          },
-        ]);
-      });
-
       setTextFieldValue("");
     } else {
       // Puedes agregar una alerta o manejar el caso de mensaje vacío de alguna manera
       console.log("No se puede enviar un mensaje vacío");
     }
   };
+
+  console.log("DATA CHAT:" + String(chat));
 
   //2 CAP
   const enviarPrimerMensaje = (dataSaveUser, dataConsultForm) => {
@@ -323,6 +318,42 @@ function Home() {
       };
     });
   };
+
+  socketRef?.current?.on("get_messages", (data) => {
+    // setear el setChat
+    setChatCap3((prev) => [
+      ...prev,
+      {
+        message: data.message_traslated_text,
+        user: data.id,
+        room_name: data.room_name,
+      },
+    ]);
+  });
+
+  // useEffect(() => {
+  //   if (socketRef.current) {
+  //     socketRef.current.on("get_messages", (data) => {
+  //       // setear el setChat
+  //       setChatCap3((prev) => [
+  //         ...prev,
+  //         {
+  //           message: data.message_traslated_text,
+  //           user: data.id,
+  //           room_name: data.room_name,
+  //         },
+  //       ]);
+
+  //       console.log(data);
+  //       console.log("DATA CHAT:" + chatCap3);
+  //     });
+  //   }
+
+  //   return () => {
+  //     // Limpiar el evento al desmontar el componente o cuando el efecto cambie
+  //     socketRef.current.off("get_messages");
+  //   };
+  // }, [textFieldValue]);
 
   const setIdLocalStorageLanguage = () => {
     //SALUDO DEL BOT DE ACUERDO AL IDIOMA - LISTA CATEGORIAS
@@ -934,28 +965,30 @@ function Home() {
             //CHATIA ASESOR
             <>
               <ul className={styles.chatbox}>
-                {chat.map((message) => (
+                {chatCap3.map((message) => (
                   <>
-                    {message.user === "Bot" && (
+                    {/* <pre>{JSON.parse(chat)}</pre> */}
+                    {/* {message.user === "user" && (
                       <li className={styles.chatincoming} key={message.id}>
-                        <img
-                          className={styles.minibot2}
-                          src="https://res.cloudinary.com/dtl1lhb4j/image/upload/v1699065957/exe%20digital/unbrk0uzq1pdvwysiqpg.png"
-                          alt="Bot Avatar"
-                        />
-
                         <p className={styles.texto}>{message.message}</p>
                       </li>
-                    )}
+                    )} */}
 
-                    {typeof message.user == "object" && (
-                      <ul className={styles.chatoutgoing} key={message.id}>
-                        {message.message && (
-                          <p className={styles.chatoutgoing_response}>
-                            {message.message}
-                          </p>
-                        )}
-                      </ul>
+                    {message.id_user_receiver ==
+                    JSON.parse(localStorage.getItem("userData")).id ? (
+                      <li className={styles.chatoutgoing} key={message.id}>
+                        <p className={styles.chatoutgoing_response}>
+                          {message.message}
+                        </p>
+                      </li>
+                    ) : (
+                      <li className={styles.chatincoming} key={message.id}>
+                        {/* <pre>
+                          {JSON.parse(localStorage.getItem("userData")).id}
+                        </pre> */}
+                        {/* <pre>{message.id_user_receiver} </pre> */}
+                        <p className={styles.texto}>{message.message}</p>
+                      </li>
                     )}
                   </>
                 ))}

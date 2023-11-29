@@ -6,19 +6,19 @@ import {
   Chip,
   Typography,
 } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 
 const Conversation = ({
   isDesktop = true,
-  setConversation,
+  onSelectConversation,
   setDataChat,
   dataAllConversations,
 }) => {
   const conversations = dataAllConversations || [];
-
-  const onSelectConversation = (conversation) => {
-    setConversation(conversation);
-    // * Aqui setear la conversaciones
+  const [conversationSelectedTemp, setConversationSelectedTemp] = useState({});
+  const onSelectConversation2 = (conversation) => {
+    onSelectConversation(conversation);
+    setConversationSelectedTemp(conversation);
     setDataChat(conversation.all_messages);
   };
 
@@ -41,13 +41,15 @@ const Conversation = ({
         {conversations.map((conversation) => (
           <Card
             key={conversation.uuid}
-            onClick={() => onSelectConversation(conversation)}
+            onClick={() => onSelectConversation2(conversation)}
             sx={{
               width: "90%",
               margin: "auto",
               marginTop: "20px",
               backgroundColor: "transparent",
               boxShadow: "none",
+              pointerEvents:
+                conversation === conversationSelectedTemp ? "none" : "auto",
             }}
           >
             <CardActionArea
@@ -150,13 +152,15 @@ const Conversation = ({
       {conversations.map((conversation) => (
         <Card
           key={conversation.uuid}
-          onClick={() => onSelectConversation(conversation)}
+          onClick={() => onSelectConversation2(conversation)}
           sx={{
             width: "100%",
             margin: "auto",
             marginTop: "20px",
             backgroundColor: "transparent",
             boxShadow: "none",
+            pointerEvents:
+              conversation === conversationSelectedTemp ? "none" : "auto",
           }}
         >
           <CardActionArea

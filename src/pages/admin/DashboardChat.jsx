@@ -51,6 +51,7 @@ const DashboardChat = () => {
   const [openModalRequestTipificar, setOpenModalRequestTipificar] =
     useState(false);
   const [showOptionsRequest, setshowOptionsRequest] = useState(false);
+  const [roomNameSelect, setRoomNameSelect] = useState("");
 
   const socketRef = useRef();
   const userData = JSON.parse(localStorage.getItem("userData"));
@@ -67,6 +68,7 @@ const DashboardChat = () => {
 
   const onGetMessagesByIdConversation = async (idConversation) => {
     const { data, error } = await getMessageByIdConversation(idConversation);
+    console.log(data);
     setDataChat(data.messages);
   };
 
@@ -77,8 +79,8 @@ const DashboardChat = () => {
     const inputElement = e.target.elements.message;
 
     const newMessage = {
-      id: userData.id,
-      room_name: "cuartito2", // !Esperar a que el cliente cree el room
+      id: userData.user.id,
+      room_name: conversationSelected.room_name,
       fullname: fullname,
       message: dataInputMessage,
       date: new Date().toLocaleString(),
@@ -93,12 +95,12 @@ const DashboardChat = () => {
 
     socket.on("connect", () => {
       console.log("Socket conectado en CHAT");
-      const roomName = "cuartito2"; // !Esperar a que el cliente cree el room
+      const roomName = "58942a47-931d-41fa-81cd-426e6d54c750"; // !Esperar a que el cliente cree el room
 
-      socket.emit("assign_user_to_room", {
-        room_name: roomName,
-        user: userData,
-      });
+      // socket.emit("assign_user_to_room", {
+      //   room_name: roomName,
+      //   user: { ...userData, fullname: userData.user.fullname },
+      // });
     });
 
     socket.on("error_joining_room", (error) => {
@@ -110,6 +112,7 @@ const DashboardChat = () => {
     });
 
     socket.on("get_messages", (messages) => {
+      console.log(messages);
       setDataChat((prev) => [...prev, messages]);
     });
 
@@ -138,8 +141,23 @@ const DashboardChat = () => {
   }, []);
 
   useEffect(() => {
-    onGetMessagesByIdConversation("30fafef2-da18-42df-9c3b-2ca07051af7b");
+    onGetMessagesByIdConversation(conversationSelected.uuid);
+
+    if (
+      conversationSelected.room_name !== null &&
+      conversationSelected.room_name !== undefined
+    ) {
+      socketRef.current.emit("assign_user_to_room", {
+        room_name: conversationSelected.room_name,
+        user: { ...userData, fullname: userData.user.fullname },
+      });
+    }
   }, [conversationSelected]);
+
+  const onSelectConversation = (conversation) => {
+    setConversationSelected(conversation);
+    setDataChat(conversation.all_messages);
+  };
 
   return (
     <LayoutDashboard title="Overall Holding">
@@ -208,10 +226,13 @@ const DashboardChat = () => {
             ) : (
               <Conversation
                 isDesktop={true}
-                setConversation={setConversationSelected}
+                // setConversation={setConversationSelected}
+                onSelectConversation={onSelectConversation}
                 setDataChat={setDataChat}
-                dataAllConversations={allConversations && allConversations.length > 0 && allConversations.filter(
-                  (conversation) => {
+                dataAllConversations={
+                  allConversations &&
+                  allConversations.length > 0 &&
+                  allConversations.filter((conversation) => {
                     if (inputSearchMessage === "") {
                       return conversation;
                     } else if (
@@ -221,8 +242,8 @@ const DashboardChat = () => {
                     ) {
                       return conversation;
                     }
-                  }
-                )}
+                  })
+                }
               />
             )}
           </Grid>
@@ -238,7 +259,8 @@ const DashboardChat = () => {
           >
             <Conversation
               isDesktop={false}
-              setConversation={setConversationSelected}
+              onSelectConversation={onSelectConversation}
+              // setConversation={setConversationSelected}
               setDataChat={setDataChat}
               dataAllConversations={allConversations}
             />
@@ -398,7 +420,7 @@ const DashboardChat = () => {
                   >
                     {dataChat &&
                       dataChat?.map((chat) =>
-                        chat?.id_user_receiver !== userID ? (
+                        chat?.id_user_sender === userID ? (
                           <MessageMe
                             key={chat.uuid}
                             message={chat.message_text}
@@ -407,7 +429,7 @@ const DashboardChat = () => {
                         ) : (
                           <MessageFrom
                             key={chat.uuid}
-                            message={chat.message_text}
+                            message={chat.message_traslated_text}
                             date={chat.created_at}
                           />
                         )
