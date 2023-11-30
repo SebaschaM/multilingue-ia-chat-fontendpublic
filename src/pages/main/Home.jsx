@@ -24,7 +24,6 @@ import {
   textModal,
 } from "../../utils/dataChatbot";
 import { useChatClient } from "../../hooks/useChatClient.JSX";
-import { set } from "date-fns";
 
 function Home() {
   //LANDING
@@ -71,15 +70,14 @@ function Home() {
   const [showTextField, setShowTextField] = useState(true);
 
   //3 CAP
-  //const [dataChat, setDataChat] = useState([]); //observacion
   const [showLoader, setShowLoader] = useState(false);
   const [chatCap3, setChatCap3] = useState([]);
-  const [userId, setUserId] = useState(null);
-  // const userData = JSON.parse(localStorage.getItem("userData"));
 
   const showLoaderTo3Cap = async () => {
     setModalExit(false);
+    setChatCap3([]);
     setChat([]);
+    setTextFieldValue("");
     setTimeout(() => {
       setShowLoader(true);
       setShowTextField(false);
@@ -92,10 +90,6 @@ function Home() {
     }, 2000);
 
     await connectSocket(userCap2, textFieldValue);
-  };
-
-  const handleChange = (e) => {
-    setTextFieldValue(e.target.value);
   };
 
   const onSubmit = async (data) => {
@@ -118,11 +112,6 @@ function Home() {
       console.error("Error al subir el formulario:", error);
     }
   };
-
-  // socketRef?.current?.on("get_messages", (messages) => {
-  //   console.log(messages);
-  //   setChat((prev) => [...prev, messages]);
-  // });
 
   const connectSocket = async (dataSaveUser, dataConsultForm) => {
     const socket = io.connect("http://localhost:5000", {
@@ -175,15 +164,16 @@ function Home() {
   const EnviarMensajeUsuario3Cap = () => {
     //FUNCION DONDE USA CUANDO EL CLIENTE MANDA ALGUN MENSAJE EN LA CAPA 3
     const idRoomName = localStorage.getItem("idRoom");
+    setTextFieldValue("");
     if (textFieldValue.trim() !== "") {
-      // setChatCap3((prev) => [
-      //   ...prev,
-      //   {
-      //     message: textFieldValue,
-      //     user: userCap2,
-      //     room_name: idRoomName,
-      //   },
-      // ]);
+      setChatCap3((prev) => [
+        ...prev,
+        {
+          message: textFieldValue,
+          user: userCap2,
+          room_name: idRoomName,
+        },
+      ]);
 
       socketRef.current.emit("send_message", {
         fullname: userCap2.fullname,
@@ -193,14 +183,32 @@ function Home() {
         message: textFieldValue,
       });
 
-      setTextFieldValue("");
+      socketRef?.current?.off("get_messages");
+      //QUISIERA TENER ESE IF, PARA PODER INVOCAR AL EVENTO get_message
+      socketRef?.current?.on("get_messages", (data) => {
+        // setear el setChat
+
+        if (data.id !== userCap2.id) {
+          console.log(data);
+          setChatCap3((prev) => [
+            ...prev,
+            {
+              message: data.message_traslated_text,
+              user_receiver: data.id_user_receiver,
+              user_sender: data.id_user_sender,
+              room_name: data.room_name,
+            },
+          ]);
+        }
+        setTextFieldValue("");
+      });
     } else {
       // Puedes agregar una alerta o manejar el caso de mensaje vacío de alguna manera
       console.log("No se puede enviar un mensaje vacío");
     }
   };
 
-  console.log("DATA CHAT:" + String(chat));
+  console.log(chatCap3);
 
   //2 CAP
   const enviarPrimerMensaje = (dataSaveUser, dataConsultForm) => {
@@ -293,7 +301,6 @@ function Home() {
   const showForm = () => {
     //MOSTRAR FORMULARIO DE ACUERDO AL IDIOMA
     const formTo2CapFind = formTo2Cap.find((form) =>
-      // eslint-disable-next-line no-prototype-builtins
       form.titleForm.hasOwnProperty(selectLanguage)
     );
 
@@ -318,42 +325,6 @@ function Home() {
       };
     });
   };
-
-  socketRef?.current?.on("get_messages", (data) => {
-    // setear el setChat
-    setChatCap3((prev) => [
-      ...prev,
-      {
-        message: data.message_traslated_text,
-        user: data.id,
-        room_name: data.room_name,
-      },
-    ]);
-  });
-
-  // useEffect(() => {
-  //   if (socketRef.current) {
-  //     socketRef.current.on("get_messages", (data) => {
-  //       // setear el setChat
-  //       setChatCap3((prev) => [
-  //         ...prev,
-  //         {
-  //           message: data.message_traslated_text,
-  //           user: data.id,
-  //           room_name: data.room_name,
-  //         },
-  //       ]);
-
-  //       console.log(data);
-  //       console.log("DATA CHAT:" + chatCap3);
-  //     });
-  //   }
-
-  //   return () => {
-  //     // Limpiar el evento al desmontar el componente o cuando el efecto cambie
-  //     socketRef.current.off("get_messages");
-  //   };
-  // }, [textFieldValue]);
 
   const setIdLocalStorageLanguage = () => {
     //SALUDO DEL BOT DE ACUERDO AL IDIOMA - LISTA CATEGORIAS
@@ -451,11 +422,11 @@ function Home() {
     setButtonChatDisable(true);
     setButtonChat(false);
     setShowTextField(true);
-    if (socketRef.current) {
-      socketRef.current.disconnect();
-    }
+    setChatCap3([]);
+    socketRef.current.disconnect();
     localStorage.removeItem("idRoom");
-    //localStorage.removeItem("idLenguaje");
+    localStorage.removeItem("userData");
+    localStorage.removeItem("idLenguaje");
   };
 
   const ChatbotView = () => {
@@ -885,7 +856,9 @@ function Home() {
                       variant="standard"
                       placeholder="Escribe tu mensaje"
                       sx={{ width: "100%" }}
-                      onChange={handleChange}
+                      onChange={(e) => {
+                        setTextFieldValue(e.target.value);
+                      }}
                       value={textFieldValue}
                     />
                     <SendIcon
@@ -967,27 +940,16 @@ function Home() {
               <ul className={styles.chatbox}>
                 {chatCap3.map((message) => (
                   <>
-                    {/* <pre>{JSON.parse(chat)}</pre> */}
-                    {/* {message.user === "user" && (
+                    {message.user_receiver ==
+                    JSON.parse(localStorage.getItem("userData")).id ? (
                       <li className={styles.chatincoming} key={message.id}>
                         <p className={styles.texto}>{message.message}</p>
                       </li>
-                    )} */}
-
-                    {message.id_user_receiver ==
-                    JSON.parse(localStorage.getItem("userData")).id ? (
+                    ) : (
                       <li className={styles.chatoutgoing} key={message.id}>
                         <p className={styles.chatoutgoing_response}>
                           {message.message}
                         </p>
-                      </li>
-                    ) : (
-                      <li className={styles.chatincoming} key={message.id}>
-                        {/* <pre>
-                          {JSON.parse(localStorage.getItem("userData")).id}
-                        </pre> */}
-                        {/* <pre>{message.id_user_receiver} </pre> */}
-                        <p className={styles.texto}>{message.message}</p>
                       </li>
                     )}
                   </>
@@ -1006,7 +968,9 @@ function Home() {
                   variant="standard"
                   placeholder="Escribe tu mensaje"
                   sx={{ width: "100%" }}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    setTextFieldValue(e.target.value);
+                  }}
                   value={textFieldValue}
                 />
                 <SendIcon
