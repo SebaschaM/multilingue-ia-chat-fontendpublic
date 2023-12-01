@@ -11,33 +11,26 @@ export const handleRequestManagment = () => {
     }
   };
 
-  /*
-  const handleGetRequestById = async (id) => {
+  const handleDeleteRequest = async (idRequest) => {
     try {
-      const { data } = await ApiJson.get(`/admin/request/get-request/${id}`);
-      return data;
+      const { data } = await ApiJson.delete(
+        `/admin/request/request-delete/${idRequest}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return { success: true, data };
     } catch (error) {
       console.log(error);
     }
   };
-*/
-  /*
-  const handleDeleteRequest = async (id) => {
-    try {
-      const { data } = await ApiJson.delete(
-        `/admin/request/delete-request/${id}`
-      );
-      return data;
-    } catch (error) {
-      console.log(error);
-    }
-  };*/
 
-  const handleEditRequest = async (id, data) => {
+  const handleGetRequestById = async (id) => {
     try {
-      const response = await ApiJson.put(
-        `/admin/request/register-request/${id}`,
-        data
+      const response = await ApiJson.get(
+        `/admin/request/get-request-by-id/${id}`
       );
       return response.data;
     } catch (error) {
@@ -45,13 +38,31 @@ export const handleRequestManagment = () => {
     }
   };
 
+  const handleUpdateStatusRequest = async (data) => {
+    try {
+      const response = await ApiJson.put(
+        `/admin/request/change-state-request`,
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  //CREAR SOLICITUD
   const handleCreateRequest = async (data) => {
     try {
       const response = await ApiJson.post(
         `/admin/request/register-request`,
         data
       );
-      console.log(response)
+      console.log(response);
       return response;
     } catch (error) {
       console.log(error);
@@ -60,9 +71,9 @@ export const handleRequestManagment = () => {
 
   return {
     handleGetAllRequests,
-    //handleGetRequestById,
-    //handleDeleteRequest,
-    handleEditRequest,
+    handleDeleteRequest,
+    handleGetRequestById,
+    handleUpdateStatusRequest,
     handleCreateRequest,
   };
 };

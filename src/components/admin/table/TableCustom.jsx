@@ -2,7 +2,6 @@ import React from "react";
 import { Box, Chip, Grid, IconButton } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { BsEye, BsPencilSquare, BsTrash3 } from "react-icons/bs";
-import { rows } from "../../../utils/dataRows";
 
 const TableCustom = ({
   setShowModalView,
@@ -13,16 +12,15 @@ const TableCustom = ({
   valueSearch,
 }) => {
   const columns = [
-    /*
     {
       field: "id",
-      headerName: "ID",
+      headerName: "ID Solicitud",
       width: 180,
       sortable: false,
       align: "center",
       headerAlign: "center",
       type: "number",
-    },*/
+    },
     {
       field: "cliente",
       headerName: "Cliente",
@@ -99,17 +97,13 @@ const TableCustom = ({
               columnGap: "0.5rem",
             }}
           >
-            {/*
-            <IconButton onClick={() => setShowModalView(true)}>
-              <BsEye size={22} color="#FF7A00" />
-            </IconButton>
-            <IconButton onClick={() => setShowModalEdit(true)}>
-              <BsPencilSquare size={22} color="#624DE3" />
-            </IconButton>
-            <IconButton onClick={() => setShowModalDelete(true)}>
-              <BsTrash3 size={22} color="#A30D11" />
-            </IconButton>  */}
-            <IconButton onClick={() => setShowModalView(true)}>
+            <IconButton
+              onClick={() => {
+                setShowModalView(true);
+                setRequestSelectedId(params.row.id);
+                console.log(filteredData);
+              }}
+            >
               <BsEye size={22} color="#FF7A00" />
             </IconButton>
             <IconButton
@@ -138,7 +132,8 @@ const TableCustom = ({
     Object.values(request).some((value) =>
       String(value).toLowerCase().includes(valueSearch.toLowerCase())
     )
-  ).map((request, index) => ({ ...request, id: index }));
+  );
+
   return (
     <div style={{ height: "fit-content", width: "100%" }}>
       <DataGrid
