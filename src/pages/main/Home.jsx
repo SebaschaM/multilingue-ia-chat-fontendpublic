@@ -108,8 +108,6 @@ function Home() {
       enviarPrimerMensaje(dataSave.user, data.consult);
       setShowCap(3);
       localStorage.setItem("userData", JSON.stringify(dataSave.user));
-
-      // ! Mandar el areaProcess al backend
       reset();
     } catch (error) {
       console.error("Error al subir el formulario:", error);
@@ -265,6 +263,7 @@ function Home() {
       socketRef.current.emit("send_message_gpt", {
         message: textFieldValue,
         room_name: idRoomName,
+        areaProcess: areaProcess,
       });
 
       socketRef?.current?.on("get_messages_gpt", (data) => {
@@ -307,6 +306,7 @@ function Home() {
   const showForm = () => {
     //MOSTRAR FORMULARIO DE ACUERDO AL IDIOMA
     const formTo2CapFind = formTo2Cap.find((form) =>
+      // eslint-disable-next-line no-prototype-builtins
       form.titleForm.hasOwnProperty(selectLanguage)
     );
 
@@ -801,8 +801,22 @@ function Home() {
                               setAreaProcess(e.target.value);
                             }}
                           >
-                            <MenuItem value={10}>Precios</MenuItem>
-                            <MenuItem value={20}>Finanzas</MenuItem>
+                            <MenuItem value={"analitica_web"}>
+                              Analitica web
+                            </MenuItem>
+                            <MenuItem value={"email_marketing"}>
+                              Email marketing
+                            </MenuItem>
+                            <MenuItem value={"seo"}>SEO</MenuItem>
+                            <MenuItem value={"redes_sociales"}>
+                              Redes sociales
+                            </MenuItem>
+                            <MenuItem value={"publicidad_linea"}>
+                              Publicidad en linea
+                            </MenuItem>
+                            <MenuItem value={"marketing_contenidos"}>
+                              Marketing de contenidos
+                            </MenuItem>
                           </Select>
                         </FormControl>
                         <div className={styles.btn_container}>
