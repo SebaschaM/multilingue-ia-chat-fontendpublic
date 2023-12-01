@@ -214,15 +214,15 @@ const DashboardManagerUser = () => {
 
   const onDeleteUsers = async () => {
     try {
-      const reponse = await handleDeleteUsers(userSelectedId);
+      const response = await handleDeleteUsers(userSelectedId);
       await onGetUsers();
       setShowModalDelete(false);
       setModalResponse({
         show: true,
-        message: reponse.data.message,
+        message: response.data.message,
       });
 
-      return reponse;
+      return response;
     } catch (error) {
       console.log(error);
     }

@@ -51,7 +51,8 @@ export const handleRequestManagment = () => {
         `/admin/request/register-request`,
         data
       );
-      return response.data;
+      console.log(response)
+      return response;
     } catch (error) {
       console.log(error);
     }

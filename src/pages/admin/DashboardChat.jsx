@@ -20,7 +20,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Conversation, MessageFrom, MessageMe } from "../../components";
+import { Conversation, MessageFrom, MessageMe, ModalCustom } from "../../components";
 import { useChat } from "../../hooks/useChat";
 import { set } from "react-hook-form";
 import FormTipify from "../../components/form/formTipify";
@@ -55,6 +55,10 @@ const DashboardChat = () => {
   const [roomNameSelect, setRoomNameSelect] = useState("");
 
   const [selectedOption, setSelectedOption] = useState("");
+  const [modalResponse, setModalResponse] = useState({
+    show: false,
+    message: "",
+  });
 
   const socketRef = useRef();
   const userData = JSON.parse(localStorage.getItem("userData"));
@@ -193,7 +197,13 @@ const DashboardChat = () => {
     setDataChat(conversation.all_messages);
   };
 
+  //! COLOCAR EL MODAL DE RESPONSE
+  useEffect(() => {
+    console.log(modalResponse, "modalResponse")
+  },[modalResponse, setModalResponse])
   return (
+
+    
     <LayoutDashboard title="Overall Holding">
       <LayoutDashboardContent title="Gestion de Chats">
         <Grid
@@ -522,13 +532,28 @@ const DashboardChat = () => {
           </Grid>
         </Grid>
 
+{/* MODAL RESPONSE */}
+        <ModalCustom
+          openModal={modalResponse?.show}
+          setOpenModal={setModalResponse}
+        >
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <Typography
+              sx={{ fontSize: "25px", fontWeight: "bold" }}
+              variant="h1"
+            >
+              {modalResponse?.message}
+            </Typography>
+          </div>
+        </ModalCustom>
+
         <Modal
           open={openModalRequest}
           onClose={() => setOpenModalRequest(false)}
           aria-labelledby="modal-modal-title"
           aria-describedby="modal-modal-description"
         >
-          {/* {"Colocar el componente aqui"} */}
+
           <Box sx={style}>
             <Typography
               id="modal-modal-title"
@@ -543,6 +568,8 @@ const DashboardChat = () => {
               onUserTyping={userData}
               openModal={setOpenModalRequest}
               onSelectedOption={selectedOption}
+              onModalResponse={modalResponse}
+              onSetModalResponse={setModalResponse}
             />
           </Box>
         </Modal>
@@ -560,13 +587,15 @@ const DashboardChat = () => {
               component="h2"
               textAlign={"center"}
             >
-              Aqui puede ir el titulo del formulario de tipificacion jnjiji
+              Tipificación
             </Typography>
             <FormTipify
               onUserSelected={conversationSelected}
               onUserTyping={userData}
-              openModal={setOpenModalRequest}
+              openModal={setOpenModalRequestTipificar}
               onSelectedOption={selectedOption}
+              onModalResponse={modalResponse}
+              onSetModalResponse={setModalResponse}
             />
           </Box>
         </Modal>

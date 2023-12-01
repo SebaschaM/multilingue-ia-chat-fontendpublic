@@ -25,7 +25,6 @@ const Conversation = ({
     setDataChat(conversation.all_messages);
   };
 
-  console.log("conversationSelectedTemp", conversationSelectedTemp);
   // useEffect(() => {
   //   const conversationSelected = JSON.parse(
   //     localStorage.getItem("conversationSelected")
@@ -36,7 +35,6 @@ const Conversation = ({
   //   }
   // }, []);
 
-  console.log("conversations", conversations);
 
   if (isDesktop) {
     return (
