@@ -23,6 +23,7 @@ import {
 import { Conversation, MessageFrom, MessageMe } from "../../components";
 import { useChat } from "../../hooks/useChat";
 import { set } from "react-hook-form";
+import FormTipify from "../../components/form/formTipify";
 
 const style = {
   position: "absolute",
@@ -47,11 +48,13 @@ const DashboardChat = () => {
   const [dataChat, setDataChat] = useState([]);
   const [inputSearchMessage, setInputSearchMessage] = useState("");
   const [conversationSelected, setConversationSelected] = useState({});
-  const [openModalRequestAgendar, setOpenModalRequestAgendar] = useState(false);
+  const [openModalRequest, setOpenModalRequest] = useState(false);
   const [openModalRequestTipificar, setOpenModalRequestTipificar] =
     useState(false);
   const [showOptionsRequest, setshowOptionsRequest] = useState(false);
   const [roomNameSelect, setRoomNameSelect] = useState("");
+
+  const [selectedOption, setSelectedOption] = useState("");
 
   const socketRef = useRef();
   const userData = JSON.parse(localStorage.getItem("userData"));
@@ -391,8 +394,9 @@ const DashboardChat = () => {
                       >
                         <Button
                           onClick={() => {
-                            setOpenModalRequestAgendar(true);
+                            setOpenModalRequest(true);
                             setshowOptionsRequest(false);
+                            setSelectedOption("agendar");
                           }}
                           sx={{
                             display: "flex",
@@ -408,6 +412,7 @@ const DashboardChat = () => {
                           onClick={() => {
                             setOpenModalRequestTipificar(true);
                             setshowOptionsRequest(false);
+                            setSelectedOption("tipificar");
                           }}
                           sx={{
                             display: "flex",
@@ -518,27 +523,27 @@ const DashboardChat = () => {
         </Grid>
 
         <Modal
-          open={openModalRequestAgendar}
-          onClose={() => setOpenModalRequestAgendar(false)}
+          open={openModalRequest}
+          onClose={() => setOpenModalRequest(false)}
           aria-labelledby="modal-modal-title"
           aria-describedby="modal-modal-description"
         >
+          {/* {"Colocar el componente aqui"} */}
           <Box sx={style}>
             <Typography
               id="modal-modal-title"
               variant="h6"
               component="h2"
-              textAlign={"center"}
+              align="center"
             >
-              Aqui puede ir el titulo del formulario de agendamiento
+              Agendamiento
             </Typography>
-            <form>
-              <TextField
-                id="outlined-basic"
-                label="Outlined"
-                variant="outlined"
-              />
-            </form>
+            <FormTipify
+              onUserSelected={conversationSelected}
+              onUserTyping={userData}
+              openModal={setOpenModalRequest}
+              onSelectedOption={selectedOption}
+            />
           </Box>
         </Modal>
 
@@ -555,15 +560,14 @@ const DashboardChat = () => {
               component="h2"
               textAlign={"center"}
             >
-              Aqui puede ir el titulo del formulario de tipificacion
+              Aqui puede ir el titulo del formulario de tipificacion jnjiji
             </Typography>
-            <form>
-              <TextField
-                id="outlined-basic"
-                label="Outlined"
-                variant="outlined"
-              />
-            </form>
+            <FormTipify
+              onUserSelected={conversationSelected}
+              onUserTyping={userData}
+              openModal={setOpenModalRequest}
+              onSelectedOption={selectedOption}
+            />
           </Box>
         </Modal>
       </LayoutDashboardContent>

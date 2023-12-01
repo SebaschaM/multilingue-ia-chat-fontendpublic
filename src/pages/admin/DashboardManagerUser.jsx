@@ -25,6 +25,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useUserManagment } from "../../hooks/useUserManagment";
 import { ModalCustom, TableCustomForUserManagment } from "../../components";
 import { BsPersonAdd, BsSearch } from "react-icons/bs";
+import { formatearFecha } from "../../utils/formatDate";
 
 const style = {
   position: "absolute",
@@ -314,14 +315,6 @@ const DashboardManagerUser = () => {
       console.error("Error al obtener usuarios:", error);
     }
   };
-
-  function formatearFecha(fechaString) {
-    return new Date(fechaString).toLocaleDateString("es-PE", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-  }
 
   function verifyUser(user_verified) {
     if (user_verified === 1) {
