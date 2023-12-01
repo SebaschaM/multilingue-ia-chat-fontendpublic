@@ -6,7 +6,7 @@ import {
   Chip,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const Conversation = ({
   isDesktop = true,
@@ -15,12 +15,28 @@ const Conversation = ({
   dataAllConversations,
 }) => {
   const conversations = dataAllConversations || [];
-  const [conversationSelectedTemp, setConversationSelectedTemp] = useState({});
+  const [conversationSelectedTemp, setConversationSelectedTemp] = useState(
+    JSON.parse(localStorage.getItem("conversationSelected")) || {}
+  );
   const onSelectConversation2 = (conversation) => {
     onSelectConversation(conversation);
     setConversationSelectedTemp(conversation);
+    localStorage.setItem("conversationSelected", JSON.stringify(conversation));
     setDataChat(conversation.all_messages);
   };
+
+  console.log("conversationSelectedTemp", conversationSelectedTemp);
+  // useEffect(() => {
+  //   const conversationSelected = JSON.parse(
+  //     localStorage.getItem("conversationSelected")
+  //   );
+  //   if (conversationSelected) {
+  //     setConversationSelectedTemp(conversationSelected);
+  //     setDataChat(conversationSelected.all_messages);
+  //   }
+  // }, []);
+
+  console.log("conversations", conversations);
 
   if (isDesktop) {
     return (
@@ -38,80 +54,89 @@ const Conversation = ({
           width: "100%",
         }}
       >
-        {conversations.map((conversation) => (
-          <Card
-            key={conversation.uuid}
-            onClick={() => onSelectConversation2(conversation)}
-            sx={{
-              width: "90%",
-              margin: "auto",
-              marginTop: "20px",
-              backgroundColor: "transparent",
-              boxShadow: "none",
-              pointerEvents:
-                conversation === conversationSelectedTemp ? "none" : "auto",
-            }}
-          >
-            <CardActionArea
+        {conversations
+          .slice()
+          .reverse()
+          .map((conversation) => (
+            <Card
+              key={conversation.uuid}
+              onClick={() => onSelectConversation2(conversation)}
               sx={{
-                display: "flex",
-                // alignItems: "start",
-                gap: "1rem",
-                width: "100%",
-                padding: "10px",
-                flexDirection: {
-                  xs: "column",
-                  md: "row",
-                },
-                justifyContent: "start",
-                alignItems: {
-                  xs: "start",
-                  md: "start",
-                },
+                width: "90%",
+                margin: "auto",
+                marginTop: "20px",
+                // backgroundColor: "transparent",
+                boxShadow: "none",
+                pointerEvents:
+                  conversation.uuid === conversationSelectedTemp.uuid
+                    ? "none"
+                    : "auto",
+                backgroundColor:
+                  conversation.uuid === conversationSelectedTemp.uuid
+                    ? "#e8e8e8"
+                    : "transparent",
               }}
             >
-              <Avatar
+              <CardActionArea
                 sx={{
-                  width: "45px",
-                  height: "45px",
-                  backgroundColor: "#666666",
+                  display: "flex",
+                  // alignItems: "start",
+                  gap: "1rem",
+                  width: "100%",
+                  padding: "10px",
+                  flexDirection: {
+                    xs: "column",
+                    md: "row",
+                  },
+                  justifyContent: "start",
+                  alignItems: {
+                    xs: "start",
+                    md: "start",
+                  },
                 }}
-                variant="rounded"
-                src="/avatar_user.jpg"
-              />
-              <Box>
-                <Typography
-                  variant="body1"
-                  component="p"
-                  fontWeight={"bold"}
+              >
+                <Avatar
                   sx={{
-                    textAlign: {
-                      xs: "center",
-                      md: "start",
-                    },
+                    width: "45px",
+                    height: "45px",
+                    backgroundColor: "#666666",
                   }}
-                >
-                  {conversation.client_conversation.fullname}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  component="p"
-                  sx={{
-                    display: {
-                      xs: "none",
-                      md: "block",
-                    },
-                  }}
-                >
-                  {conversation.last_message.message_text}
-                </Typography>
-                <Box
-                  sx={{
-                    display: "flex",
-                    gap: "10px",
-                  }}
-                >
-                  <Chip
+                  variant="rounded"
+                  src="/avatar_user.jpg"
+                />
+                <Box>
+                  <Typography
+                    variant="body1"
+                    component="p"
+                    fontWeight={"bold"}
+                    sx={{
+                      textAlign: {
+                        xs: "center",
+                        md: "start",
+                      },
+                    }}
+                  >
+                    {conversation.client_conversation.fullname}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    component="p"
+                    sx={{
+                      display: {
+                        xs: "none",
+                        md: "block",
+                      },
+                    }}
+                  >
+                    {conversation.last_message.message_text}
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: "10px",
+                    }}
+                  >
+                    {/* <Chip
                     label="Cotizacion"
                     size="small"
                     sx={{
@@ -128,12 +153,12 @@ const Conversation = ({
                       color: "#38a169",
                       fontWeight: "bold",
                     }}
-                  />
+                  /> */}
+                  </Box>
                 </Box>
-              </Box>
-            </CardActionArea>
-          </Card>
-        ))}
+              </CardActionArea>
+            </Card>
+          ))}
       </Box>
     );
   }
@@ -157,7 +182,10 @@ const Conversation = ({
             width: "100%",
             margin: "auto",
             marginTop: "20px",
-            backgroundColor: "transparent",
+            backgroundColor:
+              conversation === conversationSelectedTemp
+                ? "#e8e8e8"
+                : "transparent",
             boxShadow: "none",
             pointerEvents:
               conversation === conversationSelectedTemp ? "none" : "auto",

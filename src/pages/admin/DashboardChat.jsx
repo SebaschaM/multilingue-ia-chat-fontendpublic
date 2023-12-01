@@ -62,13 +62,23 @@ const DashboardChat = () => {
   const onGetAllConversations = async () => {
     setIsLoadingConversation(true);
     const { data, error } = await getConversationsByID(userID);
-    setAllConversations(data.conversation);
+
+    // setAllConversations(data.conversations);
+    const updatedConversations = data.conversations.map((conversation) => ({
+      ...conversation,
+      last_message: {
+        ...conversation.last_message,
+        // Update the desired properties of last_message here
+      },
+    }));
+
+    setAllConversations(updatedConversations);
     setIsLoadingConversation(false);
   };
 
   const onGetMessagesByIdConversation = async (idConversation) => {
     const { data, error } = await getMessageByIdConversation(idConversation);
-    console.log(data);
+    // console.log(data);
     setDataChat(data.messages);
   };
 
@@ -85,9 +95,19 @@ const DashboardChat = () => {
       message: dataInputMessage,
       date: new Date().toLocaleString(),
     };
-    socketRef.current.emit("send_message", newMessage);
+    socketRef.current.emit("send_message", newMessage, () => {
+      onGetAllConversations();
+    });
     inputElement.value = "";
   };
+
+  socketRef?.current?.on("update_conversations", (data) => {
+    const isUpdated = data.update;
+
+    if (isUpdated) {
+      onGetAllConversations();
+    }
+  });
 
   useEffect(() => {
     const socket = io.connect("http://localhost:5000", { reconnection: true });
@@ -111,9 +131,9 @@ const DashboardChat = () => {
       console.log(error);
     });
 
-    socket.on("get_messages", (messages) => {
-      console.log(messages);
+    socket.on("get_messages", async (messages) => {
       setDataChat((prev) => [...prev, messages]);
+      await onGetAllConversations();
     });
 
     socket.on("disconnect", () => {
@@ -154,8 +174,19 @@ const DashboardChat = () => {
     }
   }, [conversationSelected]);
 
+  // useEffect(() => {
+  //   const conversationSelectedTemp = JSON.parse(
+  //     localStorage.getItem("conversationSelected")
+  //   );
+
+  //   if (conversationSelectedTemp) {
+  //     setConversationSelected(conversationSelectedTemp);
+  //   }
+  // }, []);
+
   const onSelectConversation = (conversation) => {
     setConversationSelected(conversation);
+    // localStorage.setItem("conversationSelected", JSON.stringify(conversation));
     setDataChat(conversation.all_messages);
   };
 
@@ -414,8 +445,9 @@ const DashboardChat = () => {
                       gap: "10px",
                       marginTop: "20px",
                       paddingLeft: "20px",
-                      height: "25rem",
+                      // height: "25rem",
                       overflowY: "auto",
+                      height: "fit-content",
                     }}
                   >
                     {dataChat &&

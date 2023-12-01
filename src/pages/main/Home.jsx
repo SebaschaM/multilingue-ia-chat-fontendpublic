@@ -68,6 +68,7 @@ function Home() {
   const [chat, setChat] = useState([]);
   const [userCap2, setUserCap2] = useState(null);
   const [showTextField, setShowTextField] = useState(true);
+  const [areaProcess, setAreaProcess] = useState("");
 
   //3 CAP
   const [showLoader, setShowLoader] = useState(false);
@@ -107,6 +108,8 @@ function Home() {
       enviarPrimerMensaje(dataSave.user, data.consult);
       setShowCap(3);
       localStorage.setItem("userData", JSON.stringify(dataSave.user));
+
+      // ! Mandar el areaProcess al backend
       reset();
     } catch (error) {
       console.error("Error al subir el formulario:", error);
@@ -222,12 +225,13 @@ function Home() {
       },
     ]);
 
-    socketRef.current.emit("respuesta_de_bot", {
+    socketRef.current.emit("send_message_gpt", {
       message: dataConsultForm,
       room_name: idRoomName,
+      areaProcess: areaProcess,
     });
 
-    socketRef?.current?.on("response_bot", (data) => {
+    socketRef?.current?.on("get_messages_gpt", (data) => {
       // setear el setChat
       setChat((prev) => [
         ...prev,
@@ -238,10 +242,12 @@ function Home() {
         },
       ]);
 
-      socketRef?.current?.off("response_bot");
-      socketRef?.current?.off("respuesta_de_bot");
+      socketRef?.current?.off("get_messages_gpt");
+      socketRef?.current?.off("send_message_gpt");
     });
   };
+
+  // socketRef?.current?.on("update_conversations");
 
   const enviarMensajeUsuario = () => {
     //FUNCION DONDE USA CUANDO EL CLIENTE MANDA ALGUN MENSAJE EN LA CAPA 2
@@ -256,12 +262,12 @@ function Home() {
         },
       ]);
 
-      socketRef.current.emit("respuesta_de_bot", {
+      socketRef.current.emit("send_message_gpt", {
         message: textFieldValue,
         room_name: idRoomName,
       });
 
-      socketRef?.current?.on("response_bot", (data) => {
+      socketRef?.current?.on("get_messages_gpt", (data) => {
         // setear el setChat
         setChat((prev) => [
           ...prev,
@@ -271,8 +277,8 @@ function Home() {
             room_name: data.room_name,
           },
         ]);
-        socketRef?.current?.off("respuesta_de_bot");
-        socketRef?.current?.off("response_bot");
+        socketRef?.current?.off("send_message_gpt");
+        socketRef?.current?.off("get_messages_gpt");
       });
 
       setTextFieldValue("");
@@ -782,6 +788,23 @@ function Home() {
                           variant="standard"
                           {...register("consult")}
                         />
+                        <FormControl fullWidth>
+                          <InputLabel id="demo-simple-select-label">
+                            Area / Proceso
+                          </InputLabel>
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={areaProcess}
+                            label="Area / Proceso"
+                            onChange={(e) => {
+                              setAreaProcess(e.target.value);
+                            }}
+                          >
+                            <MenuItem value={10}>Precios</MenuItem>
+                            <MenuItem value={20}>Finanzas</MenuItem>
+                          </Select>
+                        </FormControl>
                         <div className={styles.btn_container}>
                           <Button
                             variant="contained"
@@ -970,6 +993,11 @@ function Home() {
                   sx={{ width: "100%" }}
                   onChange={(e) => {
                     setTextFieldValue(e.target.value);
+                  }}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      EnviarMensajeUsuario3Cap();
+                    }
                   }}
                   value={textFieldValue}
                 />
