@@ -7,6 +7,7 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 const Conversation = ({
   isDesktop = true,
@@ -14,6 +15,7 @@ const Conversation = ({
   setDataChat,
   dataAllConversations,
 }) => {
+  const { pathname } = useLocation();
   const conversations = dataAllConversations || [];
   const [conversationSelectedTemp, setConversationSelectedTemp] = useState(
     JSON.parse(localStorage.getItem("conversationSelected")) || {}
@@ -35,6 +37,13 @@ const Conversation = ({
   //   }
   // }, []);
 
+  // useEffect(() => {
+  //   //   // Restablecer el estado a vacío al cambiar de página
+  //   if (!String(pathname).includes("admin/dashboard/chats")) {
+  //     localStorage.removeItem("conversationSelected");
+  //     setConversationSelectedTemp({});
+  //   }
+  // }, [pathname]);
 
   if (isDesktop) {
     return (

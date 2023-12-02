@@ -65,6 +65,7 @@ const Aside = () => {
   const onClickLink = (path) => {
     setLinkSelected(path);
     // router(`/admin/dashboard/${path}`);
+    localStorage.removeItem("conversationSelected");
     router(path);
   };
 

@@ -9,7 +9,6 @@ import { v4 as uuidv4 } from "uuid";
 
 import { LayoutDashboard, LayoutDashboardContent } from "../../layout";
 import {
-  Badge,
   Box,
   Button,
   CircularProgress,
@@ -20,9 +19,13 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Conversation, MessageFrom, MessageMe, ModalCustom } from "../../components";
+import {
+  Conversation,
+  MessageFrom,
+  MessageMe,
+  ModalCustom,
+} from "../../components";
 import { useChat } from "../../hooks/useChat";
-import { set } from "react-hook-form";
 import FormTipify from "../../components/form/formTipify";
 
 const style = {
@@ -160,6 +163,10 @@ const DashboardChat = () => {
   }, []);
 
   useEffect(() => {
+    setConversationSelected({});
+  }, []);
+
+  useEffect(() => {
     onGetAllConversations();
 
     return () => {
@@ -199,11 +206,9 @@ const DashboardChat = () => {
 
   //! COLOCAR EL MODAL DE RESPONSE
   useEffect(() => {
-    console.log(modalResponse, "modalResponse")
-  },[modalResponse, setModalResponse])
+    console.log(modalResponse, "modalResponse");
+  }, [modalResponse, setModalResponse]);
   return (
-
-    
     <LayoutDashboard title="Overall Holding">
       <LayoutDashboardContent title="Gestion de Chats">
         <Grid
@@ -532,7 +537,7 @@ const DashboardChat = () => {
           </Grid>
         </Grid>
 
-{/* MODAL RESPONSE */}
+        {/* MODAL RESPONSE */}
         <ModalCustom
           openModal={modalResponse?.show}
           setOpenModal={setModalResponse}
@@ -553,7 +558,6 @@ const DashboardChat = () => {
           aria-labelledby="modal-modal-title"
           aria-describedby="modal-modal-description"
         >
-
           <Box sx={style}>
             <Typography
               id="modal-modal-title"
