@@ -101,7 +101,6 @@ const TableCustom = ({
               onClick={() => {
                 setShowModalView(true);
                 setRequestSelectedId(params.row.id);
-                console.log(filteredData);
               }}
             >
               <BsEye size={22} color="#FF7A00" />

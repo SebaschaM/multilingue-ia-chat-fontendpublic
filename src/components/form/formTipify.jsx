@@ -75,7 +75,6 @@ const FormTipify = ({
   onUserTyping,
   openModal,
   onSelectedOption,
-  onModalResponse,
   onSetModalResponse,
 }) => {
   const schema = yup.object().shape({
@@ -109,6 +108,7 @@ const FormTipify = ({
     return formattedDate;
   });
   const [isLoadingRequest, setIsLoadingRequest] = useState(false);
+  const [selectedOption, setSelectedOption] = useState();
 
   useEffect(() => {
     mappedUserTyping();
@@ -130,14 +130,11 @@ const FormTipify = ({
       reason: data.reason,
       date_attention: formatearFecha(data.date_attention),
       destination_area: data.destination_area,
-      request_type_id: 2,
+      request_type_id: selectedOption,
     };
-    // console.log(dataToSend, "dataToSend");
     setIsLoadingRequest(true);
     const response = await handleCreateRequest(dataToSend);
-    console.log(response);
     if (response.data.success) {
-      console.log("toast");
       setIsLoadingRequest(false);
       openModal(false);
       // const mappedResponse =
@@ -148,16 +145,13 @@ const FormTipify = ({
     }
   };
 
-  // const modalResponseClose = (response) => {
-  //   console.log(response)
-  //   setModalResponse(prevState => ({
-  //     ...prevState,
-  //     show: response.success,
-  //     message: response.message,
-  //   }));
-  //   console.log(modalResponse); // Deja este console.log
-
-  // }
+  useEffect(() => {
+    if (onSelectedOption === "tipificar") {
+      setSelectedOption(1);
+    } else {
+      setSelectedOption(2);
+    }
+  }, []);
 
   return (
     <>

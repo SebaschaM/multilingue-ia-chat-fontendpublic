@@ -41,6 +41,7 @@ const DashboardRequests = () => {
     message: "",
   });
   const [currentData, setCurrentData] = useState({});
+  const [typeRequest, setTypeRequest] = useState(false);
 
   const {
     handleGetAllRequests,
@@ -73,13 +74,12 @@ const DashboardRequests = () => {
   const onGetAllRequests = async () => {
     try {
       const response = await handleGetAllRequests();
-
       if (response.requests && Array.isArray(response.requests)) {
         const mappedRequests = response.requests.map((request) => ({
           id: request.id,
           cliente: request.client.fullname,
           fecha_registro: formatearFecha(request.created_at),
-          tipo: "Agendamiento",
+          tipo: transformIdRequestType(request.request_type_id),
           estado: transformText(request.status.name_status),
         }));
 
@@ -115,6 +115,15 @@ const DashboardRequests = () => {
     }
   }
 
+  function transformIdRequestType(id) {
+    if (id === 1) {
+      return "Tipificación";
+    }
+    if (id === 2) {
+      return "Agendamiento";
+    }
+  }
+
   //ELIMINAR LA SOLICITUD SELECCIONADA
   const onDeleteRequest = async () => {
     try {
@@ -140,12 +149,10 @@ const DashboardRequests = () => {
       const response = await handleGetRequestById(id);
       const requestCurrent = response.request;
 
-      console.log("requestCurrent", requestCurrent);
-
-      const currentData = {
+      const currentDataMapped = {
         user_id: requestSelectedId,
-        date_recontac: formatearFecha(requestCurrent.date_attention),
-        date_attention: formatearFecha(requestCurrent.created_at),
+        date_recontac: requestCurrent.date_attention,
+        date_atte: formatearFecha(requestCurrent.created_at),
         reason_contact: requestCurrent.reason,
         dest_area: requestCurrent.destination_area,
         fullname: requestCurrent.client.fullname,
@@ -156,10 +163,16 @@ const DashboardRequests = () => {
           requestCurrent.status.description
         ),
         type_status: requestCurrent.status.id,
+        request_type_id: requestCurrent.request_type_id, //Aca vamos a validar si es 1 es tipificación, si es 2 es agendamiento
       };
 
-      setCurrentData(currentData);
-      setValueStateSelect(currentData.type_status);
+      setCurrentData(currentDataMapped);
+
+      if (requestCurrent.request_type_id === 1) {
+        setTypeRequest(true); //acá ya se eque es un tipificación
+      } else {
+        setTypeRequest(false); //acá ya se eque es un agendamiento
+      }
     } catch (error) {
       console.log(error);
     }
@@ -184,10 +197,9 @@ const DashboardRequests = () => {
         status_id: valueStateSelect,
       };
       setShowModalEdit(false);
-      const response = await handleUpdateStatusRequest(dataRequest);
+      await handleUpdateStatusRequest(dataRequest);
       await onGetAllRequests();
       setCurrentData({});
-      console.log(response);
     } catch (error) {
       console.log(error);
     }
@@ -325,7 +337,7 @@ const DashboardRequests = () => {
               fontWeight={"bold"}
               fontSize={"2.1rem"}
             >
-              VER SOLICITUD
+              Ver solicitud
             </Typography>
             <div
               style={{
@@ -336,23 +348,26 @@ const DashboardRequests = () => {
                 marginTop: "1rem",
               }}
             >
-              <Box>
-                <TextField
-                  fullWidth
-                  id="outlined-password-input"
-                  label="Fecha de recontacto"
-                  type="text"
-                  value={currentData.date_recontac || ""}
-                  disabled={true}
-                />
-              </Box>
+              {!typeRequest && (
+                <Box>
+                  <TextField
+                    fullWidth
+                    id="outlined-password-input"
+                    label="Fecha de recontacto"
+                    type="text"
+                    value={currentData.date_recontac || ""}
+                    disabled={true}
+                  />
+                </Box>
+              )}
+
               <Box>
                 <TextField
                   fullWidth
                   id="outlined-password-input"
                   label="Fecha de creación de solicitud"
                   type="text"
-                  value={currentData.date_attention || ""}
+                  value={currentData.date_atte || ""}
                   disabled={true}
                 />
               </Box>
@@ -470,7 +485,7 @@ const DashboardRequests = () => {
               fontWeight={"bold"}
               fontSize={"2.1rem"}
             >
-              EDITAR SOLICITUD
+              Editar solicitud
             </Typography>
             <form
               style={{
@@ -482,23 +497,25 @@ const DashboardRequests = () => {
               }}
               onSubmit={handleSubmit(onEditTypeStatusRequest)}
             >
-              <Box>
-                <TextField
-                  fullWidth
-                  id="outlined-password-input"
-                  label="Fecha de recontacto"
-                  type="text"
-                  value={currentData.date_recontac || ""}
-                  disabled={true}
-                />
-              </Box>
+              {!typeRequest && (
+                <Box>
+                  <TextField
+                    fullWidth
+                    id="outlined-password-input"
+                    label="Fecha de recontacto"
+                    type="text"
+                    value={currentData.date_recontac || ""}
+                    disabled={true}
+                  />
+                </Box>
+              )}
               <Box>
                 <TextField
                   fullWidth
                   id="outlined-password-input"
                   label="Fecha de creación de solicitud"
                   type="text"
-                  value={currentData.date_attention || ""}
+                  value={currentData.date_atte || ""}
                   disabled={true}
                 />
               </Box>
