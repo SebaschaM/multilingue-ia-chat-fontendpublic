@@ -23,32 +23,16 @@ import {
 import { ModalCustom, TableCustom } from "../../components";
 import { LayoutDashboard, LayoutDashboardContent } from "../../layout";
 import { handleRequestManagment } from "../../hooks/useRequestManagment";
-
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 800,
-  maxWidth: "90%",
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
-  display: "flex",
-  flexDirection: "column",
-  gap: "1rem",
-};
+import { ca } from "date-fns/locale";
 
 const DashboardRequests = () => {
   const [valueSearch, setValueSearch] = useState("");
   const [valueState, setValueState] = useState("active");
-  const [openModal, setOpenModal] = useState(false);
+  // const [openModal, setOpenModal] = useState(false);
   const [showModalView, setShowModalView] = useState(false);
   const [showModalEdit, setShowModalEdit] = useState(false);
   const [showModalDelete, setShowModalDelete] = useState(false);
-  const { handleGetAllRequests, handleEditRequest, handleCreateRequest } =
-    handleRequestManagment();
+  const [valueStateSelect, setValueStateSelect] = useState(""); // Inicializar con el valor de currentData.type_status
   const [requestSelectedId, setRequestSelectedId] = useState(null);
   const [request, setRequest] = useState([]);
   const [isLoadingRequest, setIsLoadingRequest] = useState(false);
@@ -56,9 +40,14 @@ const DashboardRequests = () => {
     show: false,
     message: "",
   });
+  const [currentData, setCurrentData] = useState({});
 
-  const [validationCount, setValidationCount] = useState(0);
-  const [progressPassword, setProgressPassword] = useState(validationCount);
+  const {
+    handleGetAllRequests,
+    handleUpdateStatusRequest,
+    handleDeleteRequest,
+    handleGetRequestById,
+  } = handleRequestManagment();
 
   const validationSchema = Yup.object().shape({
     avality_range: Yup.string()
@@ -67,60 +56,31 @@ const DashboardRequests = () => {
     date: Yup.string()
       .required("El campo fecha es requerido")
       .max(20, "El rango debe tener como máximo 20 caracteress"),
-    label: Yup.string()
-      .required("El campo etiqueta es requerido")
-      .max(20, "El rango debe tener como máximo 20 caracteress"),
-    reason: Yup.string()
-      .required("El campo razón es requerido")
-      .max(20, "El rango debe tener como máximo 20 caracteress"),
-    target_area: Yup.string()
-      .required("El campo área de destino es requerido")
-      .max(20, "El rango debe tener como máximo 20 caracteress"),
-    email: Yup.string()
-      .required("El campo email es requerido")
-      .max(20, "El rango debe tener como máximo 20 caracteress"),
-    fullname: Yup.string()
-      .required("El campo nombre completo es requerido")
-      .max(20, "El rango debe tener como máximo 20 caracteress"),
-    cellphone: Yup.string()
-      .required("El campo celular queta es requerido")
-      .max(20, "El rango debe tener como máximo 20 caracteress"),
-    message: Yup.string()
-      .required("El campo mensaje es requerido")
-      .max(20, "El rango debe tener como máximo 20 caracteress"),
   });
 
   const {
+    reset,
     handleSubmit,
     register,
-    formState: { errors, isDirty },
-    getValues,
+    setValue,
+    formState: { errors },
   } = useForm({
-    resolver: yupResolver(validationSchema),
+    //resolver: yupResolver(validationSchema),
     shouldUnregister: false,
   });
 
-  const onModalResponse = () => {
-    console.log("Abierto");
-    setTimeout(() => {
-      setModalResponse({
-        show: false,
-        message: "",
-      });
-    }, 3000);
-  };
-
-  const getAllRequests = async () => {
+  //LISTAR TODAS LAS SOLIICTUDes
+  const onGetAllRequests = async () => {
     try {
       const response = await handleGetAllRequests();
 
       if (response.requests && Array.isArray(response.requests)) {
         const mappedRequests = response.requests.map((request) => ({
-          id: request.client.id,
+          id: request.id,
           cliente: request.client.fullname,
           fecha_registro: formatearFecha(request.created_at),
           tipo: "Agendamiento",
-          estado: request.status.name_status,
+          estado: transformText(request.status.name_status),
         }));
 
         setRequest(mappedRequests);
@@ -135,21 +95,6 @@ const DashboardRequests = () => {
     }
   };
 
-  const onCreateRequest = async (data) => {
-    //setIsLoadingRequest(true);
-    const dataRegister = {
-      ...data,
-      user_id: 1,
-      client_id: 1,
-    };
-    try {
-      const response = await handleCreateRequest(dataRegister);
-      console.log(response);
-    } catch (error) {
-      console.error("Error al crear la solicitud:", error);
-    }
-  };
-
   function formatearFecha(fechaString) {
     return new Date(fechaString).toLocaleDateString("es-PE", {
       day: "2-digit",
@@ -158,9 +103,119 @@ const DashboardRequests = () => {
     });
   }
 
+  function transformText(text) {
+    if (text === "pending") {
+      return "Pendiente";
+    }
+    if (text === "attended") {
+      return "Atendido";
+    }
+    if (text === "canceled") {
+      return "Cancelado";
+    }
+  }
+
+  //ELIMINAR LA SOLICITUD SELECCIONADA
+  const onDeleteRequest = async () => {
+    try {
+      const response = await handleDeleteRequest(requestSelectedId);
+
+      await onGetAllRequests();
+      setShowModalDelete(false);
+
+      setModalResponse({
+        show: true,
+        message: response.data.message,
+      });
+      return response;
+    } catch (error) {
+      console.error("Error al eliminar la solicitud:", error);
+    }
+  };
+
+  //OBTENER LA SOLICITUD SELECCIONADA
+
+  const onGetRequestById = async (id) => {
+    try {
+      const response = await handleGetRequestById(id);
+      const requestCurrent = response.request;
+
+      console.log("requestCurrent", requestCurrent);
+
+      const currentData = {
+        user_id: requestSelectedId,
+        date_recontac: formatearFecha(requestCurrent.date_attention),
+        date_attention: formatearFecha(requestCurrent.created_at),
+        reason_contact: requestCurrent.reason,
+        dest_area: requestCurrent.destination_area,
+        fullname: requestCurrent.client.fullname,
+        client_email: requestCurrent.client.email,
+        cellphone: requestCurrent.client.cellphone,
+        agent_email: requestCurrent.user.email,
+        status_request: traducirStatusRequest(
+          requestCurrent.status.description
+        ),
+        type_status: requestCurrent.status.id,
+      };
+
+      setCurrentData(currentData);
+      setValueStateSelect(currentData.type_status);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  function traducirStatusRequest(text) {
+    if (text === "Attended request") {
+      return "Soicitud atentida";
+    }
+    if (text === "Pending request") {
+      return "Solicitud en revisión";
+    }
+    if (text === "Canceled request") {
+      return "Solicitud cancelada";
+    }
+  }
+
+  const onEditTypeStatusRequest = async () => {
+    try {
+      const dataRequest = {
+        request_id: requestSelectedId,
+        status_id: valueStateSelect,
+      };
+      setShowModalEdit(false);
+      const response = await handleUpdateStatusRequest(dataRequest);
+      await onGetAllRequests();
+      setCurrentData({});
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
-    getAllRequests();
+    onGetAllRequests();
   }, []);
+
+  useEffect(() => {
+    if (!showModalView) {
+      reset();
+      setCurrentData({});
+    } else {
+      const id = requestSelectedId;
+      onGetRequestById(id);
+    }
+  }, [showModalView]);
+
+  useEffect(() => {
+    if (!showModalEdit) {
+      setCurrentData({});
+      reset();
+    } else {
+      const id = requestSelectedId;
+      onGetRequestById(id);
+    }
+  }, [showModalEdit]);
 
   return (
     <>
@@ -179,6 +234,7 @@ const DashboardRequests = () => {
           </div>
         </ModalCustom>
       )}
+
       <LayoutDashboard title="Exe Digital | Solicitudes">
         <LayoutDashboardContent title="Solicitudes">
           <Grid
@@ -198,14 +254,16 @@ const DashboardRequests = () => {
                     id="state"
                     value={valueState}
                     label="Estado"
+                    disabled="true"
                     onChange={(e) => setValueState(e.target.value)}
                   >
-                    <MenuItem value={"active"}>Activo</MenuItem>
+                    <MenuItem value={"active"}>All</MenuItem>
                     <MenuItem value={"inactive"}>Inactivo</MenuItem>
                   </Select>
                 </FormControl>
               </Box>
             </Grid>
+
             <Grid item xs={12} sm={6} md={2.5}>
               <Box width={"100%"}>
                 <FormControl fullWidth>
@@ -215,9 +273,10 @@ const DashboardRequests = () => {
                     id="state"
                     value={valueState}
                     label="Estado"
+                    disabled="true"
                     onChange={(e) => setValueState(e.target.value)}
                   >
-                    <MenuItem value={"active"}>Activo</MenuItem>
+                    <MenuItem value={"active"}>All</MenuItem>
                     <MenuItem value={"inactive"}>Inactivo</MenuItem>
                   </Select>
                 </FormControl>
@@ -242,23 +301,6 @@ const DashboardRequests = () => {
                 />
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6} md={2.5}>
-              <Button
-                onClick={() => setOpenModal(true)}
-                variant="contained"
-                fullWidth
-                sx={{
-                  paddingBlock: "1rem",
-                  display: "flex",
-                  columnGap: "0.5rem",
-                  alignItems: "center",
-                  color: "white",
-                }}
-              >
-                <BsPersonAdd size={18} />
-                Agregar solicitud
-              </Button>
-            </Grid>
           </Grid>
 
           <TableCustom
@@ -271,268 +313,328 @@ const DashboardRequests = () => {
           />
 
           {/* MODAL */}
-          <ModalCustom openModal={openModal} setOpenModal={setOpenModal}>
-            <Modal
-              open={openModal}
-              onClose={() => setOpenModal(false)}
-              aria-labelledby="modal-modal-title"
-              aria-describedby="modal-modal-description"
-            >
-              <Box sx={style}>
-                <Typography
-                  id="modal-modal-title"
-                  variant="h6"
-                  component="h2"
-                  align="center"
-                >
-                  AGENDAMIENTO
-                </Typography>
-                <form
-                  onSubmit={handleSubmit(onCreateRequest)}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    rowGap: "2rem",
-                  }}
-                >
-                  <Box>
-                    <TextField
-                      fullWidth
-                      id="outlined-password-input"
-                      label="Rango de disponibilidad"
-                      type="text"
-                      color={errors.fullname ? "error" : "primary"}
-                      {...register("fullname", {
-                        required: { value: true, message: "Campo requerido" },
-                        maxLength: {
-                          value: 20,
-                          message:
-                            "El rango debe tener como máximo 20 caracteres",
-                        },
-                      })}
-                    />
-                    {errors.fullname && (
-                      <Typography color="red">
-                        {errors.fullname.message}
-                      </Typography>
-                    )}
-                  </Box>
-                  <Box>
-                    <TextField
-                      fullWidth
-                      id="outlined-password-input"
-                      label="Fecha"
-                      type="text"
-                      color={errors.date ? "error" : "primary"}
-                      {...register("date", {
-                        required: { value: true, message: "Campo requerido" },
-                        maxLength: {
-                          value: 20,
-                          message:
-                            "El rango debe tener como máximo 20 caracteres",
-                        },
-                      })}
-                    />
-                    {errors.date && (
-                      <Typography color="red">{errors.date.message}</Typography>
-                    )}
-                  </Box>
-
-                  <Box>
-                    <TextField
-                      fullWidth
-                      id="outlined-password-input"
-                      label="Etiqueta"
-                      type="text"
-                      color={errors.label ? "error" : "primary"}
-                      {...register("label", {
-                        required: { value: true, message: "Campo requerido" },
-                        maxLength: {
-                          value: 20,
-                          message:
-                            "El rango debe tener como máximo 20 caracteres",
-                        },
-                      })}
-                    />
-                    {errors.label && (
-                      <Typography color="red">
-                        {errors.label.message}
-                      </Typography>
-                    )}
-                  </Box>
-                  <Box>
-                    <TextField
-                      fullWidth
-                      id="outlined-password-input"
-                      label="Razón"
-                      type="text"
-                      color={errors.reason ? "error" : "primary"}
-                      {...register("reason", {
-                        required: { value: true, message: "Campo requerido" },
-                        maxLength: {
-                          value: 20,
-                          message:
-                            "El rango debe tener como máximo 20 caracteres",
-                        },
-                      })}
-                    />
-                    {errors.reason && (
-                      <Typography color="red">
-                        {errors.reason.message}
-                      </Typography>
-                    )}
-                  </Box>
-
-                  <Box>
-                    <TextField
-                      fullWidth
-                      id="outlined-password-input"
-                      label="Área de destino"
-                      type="text"
-                      color={errors.target_area ? "error" : "primary"}
-                      {...register("target_area", {
-                        required: { value: true, message: "Campo requerido" },
-                        maxLength: {
-                          value: 20,
-                          message:
-                            "El rango debe tener como máximo 20 caracteres",
-                        },
-                      })}
-                    />
-                    {errors.target_area && (
-                      <Typography color="red">
-                        {errors.target_area.message}
-                      </Typography>
-                    )}
-                  </Box>
-
-                  <Box>
-                    <TextField
-                      fullWidth
-                      id="outlined-password-input"
-                      label="Email"
-                      type="text"
-                      color={errors.email ? "error" : "primary"}
-                      {...register("email", {
-                        required: { value: true, message: "Campo requerido" },
-                        maxLength: {
-                          value: 20,
-                          message:
-                            "El rango debe tener como máximo 20 caracteres",
-                        },
-                      })}
-                    />
-                    {errors.email && (
-                      <Typography color="red">
-                        {errors.email.message}
-                      </Typography>
-                    )}
-                  </Box>
-
-                  <Box>
-                    <TextField
-                      fullWidth
-                      id="outlined-password-input"
-                      label="Nombre completo"
-                      type="text"
-                      color={errors.fullname ? "error" : "primary"}
-                      {...register("fullname", {
-                        required: { value: true, message: "Campo requerido" },
-                        maxLength: {
-                          value: 20,
-                          message:
-                            "El rango debe tener como máximo 20 caracteres",
-                        },
-                      })}
-                    />
-                    {errors.fullname && (
-                      <Typography color="red">
-                        {errors.fullname.message}
-                      </Typography>
-                    )}
-                  </Box>
-
-                  <Box>
-                    <TextField
-                      fullWidth
-                      id="outlined-password-input"
-                      label="Celular"
-                      type="text"
-                      color={errors.cellphone ? "error" : "primary"}
-                      {...register("cellphone", {
-                        required: { value: true, message: "Campo requerido" },
-                        maxLength: {
-                          value: 20,
-                          message:
-                            "El rango debe tener como máximo 20 caracteres",
-                        },
-                      })}
-                    />
-                    {errors.cellphone && (
-                      <Typography color="red">
-                        {errors.cellphone.message}
-                      </Typography>
-                    )}
-                  </Box>
-
-                  <Box>
-                    <TextField
-                      fullWidth
-                      id="outlined-password-input"
-                      label="Mensaje"
-                      type="text"
-                      color={errors.message ? "error" : "primary"}
-                      {...register("message", {
-                        required: { value: true, message: "Campo requerido" },
-                        maxLength: {
-                          value: 20,
-                          message:
-                            "El rango debe tener como máximo 20 caracteres",
-                        },
-                      })}
-                    />
-                    {errors.message && (
-                      <Typography color="red">
-                        {errors.message.message}
-                      </Typography>
-                    )}
-                  </Box>
-
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    sx={{ color: "#fff" }}
-                    //disabled={isLoadingRequest ? true : false}
-                    /*onClick={() => {
-                      onModalResponse();
-                    }}*/
-                  >
-                    AGREGAR
-                  </Button>
-                </form>
-              </Box>
-            </Modal>
-          </ModalCustom>
-
           <ModalCustom
             openModal={showModalView}
             setOpenModal={setShowModalView}
           >
-            <h1>Ver modal</h1>
+            <Typography
+              id="modal-modal-title"
+              variant="h1"
+              component="h1"
+              align="center"
+              fontWeight={"bold"}
+              fontSize={"2.1rem"}
+            >
+              VER SOLICITUD
+            </Typography>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                rowGap: "1.2rem",
+                width: "100%",
+                marginTop: "1rem",
+              }}
+            >
+              <Box>
+                <TextField
+                  fullWidth
+                  id="outlined-password-input"
+                  label="Fecha de recontacto"
+                  type="text"
+                  value={currentData.date_recontac || ""}
+                  disabled={true}
+                />
+              </Box>
+              <Box>
+                <TextField
+                  fullWidth
+                  id="outlined-password-input"
+                  label="Fecha de creación de solicitud"
+                  type="text"
+                  value={currentData.date_attention || ""}
+                  disabled={true}
+                />
+              </Box>
+              <Box>
+                <TextField
+                  fullWidth
+                  id="outlined-password-input"
+                  label="Razón de contacto"
+                  type="text"
+                  value={currentData.reason_contact || ""}
+                  disabled={true}
+                />
+              </Box>
+              <Box>
+                <TextField
+                  fullWidth
+                  id="outlined-password-input"
+                  label="Área de destino"
+                  type="text"
+                  value={currentData.dest_area || ""}
+                  disabled={true}
+                />
+              </Box>
+              <Box>
+                <TextField
+                  fullWidth
+                  id="outlined-password-input"
+                  label="Correo del cliente"
+                  type="text"
+                  value={currentData.client_email || ""}
+                  disabled={true}
+                />
+              </Box>
+              <Box>
+                <TextField
+                  fullWidth
+                  id="outlined-password-input"
+                  label="Nombre del cliente"
+                  type="text"
+                  value={currentData.fullname || ""}
+                  disabled={true}
+                />
+              </Box>
+              <Box>
+                <TextField
+                  fullWidth
+                  id="outlined-password-input"
+                  label="Celular de contacto"
+                  type="text"
+                  value={currentData.cellphone || ""}
+                  disabled={true}
+                />
+              </Box>
+              <Box>
+                <TextField
+                  fullWidth
+                  id="outlined-password-input"
+                  label="Correo del agente"
+                  type="text"
+                  value={currentData.agent_email || ""}
+                  disabled={true}
+                />
+              </Box>
+              <Box>
+                <TextField
+                  fullWidth
+                  id="outlined-password-input"
+                  label="Estado"
+                  type="text"
+                  value={currentData.status_request || ""}
+                  disabled={true}
+                />
+              </Box>
+
+              <Box>
+                <FormControl sx={{ minWidth: 200 }} fullWidth>
+                  <InputLabel id="demo-simple-select-helper-label">
+                    Estado de solicitud
+                  </InputLabel>
+                  <Select
+                    fullWidth
+                    id="outlined-password-input"
+                    label="Estado de solicitud"
+                    type="text"
+                    value={currentData.type_status || ""}
+                    disabled={true}
+                  >
+                    <MenuItem value={1}>Atendido</MenuItem>
+                    <MenuItem value={2}>Pendiente</MenuItem>
+                    <MenuItem value={3}>Cancelado</MenuItem>
+                  </Select>{" "}
+                </FormControl>
+              </Box>
+              {/* DATOS DEL CLIENTE - FALTA AGREGAR CAMPOS */}
+              <Button
+                color="info"
+                onClick={() => {
+                  setShowModalView(false);
+                }}
+              >
+                <Typography variant="button">Aceptar</Typography>
+              </Button>
+            </div>
           </ModalCustom>
 
           <ModalCustom
             openModal={showModalEdit}
             setOpenModal={setShowModalEdit}
           >
-            <h1>Editar modal</h1>
+            <Typography
+              id="modal-modal-title"
+              variant="h1"
+              component="h1"
+              align="center"
+              fontWeight={"bold"}
+              fontSize={"2.1rem"}
+            >
+              EDITAR SOLICITUD
+            </Typography>
+            <form
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                rowGap: "1.2rem",
+                width: "100%",
+                marginTop: "1rem",
+              }}
+              onSubmit={handleSubmit(onEditTypeStatusRequest)}
+            >
+              <Box>
+                <TextField
+                  fullWidth
+                  id="outlined-password-input"
+                  label="Fecha de recontacto"
+                  type="text"
+                  value={currentData.date_recontac || ""}
+                  disabled={true}
+                />
+              </Box>
+              <Box>
+                <TextField
+                  fullWidth
+                  id="outlined-password-input"
+                  label="Fecha de creación de solicitud"
+                  type="text"
+                  value={currentData.date_attention || ""}
+                  disabled={true}
+                />
+              </Box>
+              <Box>
+                <TextField
+                  fullWidth
+                  id="outlined-password-input"
+                  label="Razón de contacto"
+                  type="text"
+                  value={currentData.reason_contact || ""}
+                  disabled={true}
+                />
+              </Box>
+              <Box>
+                <TextField
+                  fullWidth
+                  id="outlined-password-input"
+                  label="Área de destino"
+                  type="text"
+                  value={currentData.dest_area || ""}
+                  disabled={true}
+                />
+              </Box>
+              <Box>
+                <TextField
+                  fullWidth
+                  id="outlined-password-input"
+                  label="Correo del cliente"
+                  type="text"
+                  value={currentData.client_email || ""}
+                  disabled={true}
+                />
+              </Box>
+              <Box>
+                <TextField
+                  fullWidth
+                  id="outlined-password-input"
+                  label="Nombre del cliente"
+                  type="text"
+                  value={currentData.fullname || ""}
+                  disabled={true}
+                />
+              </Box>
+              <Box>
+                <TextField
+                  fullWidth
+                  id="outlined-password-input"
+                  label="Celular de contacto"
+                  type="text"
+                  value={currentData.cellphone || ""}
+                  disabled={true}
+                />
+              </Box>
+              <Box>
+                <TextField
+                  fullWidth
+                  id="outlined-password-input"
+                  label="Correo del agente"
+                  type="text"
+                  value={currentData.agent_email || ""}
+                  disabled={true}
+                />
+              </Box>
+              <Box>
+                <TextField
+                  fullWidth
+                  id="outlined-password-input"
+                  label="Estado"
+                  type="text"
+                  value={currentData.status_request || ""}
+                  disabled={true}
+                />
+              </Box>
+
+              <Box>
+                <FormControl sx={{ minWidth: 200 }} fullWidth>
+                  <InputLabel id="demo-simple-select-helper-label">
+                    Estado de solicitud
+                  </InputLabel>
+                  <Select
+                    fullWidth
+                    labelId="demo-simple-select-helper-label"
+                    id="demo-simple-select-helper"
+                    label="Estado de solicitud"
+                    value={valueStateSelect}
+                    //defaultValue={valueStateSelect}
+                    {...register("type_status", {
+                      required: true,
+                    })}
+                    onChange={(e) => setValueStateSelect(e.target.value)}
+                  >
+                    <MenuItem value={1}>Atendido</MenuItem>
+                    <MenuItem value={2}>Pendiente</MenuItem>
+                    <MenuItem value={3}>Cancelado</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+
+              {/* DATOS DEL CLIENTE - FALTA AGREGAR CAMPOS */}
+              <Button
+                color="info"
+                type="submit"
+                disabled={isLoadingRequest ? true : false}
+              >
+                <Typography variant="button">Guardar cambios</Typography>
+              </Button>
+            </form>
           </ModalCustom>
 
           <ModalCustom
             openModal={showModalDelete}
             setOpenModal={setShowModalDelete}
           >
-            <h1>Estas seguro de eliminar</h1>
+            <h1
+              style={{
+                fontSize: "1.8rem",
+              }}
+            >
+              ¿Estás seguro que deseas eliminar esta solicitud?
+            </h1>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                flexDirection: "column",
+                rowGap: "1rem",
+              }}
+            >
+              <Button color="primary" onClick={onDeleteRequest}>
+                <Typography variant="button">Aceptar</Typography>
+              </Button>
+
+              <Button color="error" onClick={() => setShowModalDelete(false)}>
+                <Typography variant="button">Cancelar</Typography>
+              </Button>
+            </Box>
           </ModalCustom>
         </LayoutDashboardContent>
       </LayoutDashboard>
