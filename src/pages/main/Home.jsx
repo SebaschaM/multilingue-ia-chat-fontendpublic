@@ -105,7 +105,11 @@ function Home() {
       const dataSave = await handleRegisterUserChat(dataRegister);
       setUserCap2(dataSave.user);
       await connectSocket(dataSave.user, data.consult);
-      enviarPrimerMensaje(dataSave.user, data.consult);
+      enviarPrimerMensaje(
+        dataSave.user,
+        data.consult,
+        dataSave.user.language.code_language
+      );
       setShowCap(3);
       localStorage.setItem("userData", JSON.stringify(dataSave.user));
       reset();
@@ -190,7 +194,6 @@ function Home() {
         // setear el setChat
 
         if (data.id !== userCap2.id) {
-          console.log(data);
           setChatCap3((prev) => [
             ...prev,
             {
@@ -209,10 +212,12 @@ function Home() {
     }
   };
 
-  console.log(chatCap3);
-
   //2 CAP
-  const enviarPrimerMensaje = (dataSaveUser, dataConsultForm) => {
+  const enviarPrimerMensaje = (
+    dataSaveUser,
+    dataConsultForm,
+    languageAbrev
+  ) => {
     const idRoomName = localStorage.getItem("idRoom");
     setChat((prev) => [
       ...prev,
@@ -227,6 +232,7 @@ function Home() {
       message: dataConsultForm,
       room_name: idRoomName,
       areaProcess: areaProcess,
+      code_language: languageAbrev,
     });
 
     socketRef?.current?.on("get_messages_gpt", (data) => {
@@ -264,6 +270,7 @@ function Home() {
         message: textFieldValue,
         room_name: idRoomName,
         areaProcess: areaProcess,
+        code_language: userCap2.language.code_language,
       });
 
       socketRef?.current?.on("get_messages_gpt", (data) => {

@@ -356,27 +356,6 @@ const DashboardChat = () => {
                     <Typography variant="h6" component="h3">
                       {conversationSelected?.client_conversation?.fullname}
                     </Typography>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
-                      }}
-                    >
-                      {conversationSelected?.client_conversation?.fullname && (
-                        <>
-                          <span
-                            style={{
-                              backgroundColor: "#4caf50",
-                              width: "10px",
-                              height: "10px",
-                              borderRadius: "50%",
-                            }}
-                          ></span>
-                          <span style={{ color: "#707070" }}>Online</span>
-                        </>
-                      )}
-                    </div>
                   </Box>
                   <Box
                     sx={{

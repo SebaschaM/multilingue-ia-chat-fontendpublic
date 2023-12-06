@@ -4,8 +4,6 @@ import { socketAtom, userAtom } from "../../store/store";
 import io from "socket.io-client";
 import Chat from "./Chat";
 
-
-
 const PanelChat = () => {
   const [connectedUsers, setConnectedUsers] = useState([]);
   const [socket] = useAtom(socketAtom);
@@ -38,20 +36,19 @@ const PanelChat = () => {
 
   useEffect(() => {
     if (socket) {
-      console.log(lastLoggedInUser, "ultimo usuario logueado")
+      console.log(lastLoggedInUser, "ultimo usuario logueado");
       const userData = { email: user.email, socket_id: "xd" };
 
       socket.emit("login", userData);
     }
   }, [user, socket]);
 
-  
   useEffect(() => {
     if (socket) {
       socket.on("users_connected", (users) => {
         setConnectedUsers(users);
         console.log("Connected users", users);
-  
+
         // Obtener el último usuario logueado de la lista
         if (users.length > 0) {
           const lastUser = users[users.length - 1];
@@ -61,8 +58,6 @@ const PanelChat = () => {
       });
     }
   }, [socket, connectedUsers]);
-
- 
 
   const toggleChat = (socketId) => {
     // console.log("Toggle chat para el usuario con ID:", socketId);
@@ -75,8 +70,6 @@ const PanelChat = () => {
     toggleChat(user.socket_id);
   };
 
-  // console.log("ultimo lloger ", lastLoggedInUser);
-
   // Filtrar la lista de usuarios para excluir al usuario actual
   const otherConnectedUsers = connectedUsers.filter(
     (u) => u.socket_id !== user.socket_id
@@ -85,9 +78,7 @@ const PanelChat = () => {
   return (
     <div>
       {/* Mostrar el ID del usuario */}
-      {lastLoggedInUser && (
-        <h4>Chat mi ID es {lastLoggedInUser.socket_id}</h4>
-      )}
+      {lastLoggedInUser && <h4>Chat mi ID es {lastLoggedInUser.socket_id}</h4>}
       <div>
         <h2>Usuarios Conectados:</h2>
         <ul>
@@ -114,11 +105,7 @@ const PanelChat = () => {
           <p>Correo Electrónico: {selectedUser.email}</p>
           <Chat userSelected={selectedUser} />
         </div>
-
-      )
-      }
-      
-      
+      )}
 
       {/* Resto de la interfaz de usuario del chat */}
     </div>
