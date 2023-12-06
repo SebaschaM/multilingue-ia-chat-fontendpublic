@@ -48,8 +48,8 @@ const TableCustomForUserManagment = ({
       type: "string",
     },
     {
-      field: "telefono",
-      headerName: "Telefono",
+      field: "teléfono",
+      headerName: "Teléfono",
       width: 200,
       sortable: false,
       align: "center",

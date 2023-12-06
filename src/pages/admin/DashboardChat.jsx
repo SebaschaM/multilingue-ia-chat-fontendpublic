@@ -210,7 +210,7 @@ const DashboardChat = () => {
   }, [modalResponse, setModalResponse]);
   return (
     <LayoutDashboard title="Overall Holding">
-      <LayoutDashboardContent title="Gestion de Chats">
+      <LayoutDashboardContent title="Gestión de Chats">
         <Grid
           container
           sx={{

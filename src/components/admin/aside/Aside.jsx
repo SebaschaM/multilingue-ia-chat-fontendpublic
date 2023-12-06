@@ -38,7 +38,7 @@ const Aside = () => {
     {
       path: "/admin/dashboard/chats",
       role: ["manager", "agent"],
-      label: "Gestion de chats",
+      label: "Gestión de chats",
       icon: <BsChatLeftDots />,
     },
     {

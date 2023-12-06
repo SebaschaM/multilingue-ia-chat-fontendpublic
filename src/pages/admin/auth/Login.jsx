@@ -417,13 +417,13 @@ function Login() {
           </form>
 
           {/* Botón para registrarse*/}
-          <p className={styles.text_link}>
+          {/* <p className={styles.text_link}>
             ¿No tienes cuenta?
             <Link to={"/register"} className={styles.link}>
               {" "}
               Registrate aquí
             </Link>
-          </p>
+          </p> */}
         </CardContent>
       </Card>
     </div>

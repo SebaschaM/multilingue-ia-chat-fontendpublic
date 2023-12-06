@@ -49,7 +49,7 @@ export const category = [
       6: "Kaypi ñuqaqaqa yanapaqmi yanapaqkunaqa yanapaqmi kani. ¿Ima sutiyki kani?",
       7: "当社は、クライアント、プロジェクト、コンテンツ管理用のソフトウェアを提供しています。また、技術サポート、トレーニング、コンサルティングも提供しています。",
       8: "Nossa empresa oferece software para gerenciamento de clientes, projetos e conteúdo. Também fornecemos suporte técnico, treinamento e consultoria.",
-      9: "Notre entreprise propose des logiciels de gestion de la clientèle, des projets et du contenu. Nous fournissons également un support technique, une formation et des conseils.",
+      9: "Notre entreprise propose des logiciels de gestión de la clientèle, des projets et du contenu. Nous fournissons également un support technique, une formation et des conseils.",
       10: "저희 회사는 고객, 프로젝트 및 콘텐츠 관리를 위한 소프트웨어를 제공합니다. 또한 기술 지원, 교육 및 컨설팅을 제공합니다.",
     },
   },
