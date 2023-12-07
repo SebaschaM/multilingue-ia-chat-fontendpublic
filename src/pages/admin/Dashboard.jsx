@@ -64,7 +64,6 @@ const Dashboard = () => {
         if (response.data && response.data.length > 0) {
           setBarChartDataRequests(response.data);
         }
-        console.log(response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -90,20 +89,20 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const response = await getTotalAttendedChats();
-      console.log(response.data)
-      if (response.data && response.data.length > 0) {
-        setTotalAttendedChats(response.data[0].total_chats_atendidos);
+    const fetchData = async () => {
+      try {
+        const response = await getTotalAttendedChats();
+        console.log(response.data);
+        if (response.data && response.data.length > 0) {
+          setTotalAttendedChats(response.data[0].total_chats_atendidos);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
       }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
+    };
 
-  fetchData();
-}, []);
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -136,17 +135,17 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const response = await getCountChatsByHour();
-  
+
         if (response.data && response.data.length > 0) {
           const lastValue = response.data[response.data.length - 1].num_chats;
-          console.log(response.data)
+
           setLastHourChats(lastValue);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
-  
+
     fetchData();
   }, []);
 
@@ -154,7 +153,6 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const response = await getTotalOfUsers();
-        console.log(response.data);
         setTotalUsers(response.data.total_users);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -163,7 +161,7 @@ const Dashboard = () => {
 
     fetchData();
   }, []);
-  
+
   return (
     <LayoutDashboard title="Exe Digital">
       <LayoutDashboardContent title="Dashboard">
@@ -268,7 +266,7 @@ const Dashboard = () => {
                 </Box>
 
                 <Typography variant="h3" color={"#7a0c2e"}>
-                 {lastHourChats}
+                  {lastHourChats}
                 </Typography>
 
                 <Typography

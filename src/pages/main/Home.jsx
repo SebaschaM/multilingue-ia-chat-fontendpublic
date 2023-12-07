@@ -23,7 +23,7 @@ import {
   formTo2Cap,
   textModal,
 } from "../../utils/dataChatbot";
-import { useChatClient } from "../../hooks/useChatClient.JSX";
+import { useChatClient } from "../../hooks/useChatClient.jsx";
 
 function Home() {
   //LANDING
