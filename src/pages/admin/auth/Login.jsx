@@ -66,8 +66,12 @@ function Login() {
       navigate("/admin/dashboard");
     }
     if (user) {
-      if (user.role.id == 1 || user.role.id == 2) {
+      if (user.role.id == 1) {
         navigate("/admin/dashboard");
+      }
+
+      if (user.role.id == 2) {
+        navigate("/admin/dashboard/chats");
       }
     }
   }, [user, navigate]);

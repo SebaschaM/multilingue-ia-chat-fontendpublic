@@ -27,6 +27,7 @@ import {
 } from "../../components";
 import { useChat } from "../../hooks/useChat";
 import FormTipify from "../../components/form/formTipify";
+import { useNavigate } from "react-router-dom";
 
 const style = {
   position: "absolute",
@@ -45,6 +46,7 @@ const style = {
 };
 
 const DashboardChat = () => {
+  const router = useNavigate();
   const [isLoadingConversation, setIsLoadingConversation] = useState(false);
   const { getConversationsByID, getMessageByIdConversation } = useChat();
   const [allConversations, setAllConversations] = useState([]);
@@ -64,10 +66,14 @@ const DashboardChat = () => {
   });
 
   const socketRef = useRef();
-  const userData = JSON.parse(localStorage.getItem("userData"));
-  const userID = userData.user.id;
-  const fullname = userData.user.fullname;
+  const userData = JSON.parse(localStorage.getItem("userData")) || {};
+  const userID = userData?.user?.id || null;
+  const fullname = userData?.user?.fullname;
   const room_name = uuidv4();
+
+  if (!userID) {
+    router("/admin/auth");
+  }
 
   const onGetAllConversations = async () => {
     setIsLoadingConversation(true);
@@ -160,6 +166,14 @@ const DashboardChat = () => {
     return () => {
       socket.disconnect();
     };
+  }, []);
+
+  useEffect(() => {
+    const data = JSON.parse(localStorage.getItem("userData"));
+    console.log(data);
+    if (!data) {
+      router("/admin/auth");
+    }
   }, []);
 
   useEffect(() => {

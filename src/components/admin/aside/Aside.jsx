@@ -62,6 +62,10 @@ const Aside = () => {
   const { user, handleLogout, setUserAtom } = useAuth();
   const [validateRole, setValidateRole] = useState();
 
+  if (!user) {
+    router("/admin/auth");
+  }
+
   const onClickLink = (path) => {
     setLinkSelected(path);
     // router(`/admin/dashboard/${path}`);
@@ -143,6 +147,10 @@ const Aside = () => {
             <Menu className={styles.sidebar_menu} closeOnClick={false}>
               {routes.map((route) => {
                 const roleMatch = route.role.includes(validateRole);
+                if (!roleMatch && user?.role?.name_role === "agent") {
+                  router("/admin/dashboard/chats");
+                }
+
                 if (roleMatch) {
                   return (
                     <MenuItem
@@ -160,6 +168,7 @@ const Aside = () => {
                     </MenuItem>
                   );
                 }
+
                 return null;
               })}
             </Menu>
