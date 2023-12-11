@@ -24,7 +24,6 @@ import {
   textModal,
 } from "../../utils/dataChatbot";
 import { useChatClient } from "../../hooks/useChatClient.jsx";
-import useFernet from "../../hooks/useFernet.js";
 
 function Home() {
   //LANDING
