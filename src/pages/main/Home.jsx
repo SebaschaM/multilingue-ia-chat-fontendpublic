@@ -175,25 +175,15 @@ function Home() {
     return room_name;
   };
 
-  const encryptMessageTest = async (message) => {
-    const f = await Fernet.getInstance(keyFernet);
-
-    const messageEncrypt = await f.encrypt(message);
-    console.log(messageEncrypt);
-
-    const decryptM = await f.decrypt(messageEncrypt);
-    console.log(decryptM);
-
-    return messageEncrypt;
-  };
-
-
   //3ERA CAP
   const EnviarMensajeUsuario3Cap = async () => {
-    //FUNCION DONDE USA CUANDO EL CLIENTE MANDA ALGUN MENSAJE EN LA CAPA 3
+    // FUNCION DONDE SE USA CUANDO EL CLIENTE MANDA ALGÚN MENSAJE EN LA CAPA 3
     const idRoomName = localStorage.getItem("idRoom");
     setTextFieldValue("");
+
     if (textFieldValue.trim() !== "") {
+      const encryptedMessage = await encryptMessageTest(textFieldValue);
+
       setChatCap3((prev) => [
         ...prev,
         {
@@ -208,31 +198,49 @@ function Home() {
         id: userCap2.id,
         date: new Date().toLocaleDateString(),
         room_name: idRoomName,
-        message: await encryptMessageTest(textFieldValue),
+        message: encryptedMessage,
       });
 
       socketRef?.current?.off("get_messages");
-      //QUISIERA TENER ESE IF, PARA PODER INVOCAR AL EVENTO get_message
-      socketRef?.current?.on("get_messages", (data) => {
+      socketRef?.current?.on("get_messages", async (data) => {
         // setear el setChat
 
         if (data.id !== userCap2.id) {
-          setChatCap3((prev) => [
-            ...prev,
-            {
-              message: data.message_traslated_text,
-              user_receiver: data.id_user_receiver,
-              user_sender: data.id_user_sender,
-              room_name: data.room_name,
-            },
-          ]);
+          try {
+            const decryptedMessage = await desencryptMessageTest(
+              data.message_traslated_text
+            );
+
+            setChatCap3((prev) => [
+              ...prev,
+              {
+                message: decryptedMessage,
+                user_receiver: data.id_user_receiver,
+                user_sender: data.id_user_sender,
+                room_name: data.room_name,
+              },
+            ]);
+          } catch (error) {
+            console.error("Error al desencriptar el mensaje:", error);
+          }
         }
         setTextFieldValue("");
       });
     } else {
-      // Puedes agregar una alerta o manejar el caso de mensaje vacío de alguna manera
       console.log("No se puede enviar un mensaje vacío");
     }
+  };
+
+  const desencryptMessageTest = async (messageEncrypt) => {
+    const f = await Fernet.getInstance(keyFernet);
+    const decryptM = await f.decrypt(messageEncrypt);
+    return decryptM;
+  };
+
+  const encryptMessageTest = async (message) => {
+    const f = await Fernet.getInstance(keyFernet);
+    const messageEncrypt = await f.encrypt(message);
+    return messageEncrypt;
   };
 
   //2 CAP
