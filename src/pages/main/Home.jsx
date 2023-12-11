@@ -4,6 +4,7 @@ import styles from "./Home.module.css";
 import { io } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import { LandingPart3, LandingPart2 } from "../../components/index";
+import { Fernet } from "fernet-ts";
 
 import {
   Box,
@@ -73,6 +74,9 @@ function Home() {
   //3 CAP
   const [showLoader, setShowLoader] = useState(false);
   const [chatCap3, setChatCap3] = useState([]);
+
+  //KEY FERNET
+  const [keyFernet, setKeyFernet] = useState("");
 
   const showLoaderTo3Cap = async () => {
     setModalExit(false);
@@ -147,6 +151,14 @@ function Home() {
       console.log(error);
     });
 
+    //escuchando la key desde el backend
+    socket.on("send_fernet_key_base_64", (data) => {
+      const { key } = data;
+      console.log(key);
+      let keyFernetDecodificade = atob(key);
+      setKeyFernet(keyFernetDecodificade);
+    });
+
     socket.on("error_send_message", (error) => {
       console.log(error);
     });
@@ -165,12 +177,33 @@ function Home() {
     return room_name;
   };
 
+  const decryptMessage = async (messageEncrypt) => {
+    const f = await Fernet.getInstance(keyFernet);
+    const messageDesencrypt = await f.decrypt(messageEncrypt);
+    console.log(messageDesencrypt);
+    return messageDesencrypt;
+  };
+
+  const encryptMessage = async (message) => {
+    const f = await Fernet.getInstance(keyFernet);
+    console.log(keyFernet);
+
+    const messageEncrypt = await f.encrypt(message);
+    console.log(messageEncrypt);
+
+    const decryptM = decryptMessage(messageEncrypt);
+    console.log(decryptM);
+
+    return messageEncrypt;
+  };
+
   //3ERA CAP
-  const EnviarMensajeUsuario3Cap = () => {
+  const EnviarMensajeUsuario3Cap = async () => {
     //FUNCION DONDE USA CUANDO EL CLIENTE MANDA ALGUN MENSAJE EN LA CAPA 3
     const idRoomName = localStorage.getItem("idRoom");
     setTextFieldValue("");
     if (textFieldValue.trim() !== "") {
+      encryptMessage(textFieldValue);
       setChatCap3((prev) => [
         ...prev,
         {
@@ -211,6 +244,8 @@ function Home() {
       console.log("No se puede enviar un mensaje vacío");
     }
   };
+
+  console.log(chatCap3);
 
   //2 CAP
   const enviarPrimerMensaje = (
