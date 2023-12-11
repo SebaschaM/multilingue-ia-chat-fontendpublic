@@ -114,12 +114,8 @@ const DashboardChat = () => {
       message: await encryptMessageTest(dataInputMessage),
       date: new Date().toLocaleString(),
     };
-    // const desencryptMessage = newMessage.message;
-    // const decryptMessage = await desencryptMessageTest(desencryptMessage);
-    // newMessage.message = decryptMessage;
 
     socketRef.current.emit("send_message", newMessage, async () => {
-      console.log(newMessage.message);
       await onGetAllConversations();
     });
     inputElement.value = "";
@@ -131,21 +127,17 @@ const DashboardChat = () => {
     if (isUpdated) {
       await onGetAllConversations();
     }
-  }); 
+  });
 
   const encryptMessageTest = async (message) => {
-    console.log(keyFernet, "llave 1");
     const f = await Fernet.getInstance(keyFernet);
     const messageEncrypt = await f.encrypt(message);
-    console.log(messageEncrypt);
     return messageEncrypt;
   };
-
 
   useEffect(() => {
     const socket = io.connect("http://localhost:5000", { reconnection: true });
     socketRef.current = socket;
-
 
     socket.on("connect", () => {
       console.log("Socket conectado en CHAT");
@@ -177,6 +169,8 @@ const DashboardChat = () => {
       );
       messages.message_traslated_text = decryptedMessage_traslated;
       setDataChat((prev) => [...prev, messages]);
+
+      await onGetAllConversations();
     });
 
     socket.on("disconnect", () => {
@@ -193,28 +187,19 @@ const DashboardChat = () => {
     socket.on("send_fernet_key_base_64", (data) => {
       const { key } = data;
       const keyFernetDecoded = atob(key);
-      console.log(keyFernetDecoded);
       setKeyFernet(keyFernetDecoded);
     });
 
     const desencryptMessageTest = async (messageEncrypt) => {
-      console.log(keyFernet, "llave 2");
       const f = await Fernet.getInstance(keyFernet);
       const decryptM = await f.decrypt(messageEncrypt);
       return decryptM;
     };
-  
+
     return () => {
       socket.disconnect();
     };
   }, [keyFernet]);
-
-  // useEffect(() => {
-  //   console.log(keyFernet);  // Asegura que este log refleje el valor actualizado de keyFernet
-  // }, [keyFernet]);
-  
-
-
 
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem("userData"));
