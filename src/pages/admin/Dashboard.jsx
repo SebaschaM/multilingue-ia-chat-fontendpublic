@@ -19,6 +19,9 @@ import {
 } from "recharts";
 import { useDashboard } from "../../hooks/useDashboard";
 
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+
 const data = [
   { name: "Grupo A", value: 400 },
   { name: "Grupo B", value: 300 },
@@ -42,6 +45,9 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
 const Dashboard = () => {
   const [openModal, setOpenModal] = useState(false);
+  const navigate = useNavigate();
+  const { handleLogout } = useAuth();
+
   const {
     handleGetRequestsForMonth,
     handleGetCountClientsByMonth,
@@ -56,6 +62,14 @@ const Dashboard = () => {
   const [totalAttendedChats, setTotalAttendedChats] = useState(0);
   const [lastHourChats, setLastHourChats] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
+
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     localStorage.removeItem("userData");
+  //     handleLogout();
+  //     navigate("/admin/auth");
+  //   }, 10000);
+  // }, []);
 
   useEffect(() => {
     const fetchData = async () => {
