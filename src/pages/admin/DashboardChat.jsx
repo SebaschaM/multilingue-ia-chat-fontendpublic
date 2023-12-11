@@ -131,7 +131,15 @@ const DashboardChat = () => {
     if (isUpdated) {
       await onGetAllConversations();
     }
-  });
+  }); 
+
+  const encryptMessageTest = async (message) => {
+    console.log(keyFernet, "llave 1");
+    const f = await Fernet.getInstance(keyFernet);
+    const messageEncrypt = await f.encrypt(message);
+    console.log(messageEncrypt);
+    return messageEncrypt;
+  };
 
 
   useEffect(() => {
@@ -147,13 +155,6 @@ const DashboardChat = () => {
       //   room_name: roomName,
       //   user: { ...userData, fullname: userData.user.fullname },
       // });
-    });
-
-    socket.on("send_fernet_key_base_64", (data) => {
-      const { key } = data;
-      const keyFernetDecoded = atob(key);
-      console.log(keyFernetDecoded);
-      setKeyFernet(keyFernetDecoded);
     });
 
     socket.on("error_joining_room", (error) => {
@@ -189,29 +190,30 @@ const DashboardChat = () => {
       });
     });
 
+    socket.on("send_fernet_key_base_64", (data) => {
+      const { key } = data;
+      const keyFernetDecoded = atob(key);
+      console.log(keyFernetDecoded);
+      setKeyFernet(keyFernetDecoded);
+    });
+
+    const desencryptMessageTest = async (messageEncrypt) => {
+      console.log(keyFernet, "llave 2");
+      const f = await Fernet.getInstance(keyFernet);
+      const decryptM = await f.decrypt(messageEncrypt);
+      return decryptM;
+    };
+  
     return () => {
       socket.disconnect();
     };
-  }, []);
-
-  useEffect(() => {
-    console.log(keyFernet);  // Asegura que este log refleje el valor actualizado de keyFernet
   }, [keyFernet]);
-  
-  const desencryptMessageTest = async (messageEncrypt) => {
-    console.log(keyFernet, "llave 2");
-    const f = await Fernet.getInstance(keyFernet);
-    const decryptM = await f.decrypt(messageEncrypt);
-    return decryptM;
-  };
 
-  const encryptMessageTest = async (message) => {
-    console.log(keyFernet, "llave 1");
-    const f = await Fernet.getInstance(keyFernet);
-    const messageEncrypt = await f.encrypt(message);
-    console.log(messageEncrypt);
-    return messageEncrypt;
-  };
+  // useEffect(() => {
+  //   console.log(keyFernet);  // Asegura que este log refleje el valor actualizado de keyFernet
+  // }, [keyFernet]);
+  
+
 
 
   useEffect(() => {
