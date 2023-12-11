@@ -63,13 +63,33 @@ const Dashboard = () => {
   const [lastHourChats, setLastHourChats] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     localStorage.removeItem("userData");
-  //     handleLogout();
-  //     navigate("/admin/auth");
-  //   }, 10000);
-  // }, []);
+  const inactivityTimeout = 300000; // 5 MINUTOS DE INACTIVIDAD
+  let activityTimer;
+
+  const resetTimer = () => {
+    clearTimeout(activityTimer);
+    activityTimer = setTimeout(() => {
+      localStorage.removeItem("userData");
+      handleLogout();
+      navigate("/admin/auth");
+    }, inactivityTimeout);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = () => resetTimer();
+    const handleKeyPress = () => resetTimer();
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("keypress", handleKeyPress);
+
+    resetTimer();
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("keypress", handleKeyPress);
+      clearTimeout(activityTimer); 
+    };
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
