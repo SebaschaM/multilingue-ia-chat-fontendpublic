@@ -28,6 +28,7 @@ import {
 import { useChat } from "../../hooks/useChat";
 import FormTipify from "../../components/form/formTipify";
 import { useNavigate } from "react-router-dom";
+import { Fernet } from "fernet-ts";
 
 const style = {
   position: "absolute",
@@ -64,6 +65,8 @@ const DashboardChat = () => {
     show: false,
     message: "",
   });
+  //fernet
+  const [keyFernet, setKeyFernet] = useState("");
 
   const socketRef = useRef();
   const userData = JSON.parse(localStorage.getItem("userData")) || {};
@@ -108,10 +111,12 @@ const DashboardChat = () => {
       id: userData.user.id,
       room_name: conversationSelected.room_name,
       fullname: fullname,
-      message: dataInputMessage,
+      message: await encryptMessageTest(dataInputMessage),
       date: new Date().toLocaleString(),
     };
     socketRef.current.emit("send_message", newMessage, () => {
+      console.log(newMessage.message)
+      newMessage.message =  desencryptMessageTest(newMessage.message)
       onGetAllConversations();
     });
     inputElement.value = "";
@@ -148,6 +153,7 @@ const DashboardChat = () => {
     });
 
     socket.on("get_messages", async (messages) => {
+      console.log(messages)
       setDataChat((prev) => [...prev, messages]);
       await onGetAllConversations();
     });
@@ -163,14 +169,44 @@ const DashboardChat = () => {
       });
     });
 
+    socket.on("send_fernet_key_base_64", (data) => {
+      const { key } = data;
+      const keyFernetDecoded = atob(key);
+      console.log(keyFernetDecoded);
+      setKeyFernet(keyFernetDecoded);
+    });
+
     return () => {
       socket.disconnect();
     };
   }, []);
 
+  const encryptMessageTest = async (message) => {
+    const f = await Fernet.getInstance(keyFernet);
+
+    const messageEncrypt = await f.encrypt(message);
+    console.log(messageEncrypt);
+
+    const decryptM = await f.decrypt(messageEncrypt);
+    console.log(decryptM);
+
+    return messageEncrypt;
+  };
+
+
+  const desencryptMessageTest = async (messageEncrypt) => {
+    const f = await Fernet.getInstance(keyFernet);
+
+    // const messageEncrypt = await f.encrypt(message);
+    // console.log(messageEncrypt);
+
+    const decryptM = await f.decrypt(messageEncrypt);
+
+    return decryptM;
+  };
+
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem("userData"));
-    console.log(data);
     if (!data) {
       router("/admin/auth");
     }
@@ -220,8 +256,8 @@ const DashboardChat = () => {
 
   //! COLOCAR EL MODAL DE RESPONSE
   useEffect(() => {
-    console.log(modalResponse, "modalResponse");
   }, [modalResponse, setModalResponse]);
+
   return (
     <LayoutDashboard title="Overall Holding">
       <LayoutDashboardContent title="Gestión de Chats">
@@ -463,6 +499,7 @@ const DashboardChat = () => {
                       height: "fit-content",
                     }}
                   >
+                    {/* Aqui  */}
                     {dataChat &&
                       dataChat?.map((chat) =>
                         chat?.id_user_sender === userID ? (

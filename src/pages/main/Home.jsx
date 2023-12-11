@@ -5,7 +5,6 @@ import { io } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import { LandingPart3, LandingPart2 } from "../../components/index";
 import { Fernet } from "fernet-ts";
-
 import {
   Box,
   TextField,
@@ -25,6 +24,7 @@ import {
   textModal,
 } from "../../utils/dataChatbot";
 import { useChatClient } from "../../hooks/useChatClient.jsx";
+import useFernet from "../../hooks/useFernet.js";
 
 function Home() {
   //LANDING
@@ -151,14 +151,6 @@ function Home() {
       console.log(error);
     });
 
-    //escuchando la key desde el backend
-    socket.on("send_fernet_key_base_64", (data) => {
-      const { key } = data;
-      console.log(key);
-      let keyFernetDecodificade = atob(key);
-      setKeyFernet(keyFernetDecodificade);
-    });
-
     socket.on("error_send_message", (error) => {
       console.log(error);
     });
@@ -173,29 +165,29 @@ function Home() {
         console.log("Sala privada cerrada");
       });
     });
+    //escuchando la key desde el backend
+    socket.on("send_fernet_key_base_64", (data) => {
+      const { key } = data;
+      const keyFernetDecoded = atob(key);
+      console.log(keyFernetDecoded);
+      setKeyFernet(keyFernetDecoded);
+    });
 
     return room_name;
   };
 
-  const decryptMessage = async (messageEncrypt) => {
+  const encryptMessageTest = async (message) => {
     const f = await Fernet.getInstance(keyFernet);
-    const messageDesencrypt = await f.decrypt(messageEncrypt);
-    console.log(messageDesencrypt);
-    return messageDesencrypt;
-  };
-
-  const encryptMessage = async (message) => {
-    const f = await Fernet.getInstance(keyFernet);
-    console.log(keyFernet);
 
     const messageEncrypt = await f.encrypt(message);
     console.log(messageEncrypt);
 
-    const decryptM = decryptMessage(messageEncrypt);
+    const decryptM = await f.decrypt(messageEncrypt);
     console.log(decryptM);
 
     return messageEncrypt;
   };
+
 
   //3ERA CAP
   const EnviarMensajeUsuario3Cap = async () => {
@@ -203,7 +195,6 @@ function Home() {
     const idRoomName = localStorage.getItem("idRoom");
     setTextFieldValue("");
     if (textFieldValue.trim() !== "") {
-      encryptMessage(textFieldValue);
       setChatCap3((prev) => [
         ...prev,
         {
@@ -218,7 +209,7 @@ function Home() {
         id: userCap2.id,
         date: new Date().toLocaleDateString(),
         room_name: idRoomName,
-        message: textFieldValue,
+        message: await encryptMessageTest(textFieldValue),
       });
 
       socketRef?.current?.off("get_messages");
@@ -244,8 +235,6 @@ function Home() {
       console.log("No se puede enviar un mensaje vacío");
     }
   };
-
-  console.log(chatCap3);
 
   //2 CAP
   const enviarPrimerMensaje = (
