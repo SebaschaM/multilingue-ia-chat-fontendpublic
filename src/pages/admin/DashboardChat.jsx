@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { LayoutDashboard, LayoutDashboardContent } from "../../layout";
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
@@ -16,6 +17,7 @@ import {
   Grid,
   IconButton,
   Modal,
+  Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
@@ -29,6 +31,7 @@ import { useChat } from "../../hooks/useChat";
 import FormTipify from "../../components/form/formTipify";
 import { useNavigate } from "react-router-dom";
 import { Fernet } from "fernet-ts";
+import { verifyMessage } from "../../utils/dataBadWords.js";
 
 const style = {
   position: "absolute",
@@ -67,6 +70,8 @@ const DashboardChat = () => {
   });
   //fernet
   const [keyFernet, setKeyFernet] = useState();
+  //toast
+  const [toast, setToast] = useState(false);
 
   const socketRef = useRef();
   const userData = JSON.parse(localStorage.getItem("userData")) || {};
@@ -101,11 +106,28 @@ const DashboardChat = () => {
     setDataChat(data.messages);
   };
 
+  //CLOSE TOAST
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setToast(false);
+  };
+
   const onSendMessage = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const dataInputMessage = formData.get("message");
     const inputElement = e.target.elements.message;
+    const codeLanguge = localStorage.getItem("idLenguaje");
+    const isBadMessage = verifyMessage(codeLanguge, dataInputMessage, true);
+
+    if (isBadMessage) {
+      inputElement.value = "";
+      setToast(true);
+      return;
+    }
 
     const newMessage = {
       id: userData.user.id,
@@ -560,6 +582,21 @@ const DashboardChat = () => {
               </>
             )}
           </Grid>
+          {toast && (
+            <Snackbar
+              open={toast}
+              autoHideDuration={3000}
+              onClose={handleClose}
+            >
+              <Alert
+                onClose={handleClose}
+                severity="warning"
+                sx={{ width: "100%" }}
+              >
+                Mensaje eliminado por motivos de seguridad
+              </Alert>
+            </Snackbar>
+          )}
         </Grid>
 
         {/* MODAL RESPONSE */}

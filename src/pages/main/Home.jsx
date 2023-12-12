@@ -13,6 +13,8 @@ import {
   MenuItem,
   InputLabel,
   Button,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 
 import SendIcon from "@mui/icons-material/Send";
@@ -24,6 +26,7 @@ import {
   textModal,
 } from "../../utils/dataChatbot";
 import { useChatClient } from "../../hooks/useChatClient.jsx";
+import { verifyMessage } from "../../utils/dataBadWords.js";
 
 function Home() {
   //LANDING
@@ -73,6 +76,9 @@ function Home() {
   //3 CAP
   const [showLoader, setShowLoader] = useState(false);
   const [chatCap3, setChatCap3] = useState([]);
+
+  //TOAST
+  const [toast, setToast] = useState(false);
 
   //KEY FERNET
   const [keyFernet, setKeyFernet] = useState("");
@@ -175,6 +181,15 @@ function Home() {
     return room_name;
   };
 
+  //TOAST CLASE
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setToast(false);
+  };
+
   //3ERA CAP
   const EnviarMensajeUsuario3Cap = async () => {
     // FUNCION DONDE SE USA CUANDO EL CLIENTE MANDA ALGÚN MENSAJE EN LA CAPA 3
@@ -182,6 +197,14 @@ function Home() {
     setTextFieldValue("");
 
     if (textFieldValue.trim() !== "") {
+      const codeLanguge = localStorage.getItem("idLenguaje");
+      const isBadMessage = verifyMessage(codeLanguge, textFieldValue, false);
+
+      if (isBadMessage) {
+        setToast(true);
+        return;
+      }
+
       const encryptedMessage = await encryptMessageTest(textFieldValue);
 
       setChatCap3((prev) => [
@@ -1038,6 +1061,21 @@ function Home() {
                     setModalExit(!modalExit);
                   }}
                 />
+                {toast && (
+                  <Snackbar
+                    open={toast}
+                    autoHideDuration={3000}
+                    onClose={handleClose}
+                  >
+                    <Alert
+                      onClose={handleClose}
+                      severity="warning"
+                      sx={{ width: "100%" }}
+                    >
+                      Mensaje eliminado por motivos de seguridad
+                    </Alert>
+                  </Snackbar>
+                )}
                 <TextField
                   id="standard-basic"
                   variant="standard"
