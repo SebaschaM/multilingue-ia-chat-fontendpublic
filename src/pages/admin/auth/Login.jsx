@@ -1,4 +1,5 @@
 import styles from "./auth.module.css";
+import ReCAPTCHA from "react-google-recaptcha";
 
 import {
   Button,
@@ -12,14 +13,21 @@ import {
 } from "@mui/material";
 import { ArrowBackIos } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../../../hooks/useAuth";
 import { socketAtom, userAtom } from "../../../store/store";
 import { useAtom } from "jotai";
+import React from "react";
+import * as yup from "yup";
 
 function Login() {
   const navigate = useNavigate();
+  const recaptchaRef = React.createRef();
+
+  const schema = yup.object().shape({
+    recaptcha: yup.string().required("Por favor, resuelve el captcha"),
+  });
 
   /*  Estados   */
   const [showCounterIntent, setShowCounterIntent] = useState(false);
@@ -27,13 +35,6 @@ function Login() {
   const [inputPassword, setInputPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [typeBottom, setTypeBottom] = useState("onClick");
-  const [dataVerifyMaintenance, setDatatVerifyMaintenance] = useState({
-    id: "",
-    message_notification: "",
-    date_start: "",
-    date_end: "",
-    status: "",
-  });
   const [dataToast, setDataToast] = useState({
     show: false,
     severity: "",
@@ -49,16 +50,11 @@ function Login() {
     handleSubmit,
     formState: { errors },
     getValues,
-  } = useForm({});
+    setValue,
+  } = useForm({ validationSchema: schema, mode: "onBlur" });
 
   /*  Hooks   */
-  const {
-    handleLogin,
-    handleCheckEmailExists,
-    user,
-    setUserAtom,
-    handleVerifyMaintenance,
-  } = useAuth();
+  const { handleLogin, handleCheckEmailExists, user, setUserAtom } = useAuth();
 
   /*  useEffects   */
   useEffect(() => {
@@ -76,37 +72,6 @@ function Login() {
     }
   }, [user, navigate]);
 
-  useEffect(() => {
-    onValidateMaintenance();
-  }, []);
-
-  /*  Función que valida si el sistema está en mantenimiento   */
-  const onValidateMaintenance = async () => {
-    const response = await handleVerifyMaintenance();
-    if (response) {
-      setDatatVerifyMaintenance(response);
-      return response;
-    } else {
-      setDataToast({
-        show: true,
-        severity: "error",
-        message: response,
-      });
-    }
-  };
-
-  if (dataVerifyMaintenance.status === "active") {
-    return (
-      <div>
-        {" "}
-        El sistema está en mantenimiento: Desde{" "}
-        {dataVerifyMaintenance.date_start} hasta{" "}
-        {dataVerifyMaintenance.date_end}, el motivo es{" "}
-        {dataVerifyMaintenance.message_notification}{" "}
-      </div>
-    );
-  }
-
   /*  Función de login, valida si el email existe y luego valida la cuenta, cuando valida la cuenta aplica el contador de intentos   */
   const onLogin = async () => {
     const email = getValues("email");
@@ -117,25 +82,37 @@ function Login() {
     }
 
     if (password && inputPassword) {
-      const response = await handleLogin({
-        email: getValues("email"),
-        password: getValues("password"),
-      });
-
-      if (response.success) {
+      const captcha = getValues("recaptcha");
+      if (!captcha) {
+        console.log(captcha);
         setDataToast({
           show: true,
-          severity: "success",
-          message: response.message,
+          severity: "warning",
+          message: "Resuelva el captcha",
         });
-        setUserAtom(response.user);
+        console.log(dataToast);
+        return;
       } else {
-        setDataToast({
-          show: true,
-          severity: "error",
-          message: response.error,
+        const response = await handleLogin({
+          email: getValues("email"),
+          password: getValues("password"),
         });
-        validateCounter(response.intents, response.error);
+
+        if (response.success) {
+          setDataToast({
+            show: true,
+            severity: "success",
+            message: response.message,
+          });
+          setUserAtom(response.user);
+        } else {
+          setDataToast({
+            show: true,
+            severity: "error",
+            message: response.error,
+          });
+          validateCounter(response.intents, response.error);
+        }
       }
     }
   };
@@ -190,6 +167,10 @@ function Login() {
     setInputPassword(false);
   };
 
+  const onChange = (e) => {
+    console.log("Captcha value:", e);
+  };
+
   return (
     /*  REFACTORIZAR 1 */
     <div className={styles.container}>
@@ -215,6 +196,32 @@ function Login() {
       {/*Este código es para validar la respuesta del backend */}
       <Snackbar
         open={dataIntent.intents >= 0 && dataIntent.message}
+        autoHideDuration={3000}
+        onClose={() =>
+          setDataToast({
+            show: false,
+            severity: "",
+            message: "",
+          })
+        }
+      >
+        <Alert
+          onClose={() =>
+            setDataToast({
+              show: false,
+              severity: "",
+              message: "",
+            })
+          }
+          severity={dataToast.severity}
+          sx={{ width: "100%" }}
+        >
+          {dataToast.message}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={dataToast.show}
         autoHideDuration={3000}
         onClose={() =>
           setDataToast({
@@ -356,47 +363,58 @@ function Login() {
             </div>
 
             {inputPassword && (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  width: "100%",
-                  justifyContent: "center",
-                }}
-              >
-                <Input
-                  placeholder="**********"
-                  {...register("password", {
-                    required: {
-                      value: true,
-                      message: "La contraseña es requerida",
-                    },
-                  })}
-                  type="password"
-                  error={errors.password}
-                  // onInput={() => countValidations(getValues("password"))}
-                  helpertext={errors.password && "Contraseña requerida"}
-                  sx={{
-                    marginTop: "1rem",
-                    height: "2.1rem",
-                    borderColor: "#17C3CE",
-                    width: "80%",
-                    ":after": {
-                      borderBottom: "3px solid #17C3CE",
-                    },
+              <>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    width: "100%",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Input
+                    placeholder="**********"
+                    {...register("password", {
+                      required: {
+                        value: true,
+                        message: "La contraseña es requerida",
+                      },
+                    })}
+                    type="password"
+                    error={errors.password}
+                    // onInput={() => countValidations(getValues("password"))}
+                    helpertext={errors.password && "Contraseña requerida"}
+                    sx={{
+                      marginTop: "1rem",
+                      height: "2.1rem",
+                      borderColor: "#17C3CE",
+                      width: "80%",
+                      ":after": {
+                        borderBottom: "3px solid #17C3CE",
+                      },
+                    }}
+                  />
+                  {errors.password && (
+                    <Typography
+                      color="red"
+                      sx={{ width: "80%" }}
+                      textAlign={"left"}
+                    >
+                      {errors.password.message}
+                    </Typography>
+                  )}
+                </div>
+                <ReCAPTCHA
+                  ref={recaptchaRef}
+                  size="normal"
+                  sitekey="6LcieC8pAAAAAFC7OJ5ADjkJP-4BWd4b2cYi6ivP"
+                  onChange={(value) => {
+                    setValue("recaptcha", value);
                   }}
                 />
-                {errors.password && (
-                  <Typography
-                    color="red"
-                    sx={{ width: "80%" }}
-                    textAlign={"left"}
-                  >
-                    {errors.password.message}
-                  </Typography>
-                )}
-              </div>
+                {errors.recaptcha && <p>{errors.recaptcha.message}</p>}
+              </>
             )}
 
             {!isLoading ? (

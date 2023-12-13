@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { LayoutDashboard, LayoutDashboardContent } from "../../layout";
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
@@ -16,6 +17,7 @@ import {
   Grid,
   IconButton,
   Modal,
+  Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
@@ -28,6 +30,8 @@ import {
 import { useChat } from "../../hooks/useChat";
 import FormTipify from "../../components/form/formTipify";
 import { useNavigate } from "react-router-dom";
+import { Fernet } from "fernet-ts";
+import { verifyMessage } from "../../utils/dataBadWords.js";
 
 const style = {
   position: "absolute",
@@ -64,6 +68,10 @@ const DashboardChat = () => {
     show: false,
     message: "",
   });
+  //fernet
+  const [keyFernet, setKeyFernet] = useState();
+  //toast
+  const [toast, setToast] = useState(false);
 
   const socketRef = useRef();
   const userData = JSON.parse(localStorage.getItem("userData")) || {};
@@ -98,32 +106,56 @@ const DashboardChat = () => {
     setDataChat(data.messages);
   };
 
+  //CLOSE TOAST
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setToast(false);
+  };
+
   const onSendMessage = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const dataInputMessage = formData.get("message");
     const inputElement = e.target.elements.message;
+    const codeLanguge = localStorage.getItem("idLenguaje");
+    const isBadMessage = verifyMessage(codeLanguge, dataInputMessage, true);
+
+    if (isBadMessage) {
+      inputElement.value = "";
+      setToast(true);
+      return;
+    }
 
     const newMessage = {
       id: userData.user.id,
       room_name: conversationSelected.room_name,
       fullname: fullname,
-      message: dataInputMessage,
+      message: await encryptMessageTest(dataInputMessage),
       date: new Date().toLocaleString(),
     };
-    socketRef.current.emit("send_message", newMessage, () => {
-      onGetAllConversations();
+
+    socketRef.current.emit("send_message", newMessage, async () => {
+      await onGetAllConversations();
     });
     inputElement.value = "";
   };
 
-  socketRef?.current?.on("update_conversations", (data) => {
+  socketRef?.current?.on("update_conversations", async (data) => {
     const isUpdated = data.update;
 
     if (isUpdated) {
-      onGetAllConversations();
+      await onGetAllConversations();
     }
   });
+
+  const encryptMessageTest = async (message) => {
+    const f = await Fernet.getInstance(keyFernet);
+    const messageEncrypt = await f.encrypt(message);
+    return messageEncrypt;
+  };
 
   useEffect(() => {
     const socket = io.connect("http://localhost:5000", { reconnection: true });
@@ -148,7 +180,18 @@ const DashboardChat = () => {
     });
 
     socket.on("get_messages", async (messages) => {
+      const encryptedMessage_text = messages.message_text;
+      const decryptedMessage = await desencryptMessageTest(
+        encryptedMessage_text
+      );
+      messages.message_text = decryptedMessage;
+      const encryptedMessage_traslated = messages.message_traslated_text;
+      const decryptedMessage_traslated = await desencryptMessageTest(
+        encryptedMessage_traslated
+      );
+      messages.message_traslated_text = decryptedMessage_traslated;
       setDataChat((prev) => [...prev, messages]);
+
       await onGetAllConversations();
     });
 
@@ -163,14 +206,25 @@ const DashboardChat = () => {
       });
     });
 
+    socket.on("send_fernet_key_base_64", (data) => {
+      const { key } = data;
+      const keyFernetDecoded = atob(key);
+      setKeyFernet(keyFernetDecoded);
+    });
+
+    const desencryptMessageTest = async (messageEncrypt) => {
+      const f = await Fernet.getInstance(keyFernet);
+      const decryptM = await f.decrypt(messageEncrypt);
+      return decryptM;
+    };
+
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [keyFernet]);
 
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem("userData"));
-    console.log(data);
     if (!data) {
       router("/admin/auth");
     }
@@ -219,9 +273,8 @@ const DashboardChat = () => {
   };
 
   //! COLOCAR EL MODAL DE RESPONSE
-  useEffect(() => {
-    console.log(modalResponse, "modalResponse");
-  }, [modalResponse, setModalResponse]);
+  useEffect(() => {}, [modalResponse, setModalResponse]);
+
   return (
     <LayoutDashboard title="Overall Holding">
       <LayoutDashboardContent title="Gestión de Chats">
@@ -463,6 +516,7 @@ const DashboardChat = () => {
                       height: "fit-content",
                     }}
                   >
+                    {/* Aqui  */}
                     {dataChat &&
                       dataChat?.map((chat) =>
                         chat?.id_user_sender === userID ? (
@@ -528,6 +582,21 @@ const DashboardChat = () => {
               </>
             )}
           </Grid>
+          {toast && (
+            <Snackbar
+              open={toast}
+              autoHideDuration={3000}
+              onClose={handleClose}
+            >
+              <Alert
+                onClose={handleClose}
+                severity="warning"
+                sx={{ width: "100%" }}
+              >
+                Mensaje eliminado por motivos de seguridad
+              </Alert>
+            </Snackbar>
+          )}
         </Grid>
 
         {/* MODAL RESPONSE */}

@@ -98,10 +98,10 @@ const Aside = () => {
 
   useEffect(() => {
     const userData = localStorage.getItem("userData");
-    console.log(userData);
+
     if (userData) {
       const userParse = JSON.parse(userData);
-      console.log(userParse);
+
       setUserAtom(userParse.user);
     }
   }, []);

@@ -4,7 +4,7 @@ import styles from "./Home.module.css";
 import { io } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import { LandingPart3, LandingPart2 } from "../../components/index";
-
+import { Fernet } from "fernet-ts";
 import {
   Box,
   TextField,
@@ -13,6 +13,8 @@ import {
   MenuItem,
   InputLabel,
   Button,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 
 import SendIcon from "@mui/icons-material/Send";
@@ -24,7 +26,7 @@ import {
   textModal,
 } from "../../utils/dataChatbot";
 import { useChatClient } from "../../hooks/useChatClient.jsx";
-import { verifyCodeLanguage } from "../../../lisuras.js";
+import { verifyMessage } from "../../utils/dataBadWords.js";
 
 function Home() {
   //LANDING
@@ -74,6 +76,12 @@ function Home() {
   //3 CAP
   const [showLoader, setShowLoader] = useState(false);
   const [chatCap3, setChatCap3] = useState([]);
+
+  //TOAST
+  const [toast, setToast] = useState(false);
+
+  //KEY FERNET
+  const [keyFernet, setKeyFernet] = useState("");
 
   const showLoaderTo3Cap = async () => {
     setModalExit(false);
@@ -162,16 +170,43 @@ function Home() {
         console.log("Sala privada cerrada");
       });
     });
+    //escuchando la key desde el backend
+    socket.on("send_fernet_key_base_64", (data) => {
+      const { key } = data;
+      const keyFernetDecoded = atob(key);
+      console.log(keyFernetDecoded);
+      setKeyFernet(keyFernetDecoded);
+    });
 
     return room_name;
   };
 
+  //TOAST CLASE
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setToast(false);
+  };
+
   //3ERA CAP
-  const EnviarMensajeUsuario3Cap = () => {
-    //FUNCION DONDE USA CUANDO EL CLIENTE MANDA ALGUN MENSAJE EN LA CAPA 3
+  const EnviarMensajeUsuario3Cap = async () => {
+    // FUNCION DONDE SE USA CUANDO EL CLIENTE MANDA ALGÚN MENSAJE EN LA CAPA 3
     const idRoomName = localStorage.getItem("idRoom");
     setTextFieldValue("");
+
     if (textFieldValue.trim() !== "") {
+      const codeLanguge = localStorage.getItem("idLenguaje");
+      const isBadMessage = verifyMessage(codeLanguge, textFieldValue, false);
+
+      if (isBadMessage) {
+        setToast(true);
+        return;
+      }
+
+      const encryptedMessage = await encryptMessageTest(textFieldValue);
+
       setChatCap3((prev) => [
         ...prev,
         {
@@ -181,44 +216,54 @@ function Home() {
         },
       ]);
 
-      const codeLanguage = localStorage.getItem("idLenguaje");
-      const containLisuras = verifyCodeLanguage(codeLanguage, textFieldValue);
-
-      if (containLisuras) {
-        alert("No se puede enviar un mensaje con lisuras");
-        return;
-      }
-
       socketRef.current.emit("send_message", {
         fullname: userCap2.fullname,
         id: userCap2.id,
         date: new Date().toLocaleDateString(),
         room_name: idRoomName,
-        message: textFieldValue,
+        message: encryptedMessage,
       });
 
       socketRef?.current?.off("get_messages");
-      //QUISIERA TENER ESE IF, PARA PODER INVOCAR AL EVENTO get_message
-      socketRef?.current?.on("get_messages", (data) => {
+      socketRef?.current?.on("get_messages", async (data) => {
         // setear el setChat
 
         if (data.id !== userCap2.id) {
-          setChatCap3((prev) => [
-            ...prev,
-            {
-              message: data.message_traslated_text,
-              user_receiver: data.id_user_receiver,
-              user_sender: data.id_user_sender,
-              room_name: data.room_name,
-            },
-          ]);
+          try {
+            const decryptedMessage = await desencryptMessageTest(
+              data.message_traslated_text
+            );
+
+            setChatCap3((prev) => [
+              ...prev,
+              {
+                message: decryptedMessage,
+                user_receiver: data.id_user_receiver,
+                user_sender: data.id_user_sender,
+                room_name: data.room_name,
+              },
+            ]);
+          } catch (error) {
+            console.error("Error al desencriptar el mensaje:", error);
+          }
         }
         setTextFieldValue("");
       });
     } else {
-      // Puedes agregar una alerta o manejar el caso de mensaje vacío de alguna manera
       console.log("No se puede enviar un mensaje vacío");
     }
+  };
+
+  const desencryptMessageTest = async (messageEncrypt) => {
+    const f = await Fernet.getInstance(keyFernet);
+    const decryptM = await f.decrypt(messageEncrypt);
+    return decryptM;
+  };
+
+  const encryptMessageTest = async (message) => {
+    const f = await Fernet.getInstance(keyFernet);
+    const messageEncrypt = await f.encrypt(message);
+    return messageEncrypt;
   };
 
   //2 CAP
@@ -1016,6 +1061,21 @@ function Home() {
                     setModalExit(!modalExit);
                   }}
                 />
+                {toast && (
+                  <Snackbar
+                    open={toast}
+                    autoHideDuration={3000}
+                    onClose={handleClose}
+                  >
+                    <Alert
+                      onClose={handleClose}
+                      severity="warning"
+                      sx={{ width: "100%" }}
+                    >
+                      Mensaje eliminado por motivos de seguridad
+                    </Alert>
+                  </Snackbar>
+                )}
                 <TextField
                   id="standard-basic"
                   variant="standard"

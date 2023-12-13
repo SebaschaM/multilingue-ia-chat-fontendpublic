@@ -34,6 +34,7 @@ export const useNotifications = () => {
           },
         }
       );
+
       return data;
     } catch (error) {
       console.log(error);
