@@ -24,6 +24,7 @@ import {
   textModal,
 } from "../../utils/dataChatbot";
 import { useChatClient } from "../../hooks/useChatClient.jsx";
+import { verifyCodeLanguage } from "../../../lisuras.js";
 
 function Home() {
   //LANDING
@@ -179,6 +180,14 @@ function Home() {
           room_name: idRoomName,
         },
       ]);
+
+      const codeLanguage = localStorage.getItem("idLenguaje");
+      const containLisuras = verifyCodeLanguage(codeLanguage, textFieldValue);
+
+      if (containLisuras) {
+        alert("No se puede enviar un mensaje con lisuras");
+        return;
+      }
 
       socketRef.current.emit("send_message", {
         fullname: userCap2.fullname,

@@ -10,6 +10,7 @@ import {
   BsArrowBarRight,
   BsArrowBarLeft,
   BsPeople,
+  BsBell,
 } from "react-icons/bs";
 import { Button, IconButton } from "@mui/material";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -52,6 +53,12 @@ const Aside = () => {
       role: ["manager"],
       label: "Gestionar Usuarios",
       icon: <BsPeople />,
+    },
+    {
+      path: "/admin/dashboard/notifications",
+      role: ["manager", "agent"],
+      label: "Gestionar notificaciones",
+      icon: <BsBell />,
     },
   ];
 

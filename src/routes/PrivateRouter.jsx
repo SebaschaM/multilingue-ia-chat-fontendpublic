@@ -7,6 +7,7 @@ import {
   DashboardMetrics,
   DashboardRequests,
 } from "../pages";
+import DashboardNotifications from "../pages/admin/DashboardNotifications";
 
 export const PrivateRouter = () => {
   return (
@@ -16,6 +17,7 @@ export const PrivateRouter = () => {
       <Route path="chats" element={<DashboardChat />} />
       <Route path="requests" element={<DashboardRequests />} />
       <Route path="manager-users" element={<DashboardManagerUser />} />
+      <Route path="notifications" element={<DashboardNotifications />} />
 
       <Route path="*" element={<Navigate to="/admin/dashboard/" />} />
     </Routes>
