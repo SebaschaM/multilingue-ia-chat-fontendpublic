@@ -74,11 +74,23 @@ export const useNotifications = () => {
     }
   };
 
+  const getAllNotificationsActive = async () => {
+    try {
+      const { data } = await ApiJson.get(
+        "/admin/notification/get-active-notifications"
+      );
+      return data;
+    } catch (error) {
+      return { success: false, message: error.response.data.error };
+    }
+  };
+
   return {
     handleGetAllNotifications,
     handleGetActiveNotifications,
     handleAddNotification,
     handleUpdateNotification,
     handleDeleteNotification,
+    getAllNotificationsActive,
   };
 };

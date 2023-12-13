@@ -56,7 +56,7 @@ const Aside = () => {
     },
     {
       path: "/admin/dashboard/notifications",
-      role: ["manager", "agent"],
+      role: ["manager"],
       label: "Gestionar notificaciones",
       icon: <BsBell />,
     },
