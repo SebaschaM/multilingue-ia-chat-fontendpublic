@@ -120,8 +120,7 @@ const DashboardChat = () => {
     const formData = new FormData(e.target);
     const dataInputMessage = formData.get("message");
     const inputElement = e.target.elements.message;
-    const codeLanguge = localStorage.getItem("idLenguaje");
-    const isBadMessage = verifyMessage(codeLanguge, dataInputMessage, true);
+    const isBadMessage = verifyMessage(2, dataInputMessage, true);
 
     if (isBadMessage) {
       inputElement.value = "";
