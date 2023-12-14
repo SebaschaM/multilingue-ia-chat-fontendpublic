@@ -3,8 +3,8 @@ import {
   Home,
   Register,
   Login,
-  Verify_Email,
-  AboutMe_Register,
+  VerifyEmail,
+  ActiveMaintenance,
   HomeChat,
   PanelChat,
   HomeChat2,
@@ -19,9 +19,8 @@ export const AppRouter = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         {/* <Route path="/home-chat" element={<HomeChat />} /> */}
-        <Route path="/verify-email" element={<Verify_Email />} />
-        {/*<Route path="/aboutme-register" element={<AboutMe_Register />} />*/}
-        {/* <Route path="/panel-chat" element={<PanelChat />} />*/}
+        <Route path="/api/admin/auth/verify-email" element={<VerifyEmail />} />
+        <Route path="/ActiveMaintenance" element={<ActiveMaintenance />} />
         {/*<Route path="/register" element={<Register />} />*/}
         <Route path="/admin/auth" element={<Login />} />
         <Route path="/admin/dashboard/*" element={<PrivateRouter />} />

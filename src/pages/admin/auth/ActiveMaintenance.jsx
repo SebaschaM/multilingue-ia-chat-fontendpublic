@@ -5,8 +5,7 @@ import { ArrowBackIos, Google } from "@mui/icons-material";
 
 import { Link } from "react-router-dom";
 
-function Verify_Email() {
-
+function ActiveMaintenance() {
   return (
     <div className={styles.container}>
       <img
@@ -82,4 +81,4 @@ function Verify_Email() {
   );
 }
 
-export default Verify_Email;
+export default ActiveMaintenance;

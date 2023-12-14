@@ -45,6 +45,16 @@ export const useAuth = () => {
     }
   };
 
+  const handleVerifyEmail = async (token) => {
+    try {
+      const { data } = await ApiJson.get(`/admin/auth/verify-email?token=${token}`);
+      return data;
+    } catch (error) {
+      return { success: false, message: error.response.data.error };
+    }
+      
+  }
+
   const handleLogout = () => {
     localStorage.removeItem("userData");
     setUserAtom(null);
@@ -74,5 +84,6 @@ export const useAuth = () => {
     setUserAtom,
     user,
     handleVerifyMaintenance,
+    handleVerifyEmail,
   };
 };

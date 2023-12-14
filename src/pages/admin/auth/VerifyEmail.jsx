@@ -2,10 +2,38 @@ import styles from "./auth.module.css";
 
 import { Button, Input, Card, CardContent, Typography } from "@mui/material";
 import { ArrowBackIos, Google } from "@mui/icons-material";
-
+import { useParams, useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../../hooks/useAuth";
 
-function AboutMe_Register() {
+function VerifyEmail() {
+  const {handleVerifyEmail} = useAuth();
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const token = params.get("token");
+  const [getToken, setGetToken] = useState("")
+
+  useEffect(() => {
+    const verifyEmail = async () => {
+      try {
+        if (token) {
+          setGetToken(token)
+          console.log("Token recibido:", token);
+          // Lógica de verificación aquí...
+          const response = await handleVerifyEmail(getToken);
+          console.log(response); // Esto imprimirá el resultado de la verificación
+        } else {
+          return <h1> Error </h1>
+        }
+      } catch (error) {
+        console.error("Error al verificar el correo:", error);
+      }
+    };
+
+    verifyEmail();
+  }, [token, handleVerifyEmail]);
+
   return (
     <div className={styles.container}>
       <img
@@ -25,7 +53,7 @@ function AboutMe_Register() {
             width: "2rem",
           }}
         />
-        <Link to={"/"}>
+        <Link to={"/admin/auth"}>
           <p className={`${styles.text_link} ${styles.text_color}`}>Login</p>
         </Link>
       </div>
@@ -41,16 +69,15 @@ function AboutMe_Register() {
       >
         <CardContent>
           <form className={styles.container_form}>
-            <h2>Comentanos sobre ti</h2>
+            <h2>Cuenta verificada 😊</h2>
             <Typography
               variant="h6"
               color="text.secondary"
               className={styles.form_description}
             >
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Unde,
-              quos.
+              Tu cuenta ha sido activada correctamente.
             </Typography>
-            <Input
+            {/* <Input
               placeholder="email@example.com"
               type="text"
               sx={{
@@ -62,9 +89,9 @@ function AboutMe_Register() {
                   borderBottom: "3px solid #17C3CE",
                 },
               }}
-            />
+            /> */}
             {/* COMPONENT */}
-            <Button
+            {/* <Button
               variant="contained"
               sx={{
                 display: "flex",
@@ -84,17 +111,18 @@ function AboutMe_Register() {
                 }}
               />
               Abir Gmail
-            </Button>
+            </Button> */}
+            <h1>✅✅✅✅</h1>
           </form>
-          <p className={styles.text_link}>
+          {/* <p className={styles.text_link}>
             <Link to={"/verify-email"} className={styles.link}>
               Reenviar correo electrónico
             </Link>
-          </p>
+          </p> */}
         </CardContent>
       </Card>
     </div>
   );
 }
 
-export default AboutMe_Register;
+export default VerifyEmail;
