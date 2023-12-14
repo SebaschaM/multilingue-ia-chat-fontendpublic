@@ -2,7 +2,7 @@ import axios from "axios";
 
 const ApiJson = axios.create({
   // baseURL: "https://exe-service.onrender.com/api",
-  baseURL: "https://fd31-190-234-28-17.ngrok-free.app/api",
+  baseURL: "https://9771-190-234-28-17.ngrok-free.app/api",
   headers: {
     "Content-Type": "application/json",
   },
