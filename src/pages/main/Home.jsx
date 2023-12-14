@@ -137,8 +137,6 @@ function Home() {
         toastMessage: dataChat.toastMessage[selectLanguage],
       };
     });
-    console.log(infoChat3cap.labelTextField);
-      console.log(infoChat3cap.toastMessage)
   };
 
   const onSubmit = async (data) => {
