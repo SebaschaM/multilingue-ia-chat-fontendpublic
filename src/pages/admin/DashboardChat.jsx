@@ -137,6 +137,7 @@ const DashboardChat = () => {
     };
 
     socketRef.current.emit("send_message", newMessage, async () => {
+      //setDataChat((prev) => [...prev, dataInputMessage]);
       await onGetAllConversations();
     });
     inputElement.value = "";

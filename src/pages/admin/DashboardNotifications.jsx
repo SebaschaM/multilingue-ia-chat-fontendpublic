@@ -89,6 +89,7 @@ const DashboardNotifications = () => {
       setShowModal(false);
       setModalResponse({ show: true, message: data2.data.message });
       setIsLoadingRequest(false);
+      onGetAllNotifications();
       reset();
     } catch (error) {
       console.log(error);
@@ -100,7 +101,6 @@ const DashboardNotifications = () => {
       const { message } = await handleDeleteNotification(requestSelectedId);
       setModalResponse({ show: true, message });
       setShowModalDelete(false);
-
       onGetAllNotifications();
     } catch (error) {
       console.log(error);

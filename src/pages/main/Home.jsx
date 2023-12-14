@@ -14,9 +14,11 @@ import {
   InputLabel,
   Button,
   Snackbar,
+  Typography,
   Alert,
 } from "@mui/material";
-
+import * as Yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 import SendIcon from "@mui/icons-material/Send";
 
 import {
@@ -27,6 +29,7 @@ import {
 } from "../../utils/dataChatbot";
 import { useChatClient } from "../../hooks/useChatClient.jsx";
 import { verifyMessage } from "../../utils/dataBadWords.js";
+import { chatDataCaps } from "../../utils/dataChatbot";
 
 function Home() {
   //LANDING
@@ -51,13 +54,31 @@ function Home() {
   });
 
   //HOOK - CAPA FORMULARIO
+  const validationSchema = Yup.object().shape({
+    fullname: Yup.string()
+      .required("El nombre es requerido")
+      .min(5, "El nombre debe tener al menos 5 caracteres"),
+    cellphone: Yup.string()
+      .required("El número de teléfono es requerido")
+      .min(9, "El número de teléfono debe tener 9 dígitos"),
+    email: Yup.string()
+      .required("El email es requerido")
+      .email("El email debe ser válido"),
+    consult: Yup.string()
+      .required("La consulta es requerida")
+      .min(5, "La consulta debe tener al menos 5 caracteres"),
+  });
+
   const { handleRegisterUserChat } = useChatClient(); //HOOK PARA REGISTRO EN FORMULARIO
   const {
     register,
     handleSubmit,
-    reset,
     formState: { errors },
-  } = useForm(); //FORMULARIO VALIDACIONES Y GUARDADO
+    reset,
+  } = useForm({
+    resolver: yupResolver(validationSchema),
+    shouldUnregister: false,
+  }); //FORMULARIO VALIDACIONES Y GUARDADO
 
   const [dataForm, setDataForm] = useState({
     form: [],
@@ -79,6 +100,9 @@ function Home() {
 
   //TOAST
   const [toast, setToast] = useState(false);
+  const [infoChat3cap, setInfoChat3cap] = useState({
+    info: [],
+  });
 
   //KEY FERNET
   const [keyFernet, setKeyFernet] = useState("");
@@ -102,9 +126,28 @@ function Home() {
     await connectSocket(userCap2, textFieldValue);
   };
 
+  const getInfoChat3Cap = async () => {
+    const dataChat = chatDataCaps.find((message) =>
+      message.labelTextField.hasOwnProperty(selectLanguage)
+    );
+
+    setInfoChat3cap(() => {
+      return {
+        labelTextField: dataChat.labelTextField[selectLanguage],
+        toastMessage: dataChat.toastMessage[selectLanguage],
+      };
+    });
+    console.log(infoChat3cap.labelTextField);
+      console.log(infoChat3cap.toastMessage)
+  };
+
   const onSubmit = async (data) => {
     try {
+      //TOAST AND TEXTFIELD BY LANGUAGE
       const languageIdLocalStorage = localStorage.getItem("idLenguaje");
+
+      getInfoChat3Cap();
+
       const dataRegister = {
         email: data.email,
         fullname: data.fullname,
@@ -174,7 +217,6 @@ function Home() {
     socket.on("send_fernet_key_base_64", (data) => {
       const { key } = data;
       const keyFernetDecoded = atob(key);
-      console.log(keyFernetDecoded);
       setKeyFernet(keyFernetDecoded);
     });
 
@@ -186,7 +228,6 @@ function Home() {
     if (reason === "clickaway") {
       return;
     }
-
     setToast(false);
   };
 
@@ -386,6 +427,20 @@ function Home() {
               phone: formTo2CapFind.form.phone[selectLanguage],
               optionSend: formTo2CapFind.form.optionSend[selectLanguage],
               optionCancel: formTo2CapFind.form.optionCancel[selectLanguage],
+              labelComboBox:
+                formTo2CapFind.form.comboBoxArea.labelComboBox[selectLanguage],
+              option1ComboBox:
+                formTo2CapFind.form.comboBoxArea.option1[selectLanguage],
+              option2ComboBox:
+                formTo2CapFind.form.comboBoxArea.option2[selectLanguage],
+              option3ComboBox:
+                formTo2CapFind.form.comboBoxArea.option3[selectLanguage],
+              option4ComboBox:
+                formTo2CapFind.form.comboBoxArea.option4[selectLanguage],
+              option5ComboBox:
+                formTo2CapFind.form.comboBoxArea.option5[selectLanguage],
+              option6ComboBox:
+                formTo2CapFind.form.comboBoxArea.option6[selectLanguage],
             },
           },
         ],
@@ -813,45 +868,132 @@ function Home() {
                         <span className={styles.form_tittle}>
                           {data.form.title}
                         </span>
-                        <TextField
-                          id="standard-basic"
-                          sx={{ width: "100%" }}
-                          label={data.form.fullanme}
-                          type="text"
-                          variant="standard"
-                          {...register("fullname")}
-                        />
+                        <Box sx={{ width: "100%" }}>
+                          <TextField
+                            id="standard-basic"
+                            sx={{ width: "100%" }}
+                            label={data.form.fullanme}
+                            type="text"
+                            variant="standard"
+                            color={errors.fullname ? "error" : "primary"}
+                            {...register("fullname", {
+                              required: {
+                                value: true,
+                                message: "El nombre es requerido",
+                              },
+                              minLength: {
+                                value: 5,
+                                message:
+                                  "El nombre debe tener al menos 5 caracteres",
+                              },
+                            })}
+                          />
+                          {errors.fullname && (
+                            <Typography color="red">
+                              {errors.fullname.message}
+                            </Typography>
+                          )}
+                        </Box>
 
-                        <TextField
-                          id="standard-basic"
-                          sx={{ width: "100%" }}
-                          label={data.form.phone}
-                          type="text"
-                          variant="standard"
-                          {...register("cellphone")}
-                        />
+                        <Box sx={{ width: "100%" }}>
+                          <TextField
+                            id="standard-basic"
+                            sx={{ width: "100%" }}
+                            label={data.form.phone}
+                            type="text"
+                            variant="standard"
+                            color={errors.cellphone ? "error" : "primary"}
+                            {...register("cellphone", {
+                              required: {
+                                value: true,
+                                message: "El teléfono es requerido",
+                              },
+                              minLength: {
+                                value: 9,
+                                message:
+                                  "El teléfono debe tener al menos 9 dígitos",
+                              },
+                              maxLength: {
+                                value: 13,
+                                message:
+                                  "El teléfono debe tener como máximo 13 dígitos",
+                              },
+                              validate: (value) => {
+                                return (
+                                  !isNaN(value) ||
+                                  "El numero de celular debe contener solo numeros"
+                                );
+                              },
+                            })}
+                          />
+                          {errors.cellphone && (
+                            <Typography color="red">
+                              {errors.cellphone.message}
+                            </Typography>
+                          )}
+                        </Box>
 
-                        <TextField
-                          id="standard-basic"
-                          sx={{ width: "100%" }}
-                          label={data.form.email}
-                          variant="standard"
-                          type="email"
-                          {...register("email")}
-                        />
-                        <TextField
-                          id="standard-multiline-static"
-                          label={data.form.consult}
-                          sx={{ width: "100%" }}
-                          multiline
-                          rows={3}
-                          type="text"
-                          variant="standard"
-                          {...register("consult")}
-                        />
+                        <Box sx={{ width: "100%" }}>
+                          <TextField
+                            id="standard-basic"
+                            sx={{ width: "100%" }}
+                            color={errors.email ? "error" : "primary"}
+                            label={data.form.email}
+                            variant="standard"
+                            type="email"
+                            {...register("email", {
+                              required: {
+                                value: true,
+                                message: "El email es requerido",
+                              },
+                              validate: (value) => {
+                                const regex =
+                                  /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i;
+                                return regex.test(value) || "Email inválido";
+                              },
+                            })}
+                          />
+                          {errors.email && (
+                            <Typography color="red">
+                              {errors.email.message}
+                            </Typography>
+                          )}
+                        </Box>
+                        <Box
+                          sx={{
+                            width: "100%",
+                          }}
+                        >
+                          <TextField
+                            id="standard-multiline-static"
+                            label={data.form.consult}
+                            sx={{ width: "100%" }}
+                            color={errors.consult ? "error" : "primary"}
+                            multiline
+                            rows={3}
+                            type="text"
+                            variant="standard"
+                            {...register("consult", {
+                              required: {
+                                value: true,
+                                message: "La consulta es requerida",
+                              },
+                              minLength: {
+                                value: 5,
+                                message:
+                                  "La consulta debe tener al menos 5 caracteres",
+                              },
+                            })}
+                          />
+                          {errors.consult && (
+                            <Typography color="red">
+                              {errors.consult.message}
+                            </Typography>
+                          )}
+                        </Box>
                         <FormControl fullWidth>
                           <InputLabel id="demo-simple-select-label">
-                            Area / Proceso
+                            {data.form.labelComboBox}
                           </InputLabel>
                           <Select
                             labelId="demo-simple-select-label"
@@ -863,20 +1005,23 @@ function Home() {
                             }}
                           >
                             <MenuItem value={"analitica_web"}>
-                              Analitica web
+                              {data.form.option1ComboBox}
                             </MenuItem>
                             <MenuItem value={"email_marketing"}>
-                              Email marketing
+                              {data.form.option2ComboBox}
                             </MenuItem>
-                            <MenuItem value={"seo"}>SEO</MenuItem>
+                            <MenuItem value={"seo"}>
+                              {" "}
+                              {data.form.option3ComboBox}
+                            </MenuItem>
                             <MenuItem value={"redes_sociales"}>
-                              Redes sociales
+                              {data.form.option4ComboBox}
                             </MenuItem>
                             <MenuItem value={"publicidad_linea"}>
-                              Publicidad en linea
+                              {data.form.option5ComboBox}
                             </MenuItem>
                             <MenuItem value={"marketing_contenidos"}>
-                              Marketing de contenidos
+                              {data.form.option6ComboBox}
                             </MenuItem>
                           </Select>
                         </FormControl>
@@ -899,7 +1044,10 @@ function Home() {
                               color: "white",
                               fontWeight: "bold",
                             }}
-                            onClick={() => setShowCap(1)}
+                            onClick={() => {
+                              setShowCap(1);
+                              reset();
+                            }}
                           >
                             {data.form.optionCancel}
                           </Button>
@@ -952,7 +1100,7 @@ function Home() {
                     <TextField
                       id="standard-basic"
                       variant="standard"
-                      placeholder="Escribe tu mensaje"
+                      placeholder={infoChat3cap.labelTextField}
                       sx={{ width: "100%" }}
                       onChange={(e) => {
                         setTextFieldValue(e.target.value);
@@ -1064,7 +1212,7 @@ function Home() {
                 {toast && (
                   <Snackbar
                     open={toast}
-                    autoHideDuration={3000}
+                    autoHideDuration={2000}
                     onClose={handleClose}
                   >
                     <Alert
@@ -1072,14 +1220,14 @@ function Home() {
                       severity="warning"
                       sx={{ width: "100%" }}
                     >
-                      Mensaje eliminado por motivos de seguridad
+                      {infoChat3cap.toastMessage}
                     </Alert>
                   </Snackbar>
                 )}
                 <TextField
                   id="standard-basic"
                   variant="standard"
-                  placeholder="Escribe tu mensaje"
+                  placeholder={infoChat3cap.labelTextField}
                   sx={{ width: "100%" }}
                   onChange={(e) => {
                     setTextFieldValue(e.target.value);
