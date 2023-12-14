@@ -136,12 +136,12 @@ const DashboardChat = () => {
       date: new Date().toLocaleString(),
     };
 
-    socketRef.current.emit("send_message", newMessage, async () => {
+    socketRef.current.emit("send_message", newMessage,  () => {
       //setDataChat((prev) => [...prev, dataInputMessage]);
-      await onGetAllConversations();
+       onGetAllConversations();
     });
     inputElement.value = "";
-  };
+  }
 
   socketRef?.current?.on("update_conversations", async (data) => {
     const isUpdated = data.update;
@@ -160,67 +160,69 @@ const DashboardChat = () => {
   useEffect(() => {
     const socket = io.connect("http://localhost:5000", { reconnection: true });
     socketRef.current = socket;
-
+  
     socket.on("connect", () => {
       console.log("Socket conectado en CHAT");
       const roomName = "58942a47-931d-41fa-81cd-426e6d54c750"; // !Esperar a que el cliente cree el room
-
+  
       // socket.emit("assign_user_to_room", {
       //   room_name: roomName,
       //   user: { ...userData, fullname: userData.user.fullname },
       // });
     });
-
+  
     socket.on("error_joining_room", (error) => {
       console.log(error);
     });
-
+  
     socket.on("error_send_message", (error) => {
       console.log(error);
     });
-
-    socket.on("get_messages", async (messages) => {
-      const encryptedMessage_text = messages.message_text;
-      const decryptedMessage = await desencryptMessageTest(
-        encryptedMessage_text
-      );
-      messages.message_text = decryptedMessage;
-      const encryptedMessage_traslated = messages.message_traslated_text;
-      const decryptedMessage_traslated = await desencryptMessageTest(
-        encryptedMessage_traslated
-      );
-      messages.message_traslated_text = decryptedMessage_traslated;
-      setDataChat((prev) => [...prev, messages]);
-
-      await onGetAllConversations();
-    });
-
+  
     socket.on("disconnect", () => {
       socket.emit("close_room", {
         room_name: "cuartito2",
         user: userData,
       });
-
+  
       socket.on("private_room_closed", () => {
         console.log("Sala privada cerrada");
       });
     });
-
-    socket.on("send_fernet_key_base_64", (data) => {
-      const { key } = data;
-      const keyFernetDecoded = atob(key);
-      setKeyFernet(keyFernetDecoded);
-    });
-
-    const desencryptMessageTest = async (messageEncrypt) => {
-      const f = await Fernet.getInstance(keyFernet);
-      const decryptM = await f.decrypt(messageEncrypt);
-      return decryptM;
-    };
-
+  
     return () => {
       socket.disconnect();
     };
+  }, []);
+
+  useEffect(() => {
+    const handleEncryption = async () => {
+      socketRef.current.on("get_messages", async (messages) => {
+        const encryptedMessage_text = messages.message_text;
+        const decryptedMessage = await desencryptMessageTest(encryptedMessage_text);
+        messages.message_text = decryptedMessage;
+        const encryptedMessage_traslated = messages.message_traslated_text;
+        const decryptedMessage_traslated = await desencryptMessageTest(encryptedMessage_traslated);
+        messages.message_traslated_text = decryptedMessage_traslated;
+        setDataChat((prev) => [...prev, messages]);
+  
+        await onGetAllConversations();
+      });
+  
+      socketRef.current.on("send_fernet_key_base_64", (data) => {
+        const { key } = data;
+        const keyFernetDecoded = atob(key);
+        setKeyFernet(keyFernetDecoded);
+      });
+  
+      const desencryptMessageTest = async (messageEncrypt) => {
+        const f = await Fernet.getInstance(keyFernet);
+        const decryptM = await f.decrypt(messageEncrypt);
+        return decryptM;
+      };
+    };
+  
+    handleEncryption();
   }, [keyFernet]);
 
   useEffect(() => {

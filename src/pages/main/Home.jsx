@@ -128,6 +128,7 @@ function Home() {
 
   const getInfoChat3Cap = async () => {
     const dataChat = chatDataCaps.find((message) =>
+      // eslint-disable-next-line no-prototype-builtins
       message.labelTextField.hasOwnProperty(selectLanguage)
     );
 
